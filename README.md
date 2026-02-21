@@ -1,4 +1,4 @@
-<img src="weepinbell.avif" style="float: right" />
+<img src="weepinbell.avif" align="right" width="300px" />
 
 # weepinbell
 
