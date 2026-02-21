@@ -1,3 +1,5 @@
+<img src="weepinbell.avif" style="float: right" />
+
 # weepinbell
 
 A [Webmention](https://www.w3.org/TR/webmention/) receiver written in [Clojure](https://clojure.org/).
