@@ -2,7 +2,7 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]))
 
-(defn load-config
+(defn load-config []
   (let [default-config (when-let [resource (io/resource "config.edn")]
                          (-> resource slurp edn/read-string))
         external-file (io/file "config/config.edn")
