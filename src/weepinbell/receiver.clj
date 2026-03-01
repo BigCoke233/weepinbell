@@ -13,14 +13,18 @@
 
 #_(defn validate-target [t])
 
-(defn validate [s t]
-  (validate-urls s t)
-  #_(validate-source s)
-  #_(validate-target t))
+;; 3.2.1 Request Verfification
+(defn verify [s t]
+  (and
+    ;; The receiver MUST check that source and target are valid URLs [URL]
+    ;; and are of schemes that are supported by the receiver.
+    (validate-urls s t)
+    #_(validate-source s)
+    #_(validate-target t)))
 
 (defn receive [wm]
   (let [{:keys [s t]} wm]
-    (if (validate s t)
+    (if (verify s t)
       "Valid Webmention"
       "Invalid Webmention")))
 
