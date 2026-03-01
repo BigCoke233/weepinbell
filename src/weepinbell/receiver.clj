@@ -19,6 +19,9 @@
     ;; The receiver MUST check that source and target are valid URLs [URL]
     ;; and are of schemes that are supported by the receiver.
     (validate-urls s t)
+    ;; The receiver MUST reject the request
+    ;; if the source URL is the same as the target URL.
+    (not (= s t))
     #_(validate-source s)
     #_(validate-target t)))
 
