@@ -6,7 +6,8 @@
                  [compojure "1.6.1"]
                  [ring/ring-defaults "0.3.2"]
                  [ring/ring-json "0.5.1"]
-                 [cheshire "6.1.0"]]
+                 [cheshire "6.1.0"]
+                 [commons-validator "1.4.1"]]
   :plugins [[lein-ring "0.12.5"]]
   :ring {:handler weepinbell.handler/app}
   :profiles

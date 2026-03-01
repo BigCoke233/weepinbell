@@ -1,11 +1,13 @@
-(ns weepinbell.receiver
-  (:require [clojure.string :refer [starts-with?]]))
+(ns weepinbell.receiver)
 
-(defn validate-url [url]
-  (or (starts-with? url "http://")
-      (starts-with? url "https://")))
+(import 'org.apache.commons.validator.UrlValidator)
+
+(defn valid-http-url? [url]
+  (let [schemes (into-array String ["http" "https"])
+        validator (UrlValidator. schemes)]
+    (.isValid validator url)))
 (defn validate-urls [s t]
-  (and (validate-url s) (validate-url t)))
+  (and (valid-http-url? s) (valid-http-url? t)))
 
 #_(defn validate-source [s])
 
