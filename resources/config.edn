@@ -1,1 +1,2 @@
-{:endpoint "/endpoint"}
+{:endpoint "/endpoint"
+ :allowed-target-domains ["example.com"]}
