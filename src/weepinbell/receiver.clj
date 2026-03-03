@@ -20,31 +20,37 @@
 (defn verify-request [s t]
   (let [checks [;; The receiver MUST check that source and target are valid URLs [URL]
                 ;; and are of schemes that are supported by the receiver.
-                (validate-urls s t) "Invalid URLs. Source and target have to be http(s) urls."
+                [(validate-urls s t) "Invalid URLs. Source and target have to be http(s) urls."]
                 ;; The receiver MUST reject the request
                 ;; if the source URL is the same as the target URL.
-                (not (= s t)) "Source and target are identical."
-                (validate-target t) "Domain of target is not allowed"]]
-    (for [[passed? msg] checks]
-      (when-not passed?
-        {:status 400
-         :body msg}))))
+                [(not (= s t)) "Source and target are identical."]
+                [(validate-target t) "Domain of target is not allowed. This receiver does not receive webmention on its behalf."]]]
+    (map (fn [[passed? msg]]
+           (when-not passed?
+             {:status 400
+              :body msg}))
+         checks)))
 
 (def wmc (chan)) ;; webmention queue
 
 (defn receive [wm]
-  (let [{:keys [s t]} wm]
+  (let [{:keys [s t]} wm
+        verification (verify-request s t)]
     ;; Request verification
-    (verify-request s t)
-    ;; The receiver SHOULD check that target is a valid
-    ;; resource for which it can accept Webmentions.
-    ;; This check SHOULD happen synchronously to reject
-    ;; invalid Webmentions before more in-depth verification begins.
-    ;;
-    ;; Webmention verification SHOULD be handled asynchronously
-    ;; to prevent DoS (Denial of Service) attacks.
-    (go (>! wmc wm))
-    {:status 202
-     :headers {"Content-Type" "text/plain"}
-     :body "Webmention accepted"}))
+    (if-let [errror-response (some identity verification)]
+      ;; respond if request verification failed
+      errror-response
+      ;; proceed if request is ok
+      (do
+        ;; The receiver SHOULD check that target is a valid
+        ;; resource for which it can accept Webmentions.
+        ;; This check SHOULD happen synchronously to reject
+        ;; invalid Webmentions before more in-depth verification begins.
+        ;;
+        ;; Webmention verification SHOULD be handled asynchronously
+        ;; to prevent DoS (Denial of Service) attacks.
+        (go (>! wmc wm))
+        {:status 202
+         :headers {"Content-Type" "text/plain"}
+         :body "Webmention accepted"}))))
 
