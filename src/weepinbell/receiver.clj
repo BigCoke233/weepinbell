@@ -3,7 +3,7 @@
   (:import [org.apache.commons.validator.routines UrlValidator]
            [java.net URI])
   (:require [weepinbell.config :refer [get-config]]
-            [clojure.core.async :refer [chan put!]]))
+            [clojure.core.async :refer [put!]]))
 
 ;; validation utilities
 (defn valid-http-url? [url]
@@ -36,11 +36,9 @@
               :body msg}))
          checks)))
 
-(def wmc (chan)) ;; webmention queue
-
 (defn receive
   "Receive webmention; call verify-request; if verification passed, push webmention into queue."
-  [wm]
+  [wm wmc]
   (let [{:keys [s t]} wm
         verification (verify-request s t)]
     ;; Request verification
