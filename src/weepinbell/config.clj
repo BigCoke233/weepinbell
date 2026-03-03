@@ -5,7 +5,7 @@
 (defn load-config []
   (let [default-config (when-let [resource (io/resource "config.edn")]
                          (-> resource slurp edn/read-string))
-        external-file (io/file "config/config.edn")
+        external-file (io/file "config.edn")
         external-config (when (.exists external-file)
                           (-> external-file slurp edn/read-string))]
     (merge default-config external-config)))
