@@ -12,5 +12,6 @@ pom.xml.asc
 .hgignore
 .hg/
 .DS_Store
-/.clj-kondo/.cache/v1
+/.clj-kondo/
 /.lsp/.cache
+/config.edn
