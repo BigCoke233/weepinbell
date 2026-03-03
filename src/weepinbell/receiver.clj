@@ -1,4 +1,5 @@
 (ns weepinbell.receiver
+  "Receiver receives Webmention request (a source and a target); verify the request; return error message if any; push Webmention into queue of processor."
   (:import [org.apache.commons.validator.routines UrlValidator]
            [java.net URI])
   (:require [weepinbell.config :refer [get-config]]
