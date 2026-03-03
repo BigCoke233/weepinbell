@@ -1,7 +1,9 @@
 (ns weepinbell.processor
   (:require [clojure.core.async :refer [go-loop <!]]
             [clojure.string :refer [includes?]]
-            [clj-http.client :as client]))
+            [clj-http.client :as client]
+            [weepinbell.storage :as storage]
+            [clojure.java-time :as jt]))
 
 (defn verify-mention
   "Get source and follow redirects to check if target link is present."
@@ -13,6 +15,28 @@
     ;; TODO needs to be more robust
     (includes? body target)))
 
+(defn process-verified-webmention
+  "If a webmention is verified, fetch microformats data and store it."
+  [source target]
+  (do
+    (println "\n🙋‍♂️ Valid webmention received:")
+    (println "from " source)
+    (println "to " target "\n"))
+  (let [data {:type "entry"
+              :author {:type "card"
+                       :name nil
+                       :photo nil
+                       :url nil}
+              :url source
+              :published nil
+              :content {:text nil
+                        :html nil}
+              :wm-received (jt/local-date-time)
+              :wm-source source
+              :wm-target target
+              :wm-id nil}]
+    (storage/append data)))
+
 (defn process-webmention
   "Retrieve webmention from queue and process it."
   [wmc]
@@ -23,7 +47,7 @@
              (if wm
                (let [{:keys [s t]} wm]
                  (if (verify-mention s t)
-                   (println "Found mention")
+                   (process-verified-webmention s t)
                    (println "Invalid mention")))
                (println "Idling")))
            (recur)))
