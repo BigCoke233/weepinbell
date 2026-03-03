@@ -3,7 +3,7 @@
   (:import [org.apache.commons.validator.routines UrlValidator]
            [java.net URI])
   (:require [weepinbell.config :refer [get-config]]
-            [clojure.core.async :refer [go chan >!]]))
+            [clojure.core.async :refer [chan put!]]))
 
 ;; validation utilities
 (defn valid-http-url? [url]
@@ -56,7 +56,7 @@
         ;;
         ;; Webmention verification SHOULD be handled asynchronously
         ;; to prevent DoS (Denial of Service) attacks.
-        (go (>! wmc wm))
+        (put! wmc wm)
         {:status 202
          :headers {"Content-Type" "text/plain"}
          :body "Webmention accepted"}))))
