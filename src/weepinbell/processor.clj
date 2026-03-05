@@ -48,13 +48,12 @@
   [wmc]
   (println "Processor started.")
   (go-loop []
-    (let [wm (<! wmc)]
+    (when-let [wm (<! wmc)]
       (println "Webmention found in queue.")
-      (if wm
-        (let [{:keys [s t]} wm]
-          (if (verify-mention s t)
-            (process-verified-webmention s t)
-            (println "Invalid mention")))
-        (println "Idling")))
+      (let [{:keys [s t]} wm]
+        (if (verify-mention s t)
+          (process-verified-webmention s t)
+          (println "Invalid mention")))
+      (println "Idling"))
     (recur)))
 
