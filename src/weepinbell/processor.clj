@@ -32,7 +32,7 @@
    :wm-target target
    :wm-id nil})
 
-(defn process-verified-webmention
+(defn process-new-webmention
   "If a webmention is verified, fetch microformats data and store it."
   [source target]
   ;; log
@@ -43,6 +43,14 @@
   (let [data (wrap-webmention source target)]
     (storage/append data)))
 
+(defn process-existing-webmention
+  "Update existing Webmention when verified, delete it otherwise."
+  [verified? source target]
+  (if verified?
+    (storage/update-wm source target
+                    (wrap-webmention source target))
+    (storage/delete-wm source target)))
+
 (defn process-webmention
   "Retrieve webmention from queue and process it."
   [wmc]
@@ -50,10 +58,12 @@
   (go-loop []
     (when-let [wm (<! wmc)]
       (println "Webmention found in queue.")
-      (let [{:keys [s t]} wm]
-        (if (verify-mention s t)
-          (process-verified-webmention s t)
-          (println "Invalid mention")))
+      (let [{:keys [s t]} wm
+            verified? (verify-mention s t)]
+        ;; handle existing webmention and new webmention differently
+        (if (storage/get-wm s t)
+          (process-existing-webmention verified? s t)
+          (when verified? (process-new-webmention s t))))
       (println "Idling"))
     (recur)))
 
