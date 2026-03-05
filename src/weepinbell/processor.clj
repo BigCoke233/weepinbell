@@ -3,7 +3,7 @@
             [clojure.string :refer [includes?]]
             [clj-http.client :as client]
             [weepinbell.storage :as storage]
-            [clojure.java-time :as jt]))
+            [java-time.api :as jt]))
 
 (defn verify-mention
   "Get source and follow redirects to check if target link is present."
