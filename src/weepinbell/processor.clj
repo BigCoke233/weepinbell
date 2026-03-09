@@ -2,7 +2,10 @@
   (:require [clojure.core.async :refer [go-loop <!]]
             [clojure.string :refer [includes?]]
             [clj-http.client :as client]
-            [weepinbell.storage :as storage]))
+            [weepinbell.storage :as storage]
+            [clojure.walk :as walk])
+  (:import [com.kylewm.mf2j Mf2Parser]
+           [java.net URI]))
 
 (defn verify-mention
   "Get source and follow redirects to check if target link is present."
@@ -14,22 +17,27 @@
     ;; TODO needs to be more robust
     (includes? body target)))
 
+(defn parse-microformats
+  "Parse microformats from a URL."
+  [url]
+  (let [parser (doto (Mf2Parser.)
+                 (.setIncludeAlternates true)
+                 (.setIncludeRelUrls true))]
+    (.parse parser (URI. url))))
+
+(defn javamap->map [map]
+  (->> (seq map) (into {}) walk/keywordize-keys))
+
 (defn wrap-webmention
-  "Make GET request to source and collect essential data. Wrap source, target and collected data into a Clojure map and return it."
+  "Parse microformats and collect essential info. Wrap source, target and collected data into a Clojure map and return it."
   [source target]
-  {:type "entry"
-   :author {:type "card"
-            :name nil
-            :photo nil
-            :url nil}
-   :url source
-   :published nil
-   :content {:text nil
-             :html nil}
-   :wm-received (System/currentTimeMillis)
-   :wm-source source
-   :wm-target target
-   :wm-id nil})
+  (let [mf (-> source
+               parse-microformats
+               javamap->map
+               :items first
+               javamap->map)
+        wm {:source source :target target}]
+    {:webmention wm :microformats mf}))
 
 (defn process-new-webmention
   "If a webmention is verified, fetch microformats data and store it."
