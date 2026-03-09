@@ -27,7 +27,7 @@
    :published nil
    :content {:text nil
              :html nil}
-   :wm-received (jt/local-date-time)
+   :wm-received (System/currentTimeMillis)
    :wm-source source
    :wm-target target
    :wm-id nil})
