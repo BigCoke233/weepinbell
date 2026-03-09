@@ -2,8 +2,7 @@
   (:require [clojure.core.async :refer [go-loop <!]]
             [clojure.string :refer [includes?]]
             [clj-http.client :as client]
-            [weepinbell.storage :as storage]
-            [java-time.api :as jt]))
+            [weepinbell.storage :as storage]))
 
 (defn verify-mention
   "Get source and follow redirects to check if target link is present."
