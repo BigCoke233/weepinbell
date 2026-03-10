@@ -1,7 +1,8 @@
 (ns weepinbell.storage
   (:require [clojure.edn :as edn]
             [weepinbell.config :refer [get-config]]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojure.string :refer [join]]))
 
 (def data-file (get-config :data-path))
 
@@ -15,7 +16,8 @@
 (defn unload-data
   "Write to data file, replacing everything."
   [data]
-  (spit data-file (pr-str data)))
+  (when-let [data-with-string (map pr-str data)]
+    (spit data-file (join "\n" data-with-string))))
 
 (defn get-wm
   "Get an existing Webmention by source and target."
