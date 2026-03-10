@@ -4,7 +4,7 @@
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
             [weepinbell.config :refer [get-config]]
             [weepinbell.receiver :refer [receive]]
-            [weepinbell.retriever :refer [retrieve-all]]
+            [weepinbell.retriever :refer [retrieve]]
             [weepinbell.processor :refer [process-webmention]]
             [clojure.core.async :refer [chan]]))
 
@@ -15,7 +15,7 @@
 (defroutes api-routes
   (POST (get-config :endpoint) [source target]
     (receive {:s source :t target} wmc))
-  (GET "/api/mentions" [] (retrieve-all))
+  (GET "/api/mentions" [filter] (retrieve filter))
   (route/not-found "Not Found"))
 
 (def app
