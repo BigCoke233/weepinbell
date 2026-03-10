@@ -1,6 +1,7 @@
 (ns weepinbell.storage
   (:require [clojure.edn :as edn]
-            [weepinbell.config :refer [get-config]]))
+            [weepinbell.config :refer [get-config]]
+            [clojure.java.io :as io]))
 
 (def data-file (get-config :data-path))
 
@@ -28,10 +29,17 @@
   (when-let [this-wm (get-wm source target)]
     (do-something-with this-wm)))
 
+(defn first-line-empty? [path]
+  (with-open [rdr (io/reader path)]
+    (let [line (line-seq rdr)]
+      (empty? line))))
+
 (defn append
   "Append an accepted webmention to .edn data file."
   [data]
-  (spit data-file (pr-str data) :append true))
+  (let [newline? (if (first-line-empty? data-file) "" "\n")
+        line (str newline? (pr-str data))]
+    (spit data-file line :append true)))
 
 (defn update-wm
   "Update an existing webmention"
