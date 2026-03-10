@@ -6,5 +6,7 @@
   "Get all webmentions."
   []
   (let [body (json/generate-string (storage/load-data))]
-    {:status 200 :body body}))
+    {:status 200
+     :headers {"Content-Type" "application/json; charset=utf-8"}
+     :body body}))
 
