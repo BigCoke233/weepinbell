@@ -32,7 +32,7 @@
     (let [line (line-seq rdr)]
       (empty? line))))
 
-(defn append
+(defn append-wm
   "Append an accepted webmention to .edn data file."
   [data]
   (let [newline? (if (first-line-empty? data-file) "" "\n")
@@ -51,5 +51,5 @@
   "Update an existing webmention"
   [source target new-data]
   (delete-wm source target)
-  (append new-data))
+  (append-wm new-data))
 

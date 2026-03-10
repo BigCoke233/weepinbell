@@ -48,7 +48,7 @@
   (println "to " target "\n")
   ;; wrap and store data
   (let [data (wrap-webmention source target)]
-    (storage/append data)))
+    (storage/append-wm data)))
 
 (defn process-existing-webmention
   "Update existing Webmention when verified, delete it otherwise."
