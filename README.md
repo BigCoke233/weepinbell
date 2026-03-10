@@ -48,5 +48,5 @@ If you're not familiar with this format, see [edn](https://github.com/edn-format
 
 ## License
 
-Copyright © 2026 Eltrac
+MIT License, Copyright © 2026 Eltrac
 
