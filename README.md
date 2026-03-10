@@ -16,9 +16,9 @@ A [Webmention](https://www.w3.org/TR/webmention/) receiver written in [Clojure](
 
 ## Roadmap
 
-- [] API Paging
-- [] RSS/Atom Feed, see [Serving RSS with Clojure](https://yogthos.net/posts/2012-08-04-Serving-RSS-with-Clojure.html)
-- [] Import from [webmention.io](https://webmention.io)
+- [ ] API Paging
+- [ ] RSS/Atom Feed, see [Serving RSS with Clojure](https://yogthos.net/posts/2012-08-04-Serving-RSS-with-Clojure.html)
+- [ ] Import from [webmention.io](https://webmention.io)
 
 ## API
 
