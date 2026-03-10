@@ -1,24 +1,7 @@
 (ns weepinbell.receiver
   "Receiver receives Webmention request (a source and a target); verify the request; return error message if any; push Webmention into queue of processor."
-  (:import [org.apache.commons.validator.routines UrlValidator]
-           [java.net URI])
-  (:require [weepinbell.config :refer [get-config]]
-            [clojure.core.async :refer [put!]]))
-
-;; validation utilities
-(defn valid-http-url? [url]
-  (let [schemes (into-array String ["http" "https"])
-        validator (UrlValidator. schemes)]
-    (.isValid validator url)))
-
-(defn validate-urls [s t]
-  (and (valid-http-url? s) (valid-http-url? t)))
-
-(defn validate-target [t]
-  (let [allow-list (get-config :allowed-target-domains)
-        target-domain (-> (URI/create t) .getHost)]
-    (some #{target-domain} allow-list)))
-;; validation utilities end
+  (:require [clojure.core.async :refer [put!]]
+            [weepinbell.utils :refer [validate-urls validate-target]]))
 
 (defn verify-request
   "Receive source and target of webmention; performs a series of checks; return a list of error responses or nil values. nil means the check has passed. The caller needs to return the first errror response if any."
