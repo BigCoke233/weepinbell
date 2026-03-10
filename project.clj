@@ -15,4 +15,7 @@
   :ring {:handler weepinbell.handler/app}
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
-                        [ring/ring-mock "0.3.2"]]}})
+                        [ring/ring-mock "0.3.2"]]}}
+  :license {:name "MIT License"
+            :url "https://mit-license.org/"
+            :distribution :repo})
