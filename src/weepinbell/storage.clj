@@ -27,12 +27,6 @@
                    (= target (get-in % [:webmention :target])))]
     (first (filter pred data))))
 
-(defn with-this-wm
-  "Do something with this Webmention (identified by source and target)."
-  [source target do-something-with]
-  (when-let [this-wm (get-wm source target)]
-    (do-something-with this-wm)))
-
 (defn first-line-empty? [path]
   (with-open [rdr (io/reader path)]
     (let [line (line-seq rdr)]
@@ -53,10 +47,8 @@
 (defn delete-wm
   "Delete a Webmention entry by source and target."
   [source target]
-  (with-this-wm source target
-    (fn [this-wm]
-      (->> (load-data)
-           (remove #(= this-wm %))
-           vec
-           unload-data))))
+  (when-let [wm (get-wm source target)]
+     (->> (load-data)
+       (remove #(= wm %))
+       unload-data)))
 
