@@ -21,8 +21,8 @@
   "Get an existing Webmention by source and target."
   [source target]
   (let [data (load-data)
-        pred #(and (= source (:wm-source %))
-                   (= target (:wm-target %)))]
+        pred #(and (= source (get-in % [:webmention :source]))
+                   (= target (get-in % [:webmention :target])))]
     (first (filter pred data))))
 
 (defn with-this-wm
