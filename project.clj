@@ -1,6 +1,6 @@
 (defproject weepinbell "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
+  :description "A Webmention receiver written in Clojure."
+  :url "https://codeberg.org/eltrac/weepinbell"
   :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.11.4"]
                  [org.clojure/core.async "1.8.741"]
