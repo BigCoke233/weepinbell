@@ -39,11 +39,6 @@
         line (str newline? (pr-str data))]
     (spit data-file line :append true)))
 
-(defn update-wm
-  "Update an existing webmention"
-  [source target new-data]
-  #_(todo))
-
 (defn delete-wm
   "Delete a Webmention entry by source and target."
   [source target]
@@ -51,4 +46,10 @@
      (->> (load-data)
        (remove #(= wm %))
        unload-data)))
+
+(defn update-wm
+  "Update an existing webmention"
+  [source target new-data]
+  (delete-wm source target)
+  (append new-data))
 
