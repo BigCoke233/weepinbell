@@ -36,9 +36,11 @@ Respond with a JSON array containing all webmentions by default. Accepts query `
 
 ## Installation
 
-### Download uberjar
+### Download
 
-For now, there is no pre-built jar provided.
+Weepinbell is provided as a `.jar` file. There's no binary.
+
+You can download the latest version in [Releases](https://codeberg.org/eltrac/weepinbell/releases) page.
 
 ### Build from source
 
