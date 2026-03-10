@@ -26,13 +26,13 @@ A [Webmention](https://www.w3.org/TR/webmention/) receiver written in [Clojure](
 
 `POST /endpoint`
 
-You can configure this endpoint path. There are not separate endpoints for different domains. All Webmention are sent to one endpoint.
+You can configure this endpoint path. There are not separate endpoints for different domains. All Webmentions are sent to one endpoint.
 
 ### Query and filter Webmentions
 
 `GET /api/mentions`
 
-Respond with a JSON array containing all webmentions by default. Accepts query `filter`, either a target URL or a domain name, e.g. `/api/mentions?target=example.com`.
+Respond with a JSON array containing all webmentions by default. Accepts query `filter`, either a target URL or a domain name, e.g. `/api/mentions?filter=example.com`.
 
 ## Config
 
