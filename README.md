@@ -34,7 +34,45 @@ You can configure this endpoint path. There are not separate endpoints for diffe
 
 Respond with a JSON array containing all webmentions by default. Accepts query `filter`, either a target URL or a domain name, e.g. `/api/mentions?filter=example.com`.
 
-## Config
+## Installation
+
+### Download uberjar
+
+For now, there is no pre-built jar provided.
+
+### Build from source
+
+Make sure you have [Leinigen](https://leiningen.org/) installed.
+
+```shell
+git clone https://codeberg.org/eltrac/weepinbell
+cd weepinbell
+lein uberjar
+```
+
+Run the jar file.
+
+```shell
+java -jar weepinbell-0.1.0-SNAPSHOT-standalone.jar
+```
+
+### Docker
+
+```docker-compose
+services:
+  weepinbell:
+    build: .
+    container_name: weepinbell
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+    restart: always
+    volumes:
+      - ./data:/app/data
+```
+
+## Configuration
 
 Configure weepinbell by creating a `config.edn`, the defaults:
 
