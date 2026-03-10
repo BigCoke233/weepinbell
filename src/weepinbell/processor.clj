@@ -36,7 +36,9 @@
                javamap->map
                :items first
                javamap->map)
-        wm {:source source :target target}]
+        wm {:source source
+            :target target
+            :modified (System/currentTimeMillis)}]
     {:webmention wm :microformats mf}))
 
 (defn process-new-webmention
