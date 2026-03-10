@@ -53,12 +53,14 @@ lein uberjar
 Run the jar file.
 
 ```shell
-java -jar weepinbell-0.1.0-SNAPSHOT-standalone.jar
+java -jar weepinbell-v0.1.0-standalone.jar
 ```
+
+Make sure the filename matches the output of `lein uberjar`.
 
 ### Docker
 
-```docker-compose
+```yaml
 services:
   weepinbell:
     build: .
