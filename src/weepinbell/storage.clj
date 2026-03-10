@@ -8,7 +8,9 @@
 (defn load-data
   "Read data file and return data as clojure data sturcture, a vector containing Webmention maps in this case."
   []
-  (-> data-file slurp edn/read-string))
+  (with-open [r (io/reader data-file)]
+    (let [string-vector (-> r line-seq vec)]
+      (vec (map edn/read-string string-vector)))))
 
 (defn unload-data
   "Write to data file, replacing everything."
