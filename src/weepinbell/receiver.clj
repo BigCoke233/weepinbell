@@ -1,6 +1,7 @@
 (ns weepinbell.receiver
   "Receiver receives Webmention request (a source and a target); verify the request; return error message if any; push Webmention into queue of processor."
-  (:require [clojure.core.async :refer [put!]]
+  (:require [clojure.string :refer [replace]]
+            [clojure.core.async :refer [put!]]
             [weepinbell.utils :refer [validate-urls validate-target]]))
 
 (defn verify-request
@@ -23,7 +24,10 @@
   "Receive webmention; call verify-request; if verification passed, push webmention into queue."
   [wm wmc]
   (let [{:keys [s t]} wm
-        verification (verify-request s t)]
+        ;; remove anchor, #...
+        source (some-> s (replace #"#.*$" ""))
+        target (some-> t (replace #"#.*$" ""))
+        verification (verify-request source target)]
     ;; Request verification
     (if-let [errror-response (some identity verification)]
       ;; respond if request verification failed
