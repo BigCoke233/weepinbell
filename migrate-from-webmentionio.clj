@@ -36,5 +36,6 @@
                        (println (str "Failed: " (.getMessage e)))))))]
     (println "Starting migration...")
     (doseq [item all-data]
-      (resend item))
+      (resend item)
+      (Thread/sleep 500))
     (println "Migration complete!")))
