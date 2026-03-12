@@ -1,6 +1,6 @@
 (ns weepinbell.processor
   (:require [clojure.core.async :refer [go-loop <!]]
-            [clojure.string :refer [includes?]]
+            [clojure.string :refer [includes? lower-case]]
             [clj-http.client :as client]
             [weepinbell.storage :as storage]
             [clojure.walk :as walk])
@@ -26,10 +26,31 @@
 (defn parse-microformats
   "Parse microformats from a URL."
   [url]
-  (let [parser (doto (Mf2Parser.)
-                 (.setIncludeAlternates true)
-                 (.setIncludeRelUrls true))]
-    (.parse parser (URI. url))))
+  (let [max-retries 3]
+    (loop [attempt 1]
+      (let [result (try
+                     (let [parser (doto (Mf2Parser.)
+                                    (.setIncludeAlternates true)
+                                    (.setIncludeRelUrls true))]
+                       {:ok true :data (.parse parser (URI. url))})
+                     (catch Exception e
+                       {:ok false :exception e}))]
+        (if (:ok result)
+          (:data result)
+          (let [e (:exception result)
+                msg (.getMessage e)]
+            (if (and (<= attempt max-retries)
+                     (or (instance? java.net.SocketTimeoutException e)
+                         (clojure.string/includes? (lower-case (str msg)) "timeout")))
+              (let [wait-time (* attempt 2000)]
+                (println (format "MF2 Parsing timeout for %s (attempt %d/%d). Retrying in %dms..."
+                                 url attempt max-retries wait-time))
+                (Thread/sleep wait-time)
+                (recur (inc attempt)))
+              (do
+                (println (format "MF2 Parsing failed for %s after %d attempts. Error: %s"
+                                 url attempt (or msg "Unknown error")))
+                nil))))))))
 
 (defn javamap->map [map]
   (->> (seq map) (into {}) walk/keywordize-keys))
