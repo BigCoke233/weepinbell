@@ -10,12 +10,18 @@
 (defn verify-mention
   "Get source and follow redirects to check if target link is present."
   [source target]
-  ;; the client follows redirects automatically
-  (let [{:keys [body]}  (client/get source)]
-    (println "Verifying mention")
-    ;; check if body contains source
-    ;; TODO needs to be more robust
-    (includes? body target)))
+  (try
+    (println (str "Verifying mention from: " source))
+    (let [{:keys [status body]} (client/get source {:throw false})]
+      (if (= 200 status)
+        ;; TODO needs to be more robust
+        (if (includes? (str body) target)
+          true
+          (do (println "Target link not found in source body.") false))
+        (do (println "Source returned status:" status) false)))
+    (catch Exception e
+      (println "Error verifying mention:" (.getMessage e))
+      false)))
 
 (defn parse-microformats
   "Parse microformats from a URL."
