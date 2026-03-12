@@ -72,7 +72,6 @@
         ;; handle existing webmention and new webmention differently
         (if (storage/get-wm s t)
           (process-existing-webmention verified? s t)
-          (when verified? (process-new-webmention s t))))
-      (println "Idling"))
+          (when verified? (process-new-webmention s t)))))
     (recur)))
 
