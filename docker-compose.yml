@@ -1,0 +1,12 @@
+services:
+  weepinbell:
+    build: .
+    container_name: weepinbell
+    ports:
+      - "5432:3000"
+    volumes:
+      - ./config.edn:/app/config.edn:ro
+      - ./data/webmention.edn:/app/data/webmention.edn:rw
+    environment:
+      - PORT=3000
+    restart: always
