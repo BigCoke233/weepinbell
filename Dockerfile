@@ -1,10 +1,20 @@
-FROM eclipse-temurin:17-jre-alpine
+FROM clojure:lein-alpine AS builder
 
 WORKDIR /app
 
-COPY target/weepinbell-0.1.0-SNAPSHOT-standalone.jar app.jar
+COPY project.clj /app/
+RUN lein deps
+
+COPY . /app
+RUN lein uberjar
+
+FROM eclipse-temurin:21-jre-alpine
+
+WORKDIR /app
+
+COPY --from=builder /app/target/default+uberjar/weepinbell-v0.1.0-standalone.jar ./weepinbell.jar
 
 EXPOSE 3000
 
-CMD ["java", "-jar", "app.jar"]
+CMD ["java", "-jar", "weepinbell.jar"]
 
