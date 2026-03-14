@@ -41,9 +41,11 @@ Respond with a JSON array containing all webmentions by default. Accepts query `
 
 ### Download
 
-Weepinbell is provided as a `.jar` file. There's no binary.
+Weepinbell is provided as a `.jar` file. You can download the latest version in [Releases](https://codeberg.org/eltrac/weepinbell/releases) page.
 
-You can download the latest version in [Releases](https://codeberg.org/eltrac/weepinbell/releases) page.
+```shell
+java -jar weepinbell-v0.1.0-standalone.jar
+```
 
 ### Build from source
 
@@ -53,30 +55,17 @@ Make sure you have [Leinigen](https://leiningen.org/) installed.
 git clone https://codeberg.org/eltrac/weepinbell
 cd weepinbell
 lein uberjar
+java -jar target/weepinbell-v0.1.0-standalone.jar
 ```
-
-Run the jar file.
-
-```shell
-java -jar weepinbell-v0.1.0-standalone.jar
-```
-
-Make sure the filename matches the output of `lein uberjar`.
 
 ### Docker
 
-```yaml
-services:
-  weepinbell:
-    build: .
-    container_name: weepinbell
-    ports:
-      - "3000:3000"
-    environment:
-      - PORT=3000
-    restart: always
-    volumes:
-      - ./data:/app/data
+[Dockerfile](Dockerfile) and [docker-compose.yml](docker-compose.yml) are included in the repository.
+
+```shell
+git clone https://codeberg.org/eltrac/weepinbell
+cd weepinbell
+docker compose up -d
 ```
 
 ## Configuration
@@ -90,6 +79,20 @@ Configure weepinbell by creating a `config.edn`, the defaults:
 ```
 
 If you're not familiar with this format, see [edn](https://github.com/edn-format/edn). In short, it's Clojure's equivalent of JSON, but more extensible.
+
+Port can be configured with enviroment variable `PORT`.
+
+## Migration
+
+You can migrate from [webmention.io](https://webmention.io/) with [this Babashka script](migrate-from-webmentionio.clj). Make sure you have [Babashka](https://babashka.org/) installed and:
+
+```shell
+./migrate-from-webmentionio.clj <token> <new_endpoint>
+```
+
+Get `<token>` in [webmention.io settings](https://webmention.io/settings). `<new_endpoint>` is your current Weepinbell endpoint (default: `localhost:3000/endpoint`).
+
+This script basically just resend all webmentions to Weepinbell. To avoid being mistaken as attacks, webmentions are resent every 0.5 seconds, so it might take a long time.
 
 ## License
 
