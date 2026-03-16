@@ -70,8 +70,9 @@
                :items first
                javamap->map)
         wm {:source source
-                 :target target
-                 :modified (System/currentTimeMillis)}
+            :target target
+            :id (digest/md5 (str source target))
+            :modified (System/currentTimeMillis)}
         raw-photo (or (-> mf
                           (get-in [:properties "author"])
                           first
