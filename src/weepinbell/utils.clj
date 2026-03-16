@@ -4,6 +4,7 @@
   (:require [weepinbell.config :refer [get-config]]
             [clj-http.client :as client]
             [clojure.string :as string]
+            [clojure.walk :as walk]
             [taoensso.timbre :as timbre]))
 
 (defn get-domain [url]
@@ -51,3 +52,5 @@
         target-valid (validate target)]
     (and source-valid target-valid)))
 
+(defn javamap->map [map]
+  (->> (seq map) (into {}) walk/keywordize-keys))

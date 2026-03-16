@@ -3,8 +3,7 @@
             [clojure.string :refer [includes? lower-case]]
             [clj-http.client :as client]
             [weepinbell.storage :as storage]
-            [clojure.walk :as walk]
-            [weepinbell.utils :refer [validate-content-types]]
+            [weepinbell.utils :refer [validate-content-types javamap->map]]
             [taoensso.timbre :as timbre])
   (:import [com.kylewm.mf2j Mf2Parser]
            [java.net URI]))
@@ -56,8 +55,6 @@
                                  url attempt (or msg "Unknown error")))
                 nil))))))))
 
-(defn javamap->map [map]
-  (->> (seq map) (into {}) walk/keywordize-keys))
 
 (defn wrap-webmention
   "Parse microformats and collect essential info. Wrap source, target and collected data into a Clojure map and return it."
