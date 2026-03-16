@@ -6,6 +6,5 @@
 (defn -main [& args]
   ;; Check for a PORT environment variable, default to 3000
   (let [port (Integer/parseInt (or (System/getenv "PORT") "3000"))]
-    (println "Starting Weepinbell server on port" port)
     (run-jetty app {:port port :join? true})))
 

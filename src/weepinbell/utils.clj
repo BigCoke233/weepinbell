@@ -3,7 +3,8 @@
            [java.net URI])
   (:require [weepinbell.config :refer [get-config]]
             [clj-http.client :as client]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [taoensso.timbre :as timbre]))
 
 (defn get-domain [url]
   (-> (URI/create url) .getHost))
@@ -30,11 +31,11 @@
       (get-in response [:headers "Content-Type"]))
     (catch clojure.lang.ExceptionInfo e
       (let [status (:status (ex-data e))]
-        (println status " error trying to get content type of " url)
+        (timbre/error status " error trying to get content type of " url)
         nil))
     (catch Exception e
-        (println "Error trying to get content type of " url)
-        (println (.getMessage e))
+        (timbre/error "Error trying to get content type of " url
+                      (.getMessage e))
       nil)))
 
 (defn plain-or-html? [content-type]

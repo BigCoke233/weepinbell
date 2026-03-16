@@ -4,7 +4,8 @@
             [clj-http.client :as client]
             [weepinbell.storage :as storage]
             [clojure.walk :as walk]
-            [weepinbell.utils :refer [validate-content-types]])
+            [weepinbell.utils :refer [validate-content-types]]
+            [taoensso.timbre :as timbre])
   (:import [com.kylewm.mf2j Mf2Parser]
            [java.net URI]))
 
@@ -12,16 +13,16 @@
   "Get source and follow redirects to check if target link is present."
   [source target]
   (try
-    (println (str "Verifying mention from: " source))
+    (timbre/info (str "Verifying mention from: " source))
     (let [{:keys [status body]} (client/get source {:throw false})]
       (if (= 200 status)
         ;; TODO needs to be more robust
         (if (includes? (str body) target)
           true
-          (do (println "Target link not found in source body.") false))
-        (do (println "Source returned status:" status) false)))
+          (do (timbre/error "Target link not found in source body.") false))
+        (do (timbre/error "Source returned status:" status) false)))
     (catch Exception e
-      (println "Error verifying mention:" (.getMessage e))
+      (timbre/error "Error verifying mention:" (.getMessage e))
       false)))
 
 (defn parse-microformats
@@ -44,12 +45,12 @@
                      (or (instance? java.net.SocketTimeoutException e)
                          (clojure.string/includes? (lower-case (str msg)) "timeout")))
               (let [wait-time (* attempt 2000)]
-                (println (format "MF2 Parsing timeout for %s (attempt %d/%d). Retrying in %dms..."
+                (timbre/warn (format "MF2 Parsing timeout for %s (attempt %d/%d). Retrying in %dms..."
                                  url attempt max-retries wait-time))
                 (Thread/sleep wait-time)
                 (recur (inc attempt)))
               (do
-                (println (format "MF2 Parsing failed for %s after %d attempts. Error: %s"
+                (timbre/warn (format "MF2 Parsing failed for %s after %d attempts. Error: %s"
                                  url attempt (or msg "Unknown error")))
                 nil))))))))
 
@@ -73,30 +74,30 @@
   "Store new webmention if verifed. Do nothing otherwise."
   [source target]
   (when (verify-mention source target)
-    (println "\n🙋‍♂️ Valid webmention received:")
-    (println "from " source)
-    (println "to " target "\n")
+    (timbre/info "\n🙋‍♂️ Valid webmention received: \n"
+      "from " source "\n"
+      "to " target "\n\n")
     (let [data (wrap-webmention source target)]
       (storage/append-wm data))))
 
 (defn process-existing-webmention
   "Update existing Webmention when verified, delete it otherwise."
   [source target]
-  (println "Webmention exists.")
+  (timbre/info "Webmention exists.")
   (if (verify-mention source target)
     (do
       (storage/update-wm source target
                          (wrap-webmention source target))
-      (println "Webmention updated."))
+      (timbre/info "Webmention updated."))
     (do
       (storage/delete-wm source target)
-      (println "Webmention no longer valid, deleted."))))
+      (timbre/info "Webmention no longer valid, deleted."))))
 
 (defn process-webmention
   [wmc]
   (go-loop []
     (when-let [webmention (<! wmc)]
-      (println "Webmention found in queue.")
+      (timbre/info "Webmention found in queue.")
       (let [{:keys [s t]} webmention]
        ;; first check Content-Types of both urls
        ;; only proceed when it's HTML or plain text
@@ -108,6 +109,6 @@
             (process-existing-webmention s t)
             (process-new-webmention s t))
           ;; if content-type check fails
-          (println "Source or target is not HTML or plain text; or error occurred trying to get content type."))))
+          (timbre/error "Source or target is not HTML or plain text; or error occurred trying to get content type."))))
     (recur)))
 
