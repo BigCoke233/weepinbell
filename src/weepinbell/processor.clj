@@ -3,7 +3,8 @@
             [clojure.string :refer [includes? lower-case]]
             [clj-http.client :as client]
             [weepinbell.storage :as storage]
-            [clojure.walk :as walk])
+            [clojure.walk :as walk]
+            [weepinbell.utils :refer [validate-content-types]])
   (:import [com.kylewm.mf2j Mf2Parser]
            [java.net URI]))
 
@@ -69,36 +70,39 @@
     {:webmention wm :microformats mf}))
 
 (defn process-new-webmention
-  "If a webmention is verified, fetch microformats data and store it."
+  "Store new webmention if verifed. Do nothing otherwise."
   [source target]
-  ;; log
-  (println "\n🙋‍♂️ Valid webmention received:")
-  (println "from " source)
-  (println "to " target "\n")
-  ;; wrap and store data
-  (let [data (wrap-webmention source target)]
-    (storage/append-wm data)))
+  (when (verify-mention source target)
+    (println "\n🙋‍♂️ Valid webmention received:")
+    (println "from " source)
+    (println "to " target "\n")
+    (let [data (wrap-webmention source target)]
+      (storage/append-wm data))))
 
 (defn process-existing-webmention
   "Update existing Webmention when verified, delete it otherwise."
-  [verified? source target]
-  (if verified?
+  [source target]
+  (if (verify-mention source target)
     (storage/update-wm source target
-                    (wrap-webmention source target))
+                       (wrap-webmention source target))
     (storage/delete-wm source target)))
 
 (defn process-webmention
-  "Retrieve webmention from queue and process it."
   [wmc]
-  (println "Processor started.")
   (go-loop []
-    (when-let [wm (<! wmc)]
+    (when-let [webmention (<! wmc)]
       (println "Webmention found in queue.")
-      (let [{:keys [s t]} wm
-            verified? (verify-mention s t)]
-        ;; handle existing webmention and new webmention differently
-        (if (storage/get-wm s t)
-          (process-existing-webmention verified? s t)
-          (when verified? (process-new-webmention s t)))))
+      (let [{:keys [s t]} webmention]
+       ;; first check Content-Types of both urls
+       ;; only proceed when it's HTML or plain text
+        (if (validate-content-types s t)
+         ;; second check if such webmention exists
+         ;; if so, update it or delete it
+         ;; if not, write to data
+          (if (storage/get-wm s t)
+            (process-existing-webmention s t)
+            (process-new-webmention s t))
+          ;; if content-type check fails
+          (println "Source or target is not HTML or plain text; or error occurred trying to get content type."))))
     (recur)))
 
