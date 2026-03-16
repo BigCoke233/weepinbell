@@ -18,9 +18,9 @@ A [Webmention](https://www.w3.org/TR/webmention/) receiver written in [Clojure](
 
 - [ ] API Paging
 - [ ] Status page for each Webmention
-- [ ] Generate unique id for each Webmention
+- [x] Generate unique id for each Webmention
 - [ ] RSS/Atom Feed, see [Serving RSS with Clojure](https://yogthos.net/posts/2012-08-04-Serving-RSS-with-Clojure.html)
-- [ ] Import from [webmention.io](https://webmention.io)
+- [x] Import from [webmention.io](https://webmention.io)
 - [ ] Webhook
 
 ## API
@@ -37,6 +37,12 @@ You can configure this endpoint path. There are not separate endpoints for diffe
 
 Respond with a JSON array containing all webmentions by default. Accepts query `filter`, either a target URL or a domain name, e.g. `/api/mentions?filter=example.com`.
 
+### Query one specific Webmention
+
+`GET /api/mention/:id`
+
+`GET /api/mention/?target=...&source=...`
+
 ## Installation
 
 ### Download
@@ -44,7 +50,7 @@ Respond with a JSON array containing all webmentions by default. Accepts query `
 Weepinbell is provided as a `.jar` file. You can download the latest version in [Releases](https://codeberg.org/eltrac/weepinbell/releases) page.
 
 ```shell
-java -jar weepinbell-v0.1.0-standalone.jar
+java -jar weepinbell-v0.x.x-standalone.jar
 ```
 
 ### Build from source
@@ -55,7 +61,7 @@ Make sure you have [Leinigen](https://leiningen.org/) installed.
 git clone https://codeberg.org/eltrac/weepinbell
 cd weepinbell
 lein uberjar
-java -jar target/weepinbell-v0.1.0-standalone.jar
+java -jar target/weepinbell-v0.x.x-standalone.jar
 ```
 
 ### Docker
@@ -73,8 +79,9 @@ docker compose up -d
 Configure weepinbell by creating a `config.edn`, the defaults:
 
 ```edn
-{:endpoint "/endpoint"
- :allowed-target-domains ["example.com"]
+{:base-url "https://localhost:3000"
+ :endpoint "/endpoint" ;; POST route that receives webmention request
+ :allowed-target-domains ["example.com"] ;; domains that this receiver receives webmention on behalf of
  :data-path "data/webmention.edn"}
 ```
 
