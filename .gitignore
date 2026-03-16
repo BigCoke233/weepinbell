@@ -16,3 +16,4 @@ pom.xml.asc
 /.lsp/.cache
 /config.edn
 /data/webmention.edn
+/data/avatars

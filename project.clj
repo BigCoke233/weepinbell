@@ -12,7 +12,8 @@
                  [commons-validator "1.10.1"]
                  [clj-http "3.13.1"]
                  [com.kylewm/mf2j "0.0.4"]
-                 [com.taoensso/timbre "6.8.0"]]
+                 [com.taoensso/timbre "6.8.0"]
+                 [digest "1.4.10"]]
   :plugins [[lein-ring "0.12.5"]]
   :ring {:handler weepinbell.handler/app}
   :main ^:skip-aot weepinbell.core

@@ -3,8 +3,13 @@
             [clojure.string :refer [includes? lower-case]]
             [clj-http.client :as client]
             [weepinbell.storage :as storage]
-            [weepinbell.utils :refer [validate-content-types javamap->map]]
-            [taoensso.timbre :as timbre])
+            [weepinbell.utils :refer [validate-content-types
+                                      javamap->map
+                                      file-exists?
+                                      download-file]]
+            [weepinbell.config :refer [get-config]]
+            [taoensso.timbre :as timbre]
+            [digest :as digest])
   (:import [com.kylewm.mf2j Mf2Parser]
            [java.net URI]))
 
@@ -27,7 +32,7 @@
       false)))
 
 (defn parse-microformats
-  "Parse microformats from a URL."
+  "Parse microformats from a  :as digestURL."
   [url]
   (let [max-retries 3]
     (loop [attempt 1]
@@ -65,9 +70,30 @@
                :items first
                javamap->map)
         wm {:source source
-            :target target
-            :modified (System/currentTimeMillis)}]
-    {:webmention wm :microformats mf}))
+                 :target target
+                 :modified (System/currentTimeMillis)}
+        raw-photo (or (-> mf
+                          (get-in [:properties "author"])
+                          first
+                          (get-in ["properties" "photo"])
+                          first)
+                      (-> mf (get-in [:properties "photo"]) first))
+          ;; download if found photo
+        proxied-photo (if raw-photo
+               (let [photo-url (str raw-photo)
+                     file-ext (or (re-find #"\.(?:jpg|jpeg|png|gif|webp)" photo-url) ".jpg")
+                     filename  (str (digest/md5 photo-url) file-ext)
+                     local-path (str "data/avatars/" filename)
+                     public-path (str "/avatars/" filename)]
+                 ;; download photo if not exists
+                 (when-not (file-exists? local-path)
+                   (timbre/info "Downloading microformats photo to proxy external image.")
+                   (download-file photo-url local-path))
+                 (str (get-config :base-url) public-path))
+                        nil)]
+      {:webmention wm
+       :microformats mf
+       :extra {:proxied-photo proxied-photo}}))
 
 (defn process-new-webmention
   "Store new webmention if verifed. Do nothing otherwise."

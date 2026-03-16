@@ -1,3 +1,4 @@
-{:endpoint "/endpoint"
+{:base-url "http://localhost:3000"
+ :endpoint "/endpoint"
  :allowed-target-domains ["example.com"]
  :data-path "data/webmention.edn"}

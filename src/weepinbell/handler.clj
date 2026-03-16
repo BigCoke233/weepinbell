@@ -16,6 +16,7 @@
   (POST (get-config :endpoint) [source target]
     (receive {:s source :t target} wmc))
   (GET "/api/mentions" [filter] (retrieve filter))
+  (route/files "/avatars/" {:root "data/avatars"})
   (route/not-found "Not Found"))
 
 (def app
