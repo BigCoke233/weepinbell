@@ -9,7 +9,7 @@
                  [ring/ring-json "0.5.1"]
                  [ring/ring-jetty-adapter "1.7.0"]
                  [cheshire "6.1.0"]
-                 [commons-validator "1.4.1"]
+                 [commons-validator "1.10.1"]
                  [clj-http "3.13.1"]
                  [com.kylewm/mf2j "0.0.4"]]
   :plugins [[lein-ring "0.12.5"]]
