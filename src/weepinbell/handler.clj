@@ -4,7 +4,7 @@
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
             [weepinbell.config :refer [get-config]]
             [weepinbell.receiver :refer [receive]]
-            [weepinbell.retriever :refer [retrieve]]
+            [weepinbell.retriever :refer [retrieve retrieve-by-id]]
             [weepinbell.processor :refer [process-webmention]]
             [clojure.core.async :refer [chan]]))
 
@@ -16,6 +16,7 @@
   (POST (get-config :endpoint) [source target]
     (receive {:s source :t target} wmc))
   (GET "/api/mentions" [filter] (retrieve filter))
+  (GET "/api/mention/:id" [id] (retrieve-by-id id))
   (route/files "/avatars/" {:root "data/avatars"})
   (route/not-found "Not Found"))
 

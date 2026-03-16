@@ -1,8 +1,8 @@
 (ns weepinbell.retriever
   (:require [weepinbell.storage :as storage]
-            [weepinbell.utils :refer [valid-http-url? get-domain get-target]]
-            [clojure.string :refer [includes?]]
-            [cheshire.core :as json]))
+            [weepinbell.utils :refer [valid-http-url? get-domain get-target respond-json]]
+            [clojure.string :refer [includes?]]))
+
 
 (defn retrieve
   "Get all webmentions."
@@ -16,8 +16,12 @@
                filter-by-target? #(= filter-string (get-target %))
                filter-by-domain? #(= filter-string (-> % get-target get-domain))
                :else             identity)] ;; Use identity instead of not-empty for "no filter"
-    ;; responsd with data filtered and converted to json
-    {:status 200
-     :headers {"Content-Type" "application/json; charset=utf-8"}
-     :body (json/generate-string (filter pred data))}))
+    (respond-json (filter pred data))))
+
+(defn retrieve-by-id
+  "Get one specific webmention by ID."
+  [id]
+  (if-let [wm (storage/get-wm id)]
+     (respond-json wm)
+     (respond-json {:message "webmention not found"} 404)))
 

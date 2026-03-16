@@ -6,7 +6,8 @@
             [clojure.string :as string]
             [clojure.walk :as walk]
             [clojure.java.io :as io]
-            [taoensso.timbre :as timbre]))
+            [taoensso.timbre :as timbre]
+            [cheshire.core :as json]))
 
 (defn get-domain [url]
   (-> (URI/create url) .getHost))
@@ -85,4 +86,14 @@
 
 (defn file-exists? [path]
   (.exists (io/file path)))
+
+(defn respond-json
+  ([data]
+    (respond-json data 200))
+  ([data status]
+  (let [json-string (json/generate-string data)
+        status status]
+    {:status status
+     :headers {"Content-Type" "application/json; charset=utf-8"}
+     :body json-string})))
 
