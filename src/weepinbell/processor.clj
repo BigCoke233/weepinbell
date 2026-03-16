@@ -82,10 +82,15 @@
 (defn process-existing-webmention
   "Update existing Webmention when verified, delete it otherwise."
   [source target]
+  (println "Webmention exists.")
   (if (verify-mention source target)
-    (storage/update-wm source target
-                       (wrap-webmention source target))
-    (storage/delete-wm source target)))
+    (do
+      (storage/update-wm source target
+                         (wrap-webmention source target))
+      (println "Webmention updated."))
+    (do
+      (storage/delete-wm source target)
+      (println "Webmention no longer valid, deleted."))))
 
 (defn process-webmention
   [wmc]
