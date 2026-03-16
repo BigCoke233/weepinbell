@@ -13,12 +13,16 @@
 (process-webmention wmc)
 
 (defroutes api-routes
+  ;; receiver endpoint
   (POST (get-config :endpoint) [source target]
     (receive {:s source :t target} wmc))
+  ;; query webmentions
   (GET "/api/mentions" [filter] (retrieve filter))
   (GET "/api/mention/:id" [id] (retrieve-by-id id))
   (GET "/api/mention" [source target] (retrieve-by-url source target))
+  ;; host proxied avatars (microformats photos)
   (route/files "/avatars/" {:root "data/avatars"})
+  ;; 404
   (route/not-found "Not Found"))
 
 (def app
