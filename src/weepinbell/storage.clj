@@ -20,12 +20,16 @@
     (spit data-file (join "\n" data-with-string))))
 
 (defn get-wm
-  "Get an existing Webmention by source and target."
-  [source target]
-  (let [data (load-data)
-        pred #(and (= source (get-in % [:webmention :source]))
-                   (= target (get-in % [:webmention :target])))]
-    (first (filter pred data))))
+  "Get a Webmention by source/target or by ID."
+  ([id]
+   (get-wm id nil))
+  ([source target]
+   (let [data (load-data)
+         pred (if target
+                #(and (= source (get-in % [:webmention :source]))
+                      (= target (get-in % [:webmention :target])))
+                #(= source (get-in % [:webmention :id])))]
+     (first (filter pred data)))))
 
 (defn first-line-empty? [path]
   (with-open [rdr (io/reader path)]
