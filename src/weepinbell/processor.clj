@@ -14,8 +14,10 @@
   [source target]
   (try
     (timbre/info (str "Verifying mention from: " source))
-    (let [{:keys [status body]} (client/get source {:throw false})]
-      (if (= 200 status)
+    ;; get first 1MB of source URL and verify
+    (let [{:keys [status body]} (client/get source {:throw false
+                                                    :headers {"Range" "bytes=0-1048575"}})]
+      (if (and (>= status 200) (< status 300))
         ;; TODO needs to be more robust
         (if (includes? (str body) target)
           true
