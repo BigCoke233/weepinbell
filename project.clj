@@ -1,4 +1,4 @@
-(defproject weepinbell "v0.1.0"
+(defproject weepinbell "v0.2.0"
   :description "A Webmention receiver written in Clojure."
   :url "https://codeberg.org/eltrac/weepinbell"
   :min-lein-version "2.0.0"
