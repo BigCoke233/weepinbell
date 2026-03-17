@@ -17,11 +17,10 @@ A [Webmention](https://www.w3.org/TR/webmention/) receiver written in [Clojure](
 ## Roadmap
 
 - [ ] API Paging
-- [ ] Status page for each Webmention
 - [x] Generate unique id for each Webmention
 - [ ] RSS/Atom Feed, see [Serving RSS with Clojure](https://yogthos.net/posts/2012-08-04-Serving-RSS-with-Clojure.html)
 - [x] Import from [webmention.io](https://webmention.io)
-- [ ] Webhook
+- [x] Webhook
 
 ## API
 
