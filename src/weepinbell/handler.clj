@@ -16,8 +16,9 @@
 (process-webmention wmc)
 
 (defroutes api-routes
-  (GET "/" [] (ui/home (get-config :allowed-target-domains)
-                       (get-config :endpoint)))
+  (GET "/" [target] (ui/home (get-config :allowed-target-domains)
+                       (get-config :endpoint)
+                       target))
   ;; receiver endpoint
   (POST (get-config :endpoint) [source target]
     (receive {:s source :t target} wmc))

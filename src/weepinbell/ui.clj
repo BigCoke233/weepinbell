@@ -14,7 +14,7 @@
                    [:title "Weepinbell - Webmention Receiver"]]
                  [:body slot]])))
 
-(defn home [domains endpoint]
+(defn home [domains endpoint preset-target]
   (->
     [:main.home
       [:img.banner {:src "/weepinbell.avif"}]
@@ -25,7 +25,8 @@
         [:p "Have him send a Webmention for you."]
         [:form {:action endpoint :method "POST"}
           [:input {:name "source" :placeholder "source"}]
-          [:input {:name "target" :placeholder "target"}]
+          [:input {:name "target" :placeholder "target"
+                   :value preset-target}]
           [:button {:type "submit"} "send"]]]]
     page-base
     page-response))
