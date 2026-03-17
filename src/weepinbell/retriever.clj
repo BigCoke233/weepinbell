@@ -3,6 +3,15 @@
             [weepinbell.utils :refer [valid-http-url? get-domain get-target respond-json]]
             [clojure.string :refer [includes?]]))
 
+;; utilities
+(defn- respond-webmention-json [data]
+  (if data
+    (respond-json data)
+    (respond-json {:status 404
+                   :message "Webmention does not exist or is pending for verification."}
+                  404)))
+;; end utilities
+
 (defn all
   "Get all webmentions."
   [filter-string]
@@ -17,12 +26,6 @@
                :else             identity)] ;; Use identity instead of not-empty for "no filter"
     (respond-json (filter pred data))))
 
-(defn- respond-webmention-json [data]
-  (if data
-    (respond-json data)
-    (respond-json {:status 404
-                   :message "Webmention does not exist or is pending for verification."}
-                  404)))
 
 (defn by-id
   "Get one specific webmention by ID."
