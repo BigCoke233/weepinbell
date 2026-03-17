@@ -8,6 +8,7 @@
                                       file-exists?
                                       download-file]]
             [weepinbell.config :refer [get-config]]
+            [weepinbell.webhook :as webhook]
             [taoensso.timbre :as timbre]
             [digest :as digest])
   (:import [com.kylewm.mf2j Mf2Parser]
@@ -131,9 +132,12 @@
          ;; second check if such webmention exists
          ;; if so, update it or delete it
          ;; if not, write to data
-          (if (storage/get-wm s t)
-            (process-existing-webmention s t)
-            (process-new-webmention s t))
+          (do
+            (if (storage/get-wm s t)
+              (process-existing-webmention s t)
+              (process-new-webmention s t))
+            ;; trigger webhook
+            (webhook/trigger :on-receive))
           ;; if content-type check fails
           (timbre/error "Source or target is not HTML or plain text; or error occurred trying to get content type."))))
     (recur)))
