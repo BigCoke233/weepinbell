@@ -3,8 +3,7 @@
             [weepinbell.utils :refer [valid-http-url? get-domain get-target respond-json]]
             [clojure.string :refer [includes?]]))
 
-
-(defn retrieve-all
+(defn all
   "Get all webmentions."
   [filter-string]
   (let [data (storage/load-data)
@@ -18,19 +17,19 @@
                :else             identity)] ;; Use identity instead of not-empty for "no filter"
     (respond-json (filter pred data))))
 
-(defn respond-webmention-json [data]
+(defn- respond-webmention-json [data]
   (if data
     (respond-json data)
     (respond-json {:status 404
                    :message "Webmention does not exist or is pending for verification."}
                   404)))
 
-(defn retrieve-by-id
+(defn by-id
   "Get one specific webmention by ID."
   [id]
   (respond-webmention-json (storage/get-wm id)))
 
-(defn retrieve-by-url
+(defn by-st-pair
   "Get one specific webmention by source and target."
   [source target]
   (respond-webmention-json (storage/get-wm source target)))
