@@ -100,3 +100,12 @@
      :headers {"Content-Type" "application/json; charset=utf-8"}
      :body json-string})))
 
+(defn format-list [coll]
+  (let [total (count coll)]
+    (cond
+      (= total 0) ""
+      (= total 1) (first coll)
+      :else (str (clojure.string/join ", " (butlast coll))
+                 " and "
+                 (last coll)))))
+

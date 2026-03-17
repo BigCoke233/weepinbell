@@ -8,6 +8,7 @@
             [weepinbell.receiver :refer [receive]]
             [weepinbell.retriever :as retriever]
             [weepinbell.processor :refer [process-webmention]]
+            [weepinbell.ui :as ui]
             [clojure.core.async :refer [chan]]))
 
 (def wmc (chan))
@@ -15,6 +16,8 @@
 (process-webmention wmc)
 
 (defroutes api-routes
+  (GET "/" [] (ui/home (get-config :allowed-target-domains)
+                       (get-config :endpoint)))
   ;; receiver endpoint
   (POST (get-config :endpoint) [source target]
     (receive {:s source :t target} wmc))
