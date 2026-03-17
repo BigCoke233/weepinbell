@@ -2,6 +2,8 @@
   (:require [compojure.core :refer [defroutes POST GET context]]
             [compojure.route :as route]
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
+            [ring.middleware.resource :refer [wrap-resource]]
+            [ring.middleware.content-type :refer [wrap-content-type]]
             [weepinbell.config :refer [get-config]]
             [weepinbell.receiver :refer [receive]]
             [weepinbell.retriever :as retriever]
@@ -34,4 +36,8 @@
   (route/not-found "Not Found"))
 
 (def app
-  (wrap-defaults api-routes api-defaults))
+  (-> api-routes
+      (wrap-resource "static")
+      (wrap-defaults api-defaults)
+      (wrap-content-type)))
+
