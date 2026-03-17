@@ -10,7 +10,10 @@
             [cheshire.core :as json]))
 
 (defn get-domain [url]
-  (-> (URI/create url) .getHost))
+  (-> url URI/create .getHost))
+
+(defn get-path [url]
+  (-> url URI/create .getPath))
 
 (defn get-target [wm]
   (get-in wm [:webmention :target]))

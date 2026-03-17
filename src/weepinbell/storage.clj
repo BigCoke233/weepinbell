@@ -1,6 +1,7 @@
 (ns weepinbell.storage
   (:require [clojure.edn :as edn]
             [weepinbell.config :refer [get-config]]
+            [weepinbell.utils :refer [get-domain get-target get-path]]
             [clojure.java.io :as io]
             [clojure.string :refer [join]]))
 
@@ -29,6 +30,12 @@
   (if target
     #(st-pair-equal-pred source target %)
     #(id-equal-pred source %)))
+(defn- domain-equal [domain wm]
+  (= domain
+     (-> wm get-target get-domain)))
+(defn- path-equal [path wm]
+  (= path
+     (-> wm get-target get-path)))
 ;; end predicates
 
 (defn with-webmentions
@@ -52,6 +59,16 @@
    (let [pred (get-predicate source target)]
      (with-webmentions
        #(->> % (remove pred) unload-data)))))
+
+(defn get-wms-by-domain
+  ([domain]
+    (get-wms-by-domain domain nil))
+  ([domain path]
+   (with-webmentions
+      #(cond->> %
+                true         (filter (partial domain-equal domain))
+                (some? path) (filter (partial path-equal path))
+                true         vec))))
 
 (defn first-line-empty? [path]
   (with-open [rdr (io/reader path)]
