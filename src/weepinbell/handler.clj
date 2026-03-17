@@ -32,8 +32,8 @@
       (GET "/all" [filter] (retriever/all filter)))
     ;; query one specific webmention
     (context "/mention" []
-      (GET "/mention/:id" [id] (retriever/by-id id))
-      (GET "/mention" [source target] (retriever/by-st-pair source target))))
+      (GET "/:id" [id] (retriever/by-id id))
+      (GET "/" [source target] (retriever/by-st-pair source target))))
   ;; host proxied avatars (microformats photos)
   (route/files "/avatars/" {:root "data/avatars"})
   ;; 404
