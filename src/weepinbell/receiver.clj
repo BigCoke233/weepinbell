@@ -2,7 +2,10 @@
   "Receiver receives Webmention request (a source and a target); verify the request; return error message if any; push Webmention into queue of processor."
   (:require [clojure.string :as string]
             [clojure.core.async :refer [put!]]
-            [weepinbell.utils :refer [validate-urls validate-target]]))
+            [weepinbell.utils :refer [validate-urls validate-target]]
+            [weepinbell.config :refer [get-config]]
+            [digest :as digest]
+            [cheshire.core :as json]))
 
 (defn verify-request
   [source target]
@@ -38,9 +41,15 @@
         ;; Webmention verification SHOULD be handled asynchronously
         ;; to prevent DoS (Denial of Service) attacks.
         (put! wmc wm)
-        ;; respond with 202 when Webmention passed checks and
-        ;; was sent into queue.
-        {:status 202
-         :headers {"Content-Type" "text/plain"}
-         :body "Webmention accepted"}))))
+        ;; respond with 201 when Webmention passed checks and
+        ;; was sent into queue, include a Location header
+        (let [wm-id (digest/md5 (str source target))
+              wm-url (str (get-config :base-url) "/api/mention/" wm-id)
+              response {:status 201
+                        :message "Webmention is accepted and pending for verification."
+                        :url wm-url}]
+          {:status 201
+           :headers {"Location" wm-url}
+           :body (json/generate-string response)})))))
+
 
