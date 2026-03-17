@@ -1,7 +1,12 @@
 (ns weepinbell.retriever
   (:require [weepinbell.storage :as storage]
-            [weepinbell.utils :refer [valid-http-url? get-domain get-target respond-json]]
-            [clojure.string :refer [includes?]]))
+            [weepinbell.utils :refer [valid-http-url?
+                                      get-domain
+                                      get-path
+                                      get-target
+                                      respond-json]]
+            [clojure.string :refer [includes?]]
+            [cheshire.core :as json]))
 
 ;; utilities
 (defn- respond-webmention-json [data]
@@ -26,6 +31,24 @@
                :else             identity)] ;; Use identity instead of not-empty for "no filter"
     (respond-json (filter pred data))))
 
+(defn by-domain
+  "Get webmentions sent to a particular domain."
+  [domain]
+  (let [data (storage/get-wms-by-domain domain)]
+    (respond-json data)))
+
+(defn by-domain-path
+  "Get webmention sent to a particular path on a particular domain. More flexible than bare URL."
+  [domain path]
+  (let [data (storage/get-wms-by-domain domain path)]
+    (respond-json data)))
+
+(defn by-url
+  "Get webmention sent to a particular URL."
+  [url]
+  (let [domain (get-domain url)
+        path (get-path url)]
+    (by-domain-path domain path)))
 
 (defn by-id
   "Get one specific webmention by ID."
