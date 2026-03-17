@@ -24,12 +24,16 @@
   ([id]
    (get-wm id nil))
   ([source target]
-   (let [data (load-data)
-         pred (if target
-                #(and (= source (get-in % [:webmention :source]))
-                      (= target (get-in % [:webmention :target])))
-                #(= source (get-in % [:webmention :id])))]
-     (first (filter pred data)))))
+   (with-open [r (io/reader data-file)]
+     (let [lines (line-seq r)
+           pred (if target
+                  (fn [wm] (and (= source (get-in wm [:webmention :source]))
+                                (= target (get-in wm [:webmention :target]))))
+                  (fn [wm] (= source (get-in wm [:webmention :id]))))]
+       (->> lines
+            (map edn/read-string)
+            (filter pred)
+            first)))))
 
 (defn first-line-empty? [path]
   (with-open [rdr (io/reader path)]
