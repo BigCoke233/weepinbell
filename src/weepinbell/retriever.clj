@@ -46,9 +46,14 @@
 (defn by-url
   "Get webmention sent to a particular URL."
   [url]
-  (let [domain (get-domain url)
-        path (get-path url)]
-    (by-domain-path domain path)))
+  (if url
+    (let [domain (get-domain url)
+          path (get-path url)]
+      (by-domain-path domain path))
+    ;; if no url query is passed
+    (respond-json {:status 400
+                   :message "Missing URL. Specify target URL whose webmentions you are querying."}
+                  400)))
 
 (defn by-id
   "Get one specific webmention by ID."
