@@ -7,7 +7,7 @@
 (def data-file (get-config :data-path))
 
 (defn load-data
-  "Read data file and return data as clojure data sturcture, a vector containing Webmention maps in this case."
+  "Read data file and return data as clojure data sturcture, a vector containing Webmention maps in this case. Note that is't extremely costly to load all data at once!"
   []
   (with-open [r (io/reader data-file)]
     (let [string-vector (-> r line-seq vec)]
@@ -45,6 +45,7 @@
    (let [pred (get-predicate source target)]
      (with-webmentions
        #(first (filter pred %))))))
+
 (defn delete-wm
   ([id] (delete-wm id nil))
   ([source target]
