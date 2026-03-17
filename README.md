@@ -2,7 +2,7 @@
 ⚠️ This Project is still under active development ⚠️
 ```
 
-<img src="weepinbell.avif" align="right" width="300px" />
+<img src="resources/static/weepinbell.avif" align="right" width="300px" />
 
 # weepinbell
 
