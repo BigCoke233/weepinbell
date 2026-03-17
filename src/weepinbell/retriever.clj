@@ -18,18 +18,20 @@
                :else             identity)] ;; Use identity instead of not-empty for "no filter"
     (respond-json (filter pred data))))
 
-(defn respond-json-or-404 [data]
+(defn respond-webmention-json [data]
   (if data
     (respond-json data)
-    (respond-json {:message "webmention not found"} 404)))
+    (respond-json {:status 404
+                   :message "Webmention does not exist or is pending for verification."}
+                  404)))
 
 (defn retrieve-by-id
   "Get one specific webmention by ID."
   [id]
-  (respond-json-or-404 (storage/get-wm id)))
+  (respond-webmention-json (storage/get-wm id)))
 
 (defn retrieve-by-url
   "Get one specific webmention by source and target."
   [source target]
-  (respond-json-or-404 (storage/get-wm source target)))
+  (respond-webmention-json (storage/get-wm source target)))
 
