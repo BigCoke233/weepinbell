@@ -5,7 +5,7 @@
   :dependencies [[org.clojure/clojure "1.11.4"]
                  [org.clojure/core.async "1.8.741"]
                  [compojure "1.7.0"]
-                 [ring/ring-defaults "0.4.0"]
+                 [ring/ring-defaults "0.7.0"]
                  [ring/ring-json "0.5.1"]
                  [ring/ring-jetty-adapter "1.7.0"]
                  [cheshire "6.1.0"]
