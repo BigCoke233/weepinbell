@@ -20,7 +20,7 @@
       [:img.banner {:src "/weepinbell.avif"}]
       [:div
         [:p "This is a " [:a {:href "https://codeberg.org/eltrac/weepinbell" :target "_blank"} "Weepinbell"] "."]
-        [:p "He receives " [:a {:href "https://indieweb.org/webmention" :target "_blank"}] " for " (format-list domains)]]
+        [:p "He receives " [:a {:href "https://indieweb.org/webmention" :target "_blank"} "Webmention"] " for " (format-list domains)]]
       [:div
         [:p "Have him send a Webmention for you."]
         [:form {:action endpoint :method "POST"}
