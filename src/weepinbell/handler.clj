@@ -4,7 +4,7 @@
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
             [weepinbell.config :refer [get-config]]
             [weepinbell.receiver :refer [receive]]
-            [weepinbell.retriever :refer [retrieve retrieve-by-id retrieve-by-url]]
+            [weepinbell.retriever :refer [retrieve-all retrieve-by-id retrieve-by-url]]
             [weepinbell.processor :refer [process-webmention]]
             [clojure.core.async :refer [chan]]))
 
@@ -17,7 +17,7 @@
   (POST (get-config :endpoint) [source target]
     (receive {:s source :t target} wmc))
   ;; query webmentions
-  (GET "/api/mentions" [filter] (retrieve filter))
+  (GET "/api/mentions/all" [filter] (retrieve-all filter))
   (GET "/api/mention/:id" [id] (retrieve-by-id id))
   (GET "/api/mention" [source target] (retrieve-by-url source target))
   ;; host proxied avatars (microformats photos)

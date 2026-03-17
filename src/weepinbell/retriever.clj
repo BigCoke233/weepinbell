@@ -4,7 +4,7 @@
             [clojure.string :refer [includes?]]))
 
 
-(defn retrieve
+(defn retrieve-all
   "Get all webmentions."
   [filter-string]
   (let [data (storage/load-data)
