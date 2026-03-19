@@ -9,6 +9,7 @@
             [weepinbell.retriever :as retriever]
             [weepinbell.processor :refer [process-webmention]]
             [weepinbell.ui :as ui]
+            [weepinbell.feed :as feed]
             [clojure.core.async :refer [chan]]))
 
 (def wmc (chan))
@@ -34,6 +35,8 @@
     (context "/mention" []
       (GET "/:id" [id] (retriever/by-id id))
       (GET "/" [source target] (retriever/by-st-pair source target))))
+  ;; RSS feed
+  (GET "/feed/:domain" [domain] (feed/rss domain))
   ;; host proxied avatars (microformats photos)
   (route/files "/avatars/" {:root "data/avatars"})
   ;; 404

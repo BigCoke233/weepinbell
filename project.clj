@@ -15,6 +15,7 @@
                  [com.taoensso/timbre "6.8.0"]
                  [digest "1.4.10"]
                  [hiccup "2.0.0"]
+                 [clj-rss "0.4.0"]
                  [org.slf4j/slf4j-nop "2.0.17"]]
   :plugins [[lein-ancient "0.6.15"]]
   :ring {:handler weepinbell.handler/app}
