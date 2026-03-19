@@ -18,7 +18,7 @@ A [Webmention](https://www.w3.org/TR/webmention/) receiver written in [Clojure](
 
 - [ ] API Paging
 - [x] Generate unique id for each Webmention
-- [ ] RSS/Atom Feed, see [Serving RSS with Clojure](https://yogthos.net/posts/2012-08-04-Serving-RSS-with-Clojure.html)
+- [x] RSS/Atom Feed, see [Serving RSS with Clojure](https://yogthos.net/posts/2012-08-04-Serving-RSS-with-Clojure.html)
 - [x] Import from [webmention.io](https://webmention.io)
 - [x] Webhook
 
@@ -81,7 +81,9 @@ Configure weepinbell by creating a `config.edn`, the defaults:
 {:base-url "https://localhost:3000"
  :endpoint "/endpoint" ;; POST route that receives webmention request
  :allowed-target-domains ["example.com"] ;; domains that this receiver receives webmention on behalf of
- :data-path "data/webmention.edn"}
+ :data-path "data/webmention.edn"
+ :webhook {:on-receive []}
+ :feed-length 8}
 ```
 
 If you're not familiar with this format, see [edn](https://github.com/edn-format/edn). In short, it's Clojure's equivalent of JSON, but more extensible.
