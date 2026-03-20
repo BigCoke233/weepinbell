@@ -16,7 +16,7 @@
                  [digest "1.4.10"]
                  [hiccup "2.0.0"]
                  [clj-rss "0.4.0"]
-                 [org.slf4j/slf4j-nop "2.0.17"]]
+                 [com.fzakaria/slf4j-timbre "0.4.1"]]
   :plugins [[lein-ancient "0.6.15"]]
   :ring {:handler weepinbell.handler/app}
   :main ^:skip-aot weepinbell.core
