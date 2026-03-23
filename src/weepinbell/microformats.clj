@@ -5,7 +5,7 @@
            [java.net URI]))
 
 (defn parse
-  "Parse microformats from a  :as digestURL."
+  "Parse microformats from a URL."
   [url]
   (let [max-retries 3]
     (loop [attempt 1]
@@ -32,3 +32,4 @@
                 (timbre/warn (format "MF2 Parsing failed for %s after %d attempts. Error: %s"
                                  url attempt (or msg "Unknown error")))
                 nil))))))))
+
