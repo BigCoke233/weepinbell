@@ -13,10 +13,10 @@
                  [clj-http "3.13.1"]
                  [com.kylewm/mf2j "0.0.4"]
                  [com.taoensso/timbre "6.8.0"]
-                 [digest "1.4.10"]
                  [hiccup "2.0.0"]
                  [clj-rss "0.4.0"]
-                 [com.fzakaria/slf4j-timbre "0.4.1"]]
+                 [com.fzakaria/slf4j-timbre "0.4.1"]
+                 [thedavidmeister/cljc-md5 "0.0.2"]]
   :plugins [[lein-ancient "0.6.15"]]
   :ring {:handler weepinbell.handler/app}
   :main ^:skip-aot weepinbell.core

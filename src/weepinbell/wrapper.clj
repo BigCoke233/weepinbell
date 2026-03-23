@@ -4,8 +4,8 @@
                                       download-file]]
             [weepinbell.config :refer [get-config]]
             [weepinbell.microformats :as microformats]
-            [digest :as digest]
-            [taoensso.timbre :as timbre]))
+            [taoensso.timbre :as timbre]
+            [md5.core :refer [string->md5-hex]]))
 
 (defn- find-mf-photo [mf]
   (or (-> mf
@@ -19,7 +19,7 @@
   (if raw-photo
                (let [photo-url (str raw-photo)
                      file-ext (or (re-find #"\.(?:jpg|jpeg|png|gif|webp)" photo-url) ".jpg")
-                     filename  (str (digest/md5 photo-url) file-ext)
+                     filename  (str (string->md5-hex photo-url) file-ext)
                      local-path (str "data/avatars/" filename)
                      public-path (str "/avatars/" filename)]
                  ;; download photo if not exists
@@ -38,7 +38,7 @@
                javamap->map)
         wm {:source source
             :target target
-            :id (digest/md5 (str source target))
+            :id (string->md5-hex (str source target))
             :modified (System/currentTimeMillis)}
         proxied-photo (-> mf find-mf-photo proxy-mf-photo)]
       {:webmention wm

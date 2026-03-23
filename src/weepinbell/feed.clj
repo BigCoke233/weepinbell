@@ -3,7 +3,7 @@
             [weepinbell.utils :refer [get-domain]]
             [weepinbell.config :refer [get-config]]
             [weepinbell.storage :as storage]
-            [digest :as digest])
+            [md5.core :refer [string->md5-hex]])
   (:import [java.time Instant]))
 
 (def feed-length (get-config :feed-length))
@@ -19,7 +19,7 @@
             (->> wms
                  (map #(let [wm (:webmention %)
                              id (if-let [id (:id wm)] id
-                                        (digest/md5 (str (:source wm) (:target wm))))
+                                        (string->md5-hex (str (:source wm) (:target wm))))
                              permalink (str (get-config :base-url) "/api/mention/" id)
                              modified (:modified wm)
                              pub-date (when modified
