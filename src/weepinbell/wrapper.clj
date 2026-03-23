@@ -34,6 +34,7 @@
   [source target]
   (let [mf (-> source
                microformats/parse
+               javamap->map
                :items first
                javamap->map)
         wm {:source source
