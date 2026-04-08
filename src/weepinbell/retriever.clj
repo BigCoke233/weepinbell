@@ -1,13 +1,9 @@
 (ns weepinbell.retriever
   (:require [weepinbell.storage :as storage]
-            [weepinbell.utils :refer [valid-http-url?
-                                      get-domain
+            [weepinbell.utils :refer [get-domain
                                       get-path
-                                      get-target
                                       respond-json]]
-            [weepinbell.microformats-wrapper :as mf-wrapper]
-            [clojure.string :refer [includes?]]
-            [cheshire.core :as json]))
+            [weepinbell.microformats-wrapper :as mf-wrapper]))
 
 ;; utilities
 (defn- respond-webmention-json [data]
@@ -18,9 +14,14 @@
                   404)))
 
 (defn- wrap-response-object [data]
-  {:webmention (:webmention data)
-   :microformats (mf-wrapper/wrap-entry (:microformats data))
-   :extra (:extra data)})
+  (let [result {:webmention (:webmention data)}]
+    (cond-> result
+      (not (empty? (:microformats data)))
+        (assoc :microformats (-> data
+                                 :microformats
+                                 mf-wrapper/wrap-entry))
+      (:extra data)
+        (assoc :extra (:extra data)))))
 
 (defn- wrap-response-list [data]
   (map wrap-response-object data))
