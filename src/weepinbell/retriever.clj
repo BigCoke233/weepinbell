@@ -29,14 +29,16 @@
 (defn by-domain
   "Get webmentions sent to a particular domain."
   [domain]
-  (let [data (storage/get-wms-by-domain domain)]
-    (respond-json data)))
+  (-> (storage/get-wms-by-domain domain)
+      wrap-response-list
+      respond-json))
 
 (defn by-domain-path
   "Get webmention sent to a particular path on a particular domain. More flexible than bare URL."
   [domain path]
-  (let [data (storage/get-wms-by-domain domain path)]
-    (respond-json data)))
+  (-> (storage/get-wms-by-domain domain path)
+      wrap-response-list
+      respond-json))
 
 (defn by-url
   "Get webmention sent to a particular URL."
@@ -53,10 +55,14 @@
 (defn by-id
   "Get one specific webmention by ID."
   [id]
-  (respond-webmention-json (storage/get-wm id)))
+  (-> (storage/get-wm id)
+      wrap-response-object
+      respond-webmention-json))
 
 (defn by-st-pair
   "Get one specific webmention by source and target."
   [source target]
-  (respond-webmention-json (storage/get-wm source target)))
+  (-> (storage/get-wm source target)
+      wrap-response-object
+      respond-webmention-json))
 
