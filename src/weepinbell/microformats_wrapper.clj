@@ -23,6 +23,9 @@
   [entry prop]
   (first (get-prop entry prop)))
 
+(defn- get-mf-type [mf]
+  (first (or (:type mf) (get mf "type"))))
+
 (defn- get-entry-type
   "Get type of an h-entry item in keyword. (:like-of, :repost-of, :in-reply-to)"
   [entry]
@@ -36,15 +39,19 @@
 (defn- get-card-info
   "Get essential information of an h-card item and flatten it into a map."
   [card]
-  {:name (get-prop-first card :name)
-   :nickname (get-prop-first card :nickname)
-   :photo (get-prop-first card :photo)
-   :url (get-prop-first card :url)})
+  (when (and card
+             (= (get-mf-type card) "h-card"))
+    {:name (get-prop-first card :name)
+     :nickname (get-prop-first card :nickname)
+     :photo (get-prop-first card :photo)
+     :url (get-prop-first card :url)}))
 
 (defn wrap-entry
   "Wrap parsed raw microformats (h-entry) data. If no h-entry found, return nil."
   [entry]
-  (when entry
+  ;; make sure it's h-entry
+  (when (and entry
+             (= (get-mf-type entry) "h-entry"))
     {:author (get-card-info (get-prop-first entry :author))
      :type (get-entry-type entry)
      :published (get-prop-first entry :published)
