@@ -5,6 +5,7 @@
                                       get-path
                                       get-target
                                       respond-json]]
+            [weepinbell.microformats-wrapper :as mf-wrapper]
             [clojure.string :refer [includes?]]
             [cheshire.core :as json]))
 
@@ -15,21 +16,15 @@
     (respond-json {:status 404
                    :message "Webmention does not exist or is pending for verification."}
                   404)))
-;; end utilities
 
-(defn all
-  "Get all webmentions."
-  [filter-string]
-  (let [data (storage/load-data)
-        has-filter? (not (nil? filter-string))
-        filter-by-target? (and has-filter? (valid-http-url? filter-string))
-        filter-by-domain? (and has-filter? (includes? filter-string "."))
-        ;; determine filter predicate
-        pred (cond
-               filter-by-target? #(= filter-string (get-target %))
-               filter-by-domain? #(= filter-string (-> % get-target get-domain))
-               :else             identity)] ;; Use identity instead of not-empty for "no filter"
-    (respond-json (filter pred data))))
+(defn- wrap-response-object [data]
+  {:webmention (:webmention data)
+   :microformats (mf-wrapper/wrap-entry (:microformats data))
+   :extra (:extra data)})
+
+(defn- wrap-response-list [data]
+  (map wrap-response-object data))
+;; end utilities
 
 (defn by-domain
   "Get webmentions sent to a particular domain."
