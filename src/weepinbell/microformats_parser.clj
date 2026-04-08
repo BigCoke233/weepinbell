@@ -1,4 +1,4 @@
-(ns weepinbell.microformats
+(ns weepinbell.microformats-parser
   (:require [clojure.string :refer [includes? lower-case]]
             [taoensso.timbre :as timbre])
   (:import [com.kylewm.mf2j Mf2Parser]
@@ -32,4 +32,3 @@
                 (timbre/warn (format "MF2 Parsing failed for %s after %d attempts. Error: %s"
                                  url attempt (or msg "Unknown error")))
                 nil))))))))
-

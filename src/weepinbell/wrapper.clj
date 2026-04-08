@@ -3,7 +3,7 @@
                                       file-exists?
                                       download-file]]
             [weepinbell.config :refer [get-config]]
-            [weepinbell.microformats :as microformats]
+            [weepinbell.microformats-parser :as mf-parser]
             [taoensso.timbre :as timbre]
             [md5.core :refer [string->md5-hex]]))
 
@@ -33,7 +33,7 @@
   "Parse microformats and collect essential info. Wrap source, target and collected data into a Clojure map and return it."
   [source target]
   (let [mf (-> source
-               microformats/parse
+               mf-parser/parse
                javamap->map
                :items first
                javamap->map)
