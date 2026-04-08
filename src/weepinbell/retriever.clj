@@ -34,20 +34,15 @@
       wrap-response-list
       respond-json))
 
-(defn by-domain-path
-  "Get webmention sent to a particular path on a particular domain. More flexible than bare URL."
-  [domain path]
-  (-> (storage/get-wms-by-domain domain path)
-      wrap-response-list
-      respond-json))
-
 (defn by-url
   "Get webmention sent to a particular URL."
   [url]
   (if url
-    (let [domain (get-domain url)
-          path (get-path url)]
-      (by-domain-path domain path))
+    (->> (get-domain url)
+         storage/get-wms-by-domain
+         (filter #(= url (get-in % [:webmention :target])))
+         wrap-response-list
+         respond-json)
     ;; if no url query is passed
     (respond-json {:status 400
                    :message "Missing URL. Specify target URL whose webmentions you are querying."}

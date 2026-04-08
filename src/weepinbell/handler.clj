@@ -28,8 +28,7 @@
     ;; query webmention list
     (context "/mentions" []
       (GET "/" [url] (retriever/by-url url))
-      (GET "/:domain" [domain] (retriever/by-domain domain))
-      (GET "/:domain/:path" [domain path] (retriever/by-domain-path domain path)))
+      (GET "/:domain" [domain] (retriever/by-domain domain)))
     ;; query one specific webmention
     (context "/mention" []
       (GET "/:id" [id] (retriever/by-id id))
