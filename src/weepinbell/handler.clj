@@ -29,6 +29,13 @@
     (context "/mentions" []
       (GET "/" [url] (retriever/by-url url))
       (GET "/:domain" [domain] (retriever/by-domain domain)))
+    ;; query webmention list by microformats type
+    (context "/likes" []
+      (GET "/:domain" [domain] (retriever/by-domain domain :like-of)))
+    (context "/reposts" []
+      (GET "/:domain" [domain] (retriever/by-domain domain :repost-of)))
+    (context "/replies" []
+      (GET "/:domain" [domain] (retriever/by-domain domain :in-reply-to)))
     ;; query one specific webmention
     (context "/mention" []
       (GET "/:id" [id] (retriever/by-id id))

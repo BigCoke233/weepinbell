@@ -29,10 +29,13 @@
 
 (defn by-domain
   "Get webmentions sent to a particular domain."
-  [domain]
-  (-> (storage/get-wms-by-domain domain)
-      wrap-response-list
-      respond-json))
+  ([domain]
+    (by-domain domain nil))
+  ([domain mftype]
+    (cond->> (storage/get-wms-by-domain domain)
+             true    wrap-response-list
+             mftype  (filter #(= (-> % :microformats :type) mftype))
+             true    respond-json)))
 
 (defn by-url
   "Get webmention sent to a particular URL."
