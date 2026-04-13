@@ -31,11 +31,14 @@
       (GET "/:domain" [domain] (retriever/by-domain domain)))
     ;; query webmention list by microformats type
     (context "/likes" []
-      (GET "/:domain" [domain] (retriever/by-domain domain :like-of)))
+      (GET "/" [url] (retriever/by-url url :like))
+      (GET "/:domain" [domain] (retriever/by-domain domain :like)))
     (context "/reposts" []
-      (GET "/:domain" [domain] (retriever/by-domain domain :repost-of)))
+      (GET "/" [url] (retriever/by-url url :repost))
+      (GET "/:domain" [domain] (retriever/by-domain domain :repost)))
     (context "/replies" []
-      (GET "/:domain" [domain] (retriever/by-domain domain :in-reply-to)))
+      (GET "/" [url] (retriever/by-url url :reply))
+      (GET "/:domain" [domain] (retriever/by-domain domain :reply)))
     ;; query one specific webmention
     (context "/mention" []
       (GET "/:id" [id] (retriever/by-id id))

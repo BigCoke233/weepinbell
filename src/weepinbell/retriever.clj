@@ -25,31 +25,46 @@
 
 (defn- wrap-response-list [data]
   (map wrap-response-object data))
+
+(defn- get-mftype-key [typ]
+  (get {:like :like-of
+        :repost :repost-of
+        :reply :in-reply-to
+        :rsvp :rsvp} typ))
+
+(defn- filter-response-by-mftype [typ data]
+  (when typ
+    (filter #(= (-> % :microformats :type)
+                (get-mftype-key typ))
+            data)))
 ;; end utilities
 
 (defn by-domain
   "Get webmentions sent to a particular domain."
   ([domain]
     (by-domain domain nil))
-  ([domain mftype]
-    (cond->> (storage/get-wms-by-domain domain)
-             true    wrap-response-list
-             mftype  (filter #(= (-> % :microformats :type) mftype))
-             true    respond-json)))
+  ([domain typ]
+    (->> (storage/get-wms-by-domain domain)
+         wrap-response-list
+         (filter-response-by-mftype typ)
+         respond-json)))
 
 (defn by-url
   "Get webmention sent to a particular URL."
-  [url]
-  (if url
+  ([url]
+    (by-url url nil))
+  ([url typ]
+    (if url
     (->> (get-domain url)
          storage/get-wms-by-domain
          (filter #(= url (get-in % [:webmention :target])))
          wrap-response-list
+         (filter-response-by-mftype typ)
          respond-json)
     ;; if no url query is passed
     (respond-json {:status 400
                    :message "Missing URL. Specify target URL whose webmentions you are querying."}
-                  400)))
+                  400))))
 
 (defn by-id
   "Get one specific webmention by ID."
