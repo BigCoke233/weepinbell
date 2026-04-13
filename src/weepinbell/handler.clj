@@ -12,9 +12,17 @@
             [weepinbell.feed :as feed]
             [clojure.core.async :refer [chan]]))
 
-(def wmc (chan))
+;; Start webmention processor
 
+(def wmc (chan))
 (process-webmention wmc)
+
+;; Define API routes
+
+(defmacro defmention-routes [base-path mention-type]
+  `(context ~base-path []
+     (GET "/" [~'url] (retriever/by-url ~'url ~mention-type))
+     (GET "/:domain" [~'domain] (retriever/by-domain ~'domain ~mention-type))))
 
 (defroutes api-routes
   (GET "/" [target] (ui/home (get-config :allowed-target-domains)
@@ -26,19 +34,10 @@
   ;; query API routes
   (context "/api" []
     ;; query webmention list
-    (context "/mentions" []
-      (GET "/" [url] (retriever/by-url url))
-      (GET "/:domain" [domain] (retriever/by-domain domain)))
-    ;; query webmention list by microformats type
-    (context "/likes" []
-      (GET "/" [url] (retriever/by-url url :like))
-      (GET "/:domain" [domain] (retriever/by-domain domain :like)))
-    (context "/reposts" []
-      (GET "/" [url] (retriever/by-url url :repost))
-      (GET "/:domain" [domain] (retriever/by-domain domain :repost)))
-    (context "/replies" []
-      (GET "/" [url] (retriever/by-url url :reply))
-      (GET "/:domain" [domain] (retriever/by-domain domain :reply)))
+    (defmention-routes "/mentions" nil)
+    (defmention-routes "/likes" :like)
+    (defmention-routes "/reposts" :repost)
+    (defmention-routes "/replies" :reply)
     ;; query one specific webmention
     (context "/mention" []
       (GET "/:id" [id] (retriever/by-id id))
