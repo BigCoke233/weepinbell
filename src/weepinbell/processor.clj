@@ -34,7 +34,8 @@
       "from " source "\n"
       "to " target "\n\n")
     (let [data (wrapper/wrap source target)]
-      (storage/append-wm data))))
+      (storage/append-wm data)))
+  (webhook/trigger :on-create))
 
 (defn process-existing-webmention
   "Update existing Webmention when verified, delete it otherwise."
@@ -44,9 +45,11 @@
     (do
       (storage/update-wm source target
                          (wrapper/wrap source target))
+      (webhook/trigger :on-update)
       (timbre/info "Webmention updated."))
     (do
       (storage/delete-wm source target)
+      (webhook/trigger :on-delete)
       (timbre/info "Webmention no longer valid, deleted."))))
 
 (defn process-webmention
