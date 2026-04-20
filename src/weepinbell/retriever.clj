@@ -44,10 +44,10 @@
   ([domain]
     (by-domain domain nil))
   ([domain typ]
-    (->> (storage/get-wms-by-domain domain)
-         wrap-response-list
-         (filter-response-by-mftype typ)
-         respond-json)))
+    (cond->> (storage/get-wms-by-domain domain)
+             true wrap-response-list
+             typ  (filter-response-by-mftype typ)
+             true respond-json)))
 
 (defn by-url
   "Get webmention sent to a particular URL."
@@ -55,12 +55,12 @@
     (by-url url nil))
   ([url typ]
     (if url
-    (->> (get-domain url)
-         storage/get-wms-by-domain
-         (filter #(= url (get-in % [:webmention :target])))
-         wrap-response-list
-         (filter-response-by-mftype typ)
-         respond-json)
+    (cond->> (get-domain url)
+             true storage/get-wms-by-domain
+             true (filter #(= url (get-in % [:webmention :target])))
+             true wrap-response-list
+             typ  (filter-response-by-mftype typ)
+             true respond-json)
     ;; if no url query is passed
     (respond-json {:status 400
                    :message "Missing URL. Specify target URL whose webmentions you are querying."}
