@@ -5,6 +5,7 @@
   :dependencies [[org.clojure/clojure "1.12.4"]
                  [org.clojure/core.async "1.8.741"]
                  [compojure "1.7.2"]
+                 [ring/ring-core "1.15.4"]
                  [ring/ring-defaults "0.7.0"]
                  [ring/ring-json "0.5.1"]
                  [ring/ring-jetty-adapter "1.15.3"]
@@ -16,8 +17,10 @@
                  [hiccup "2.0.0"]
                  [clj-rss "0.4.0"]
                  [com.fzakaria/slf4j-timbre "0.4.1"]
-                 [thedavidmeister/cljc-md5 "0.0.2"]]
-  :plugins [[lein-ancient "0.6.15"]]
+                 [thedavidmeister/cljc-md5 "0.0.2"]
+                 [ring/ring-mock "0.6.2"]]
+  :plugins [[lein-ancient "0.6.15"]
+            [lein-ring "0.12.6"]]
   :ring {:handler weepinbell.handler/app}
   :main ^:skip-aot weepinbell.core
   :profiles {:uberjar {:aot :all}}
