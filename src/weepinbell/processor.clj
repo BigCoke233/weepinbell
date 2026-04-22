@@ -5,7 +5,6 @@
             [weepinbell.storage :as storage]
             [weepinbell.utils :refer [validate-content-types]]
             [weepinbell.wrapper :as wrapper]
-            [weepinbell.webhook :as webhook]
             [taoensso.timbre :as timbre]))
 
 (defn verify-mention
@@ -28,32 +27,32 @@
 
 (defn process-new-webmention
   "Store new webmention if verifed. Do nothing otherwise."
-  [source target]
+  [source target callbacks]
   (when (verify-mention source target)
     (timbre/info "\n🙋‍♂️ Valid webmention received: \n"
       "from " source "\n"
       "to " target "\n\n")
     (let [data (wrapper/wrap source target)]
       (storage/append-wm data)))
-  (webhook/trigger :on-create))
+  ((:on-create callbacks)))
 
 (defn process-existing-webmention
   "Update existing Webmention when verified, delete it otherwise."
-  [source target]
+  [source target callbacks]
   (timbre/info "Webmention exists.")
   (if (verify-mention source target)
     (do
       (storage/update-wm source target
                          (wrapper/wrap source target))
-      (webhook/trigger :on-update)
+      ((:on-update callbacks))
       (timbre/info "Webmention updated."))
     (do
       (storage/delete-wm source target)
-      (webhook/trigger :on-delete)
+      ((:on-delete callbacks))
       (timbre/info "Webmention no longer valid, deleted."))))
 
 (defn process-webmention
-  [wmc]
+  [wmc callbacks]
   (go-loop []
     (when-let [webmention (<! wmc)]
       (timbre/info "Webmention found in queue.")
@@ -66,10 +65,9 @@
          ;; if not, write to data
           (do
             (if (storage/get-wm s t)
-              (process-existing-webmention s t)
-              (process-new-webmention s t))
-            ;; trigger webhook
-            (webhook/trigger :on-receive))
+              (process-existing-webmention s t callbacks)
+              (process-new-webmention s t callbacks))
+            ((:on-receive callbacks)))
           ;; if content-type check fails
           (timbre/error "Source or target is not HTML or plain text; or error occurred trying to get content type."))))
     (recur)))

@@ -7,15 +7,11 @@
             [weepinbell.config :refer [get-config]]
             [weepinbell.receiver :refer [receive]]
             [weepinbell.retriever :as retriever]
-            [weepinbell.processor :refer [process-webmention]]
             [weepinbell.ui :as ui]
             [weepinbell.feed :as feed]
             [clojure.core.async :refer [chan]]))
 
-;; Start webmention processor
-
 (def wmc (chan))
-(process-webmention wmc)
 
 ;; Define API routes
 

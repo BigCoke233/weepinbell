@@ -1,16 +1,21 @@
 (ns weepinbell.webhook
   (:require [clj-http.client :as client]
             [taoensso.timbre :as timbre]
-            [weepinbell.config :refer [get-config]]
             [weepinbell.utils :refer [valid-http-url?]]))
 
-(defn trigger [keyw]
-  ;; keyw = on-receive, on-create, on-update, on-delete
-  (when-let [hooks (get (get-config :webhook) keyw)]
-    (->> hooks
-         (filter string?)
-         (filter valid-http-url?)
-         (map #((client/post %)
-                (timbre/info "Webhook triggered: " %)))
-         doall)))
+(defn trigger 
+  "Send requests to a list of webhooks."
+  ([urls]
+    (trigger urls nil))
+  ([keyw webhooks]
+    (when-let [hooks (if (nil? webhooks) keyw
+                         ;; if webhook list provided
+                         ;; retrieve from config
+                         (->> (get webhooks keyw)
+                              (filter string?)
+                              (filter valid-http-url?)))]
+      (->> hooks
+           (map #((client/post %)
+                  (timbre/info "Webhook triggered: " %)))
+           doall))))
 
