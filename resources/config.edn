@@ -2,5 +2,8 @@
  :endpoint "/endpoint"
  :allowed-target-domains ["example.com"]
  :data-path "data/webmention.edn"
- :webhook {:on-receive []}
+ :webhook {:on-receive []
+           :on-create []
+           :on-update []
+           :on-delete []}
  :feed-length 8}
