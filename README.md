@@ -1,26 +1,31 @@
-```
-⚠️ This Project is still under active development ⚠️
-```
+> [!warning]
+> This Project is still under active development. API may change. There may be fatal bugs.
 
 <img src="resources/static/weepinbell.avif" align="right" width="300px" />
 
 # weepinbell
 
-A [Webmention](https://www.w3.org/TR/webmention/) receiver written in [Clojure](https://clojure.org/).
+![pipeline status](https://ci.codeberg.org/api/badges/16777/status.svg)
+
+> "When hungry, it swallows anything that moves. Its hapless prey is dissolved by strong acids."
+
+A feature-rich [Webmention](https://www.w3.org/TR/webmention/) receiver written in [Clojure](https://clojure.org/), with [microformats](https://microformats.org/) and RSS support. 
+
+It *eats up* in-coming Webmention request, *dissolve* the target's HTML and *grows* its own data file. And it rings its little *bell* to let you know that people mentioned you. Such a lovely pokémon!
 
 ## Features
 
 - Implements [Webmention](https://www.w3.org/TR/webmention/) receiver
 - Parse and store [microformats](https://microformats.org/)
-- Webmention query API and filtering by target url or domain
+- JSON API used for querying exisiting mentions 
+- RSS Feed 
+- Webhook
 
 ## Roadmap
 
+- [ ] Unit tests (100% coverage) 🚩
 - [ ] API Paging
-- [x] Generate unique id for each Webmention
-- [x] RSS/Atom Feed, see [Serving RSS with Clojure](https://yogthos.net/posts/2012-08-04-Serving-RSS-with-Clojure.html)
-- [x] Import from [webmention.io](https://webmention.io)
-- [x] Webhook
+- [ ] Admin UI 
 
 ## API
 
@@ -36,13 +41,28 @@ You can configure this endpoint path. There are not separate endpoints for diffe
 
 Respond with a JSON array containing all webmentions by default. Accepts query `filter`, either a target URL or a domain name, e.g. `/api/mentions?filter=example.com`.
 
+`mentions` is for generic Webmention. If a Webmention target has microformats markup, it may contain `u-like-of` `u-in-reply-to` and `u-repost-of` elements, Weepinbell see them as special mentions. Use `/api/likes` `/api/replies` and `/api/reposts` to get these special mentions.
+
 ### Query one specific Webmention
 
 `GET /api/mention/:id`
 
 `GET /api/mention/?target=...&source=...`
 
+Special mentions `/api/{likes|replies|reposts}` works, too.
+
+### RSS Feed 
+
+`/feed/:domain`
+
+Subscribe to Webmentions sent to a specific domain.
+
 ## Installation
+
+### Requirements
+
+- JDK (Java), >= 17
+- [Leiningen](https://codeberg.org/leiningen/leiningen) (optional, only if you want to build from source)
 
 ### Download
 
@@ -73,6 +93,8 @@ cd weepinbell
 docker compose up -d
 ```
 
+Podman should work as well, but it's not tested.
+
 ## Configuration
 
 Configure weepinbell by creating a `config.edn`, the defaults:
@@ -82,8 +104,12 @@ Configure weepinbell by creating a `config.edn`, the defaults:
  :endpoint "/endpoint" ;; POST route that receives webmention request
  :allowed-target-domains ["example.com"] ;; domains that this receiver receives webmention on behalf of
  :data-path "data/webmention.edn"
- :webhook {:on-receive []}
- :feed-length 8}
+ :webhook {:on-receive [] ;; sends GET requests to these URLs
+           :on-create []  ;; when certain events occur
+           :on-delete []
+           :on-update []}
+ :feed-length 8 ;; number of RSS feed items
+}
 ```
 
 If you're not familiar with this format, see [edn](https://github.com/edn-format/edn). In short, it's Clojure's equivalent of JSON, but more extensible.
