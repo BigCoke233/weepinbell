@@ -1,6 +1,10 @@
 when:
   - event: push
     branch: master
+    paths:
+      - resources/**
+      - src/**
+      - test/**
 
 steps:
   - name: run tests
