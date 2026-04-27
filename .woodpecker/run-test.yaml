@@ -1,0 +1,9 @@
+when:
+  - event: push
+    branch: master
+
+steps:
+  - name: run tests
+    image: clojure:latest
+    commands:
+      - lein test
