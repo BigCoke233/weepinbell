@@ -34,7 +34,7 @@ It *eats up* in-coming Webmention request, *dissolve* the target's HTML and *gro
 
 `POST /endpoint`
 
-You can configure this endpoint path. There are not separate endpoints for different domains. All Webmentions are sent to one endpoint.
+You can configure this endpoint path. There are no separate endpoints for different domains. All Webmentions are sent to one endpoint.
 
 ### Query Webmentions sent to a URL
 
@@ -164,7 +164,7 @@ You can migrate from [webmention.io](https://webmention.io/) with [this Babashka
 
 Get `<token>` in [webmention.io settings](https://webmention.io/settings). `<new_endpoint>` is your current Weepinbell endpoint (default: `localhost:3000/endpoint`).
 
-This script basically just resend all webmentions to Weepinbell. To avoid being mistaken as attacks, webmentions are resent every 0.5 seconds, so it might take a long time.
+This script basically just resends all webmentions to Weepinbell. To avoid being mistaken as attacks, webmentions are resent every 0.5 seconds, so it might take a long time.
 
 ## License
 
