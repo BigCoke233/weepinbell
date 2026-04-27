@@ -20,6 +20,7 @@ It *eats up* in-coming Webmention request, *dissolve* the target's HTML and *gro
 - JSON API used for querying exisiting mentions 
 - RSS Feed 
 - Webhook
+- Image proxy for microformats photos
 
 ## Roadmap
 
@@ -35,13 +36,50 @@ It *eats up* in-coming Webmention request, *dissolve* the target's HTML and *gro
 
 You can configure this endpoint path. There are not separate endpoints for different domains. All Webmentions are sent to one endpoint.
 
-### Query and filter Webmentions
+### Query Webmentions sent to a URL
 
-`GET /api/mentions`
-
-Respond with a JSON array containing all webmentions by default. Accepts query `filter`, either a target URL or a domain name, e.g. `/api/mentions?filter=example.com`.
+`GET /api/mentions?url=`
 
 `mentions` is for generic Webmention. If a Webmention target has microformats markup, it may contain `u-like-of` `u-in-reply-to` and `u-repost-of` elements, Weepinbell see them as special mentions. Use `/api/likes` `/api/replies` and `/api/reposts` to get these special mentions.
+
+Response body:
+
+```JSON
+{
+    "webmention": {
+      "source": "...",
+      "target": "...",
+      "id": "...",
+      "modified": ...
+    },
+    // if target has no microformats markup 
+    // this will be left empty
+    "microformats": {
+      "author": {
+        "name": "...",
+        "nickname": "...",
+        "photo": "...",
+        "url": "..."
+      },
+      // supported types: in-reply-to, like-of, repost-of
+      "type": "in-reply-to",
+      "published": "...",
+      "content": {
+        "html": "...",
+        "text": "..."
+      }
+    },
+    "extra": {
+      "proxied-photo": "..."
+    }
+  },
+```
+
+### Query Webmentions sent to a domain 
+
+`GET /api/mentions/:domain`
+
+Special mentions `/api/{likes|replies|reposts}` works, too.
 
 ### Query one specific Webmention
 
