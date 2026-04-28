@@ -1,0 +1,36 @@
+when:
+  - event: release
+
+steps:
+  - name: Build
+    image: clojure:latest
+    commands:
+      - lein uberjar
+
+  - name: Publish
+    image: alpine:latest
+    commands:
+      - apk add --no-cache curl jq
+      - |
+        VERSION=$(grep 'defproject' project.clj | sed 's/.*"\(.*\)".*/\1/')
+        echo "Version: $VERSION"
+        RELEASE_ID=$(curl -s -H "accept: application/json" \
+          "https://codeberg.org/api/v1/repos/eltrac/weepinbell/releases/latest" | jq -r '.id')
+        if [ -z "$RELEASE_ID" ] || [ "$RELEASE_ID" = "null" ]; then
+          echo "Failed to retrieve release ID"
+          exit 1
+        fi
+        echo "Latest release ID: $RELEASE_ID"
+      - |
+        for jar in target/uberjar/weepinbell-${VERSION}.jar target/uberjar/weepinbell-${VERSION}-standalone.jar; do
+          if [ -f "$jar" ]; then
+            echo "Uploading $jar..."
+            curl -X POST \
+              "https://codeberg.org/api/v1/repos/eltrac/weepinbell/releases/${RELEASE_ID}/assets?name=$(basename "$jar")" \
+              -H "Authorization: token ${FORGEJO_TOKEN}" \
+              -F "attachment=@$jar"
+            echo ""
+          else
+            echo "Warning: $jar not found, skipping"
+          fi
+        done
