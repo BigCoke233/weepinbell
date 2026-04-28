@@ -21,7 +21,6 @@ steps:
           exit 1
         fi
         echo "Latest release ID: $RELEASE_ID"
-      - |
         for jar in target/uberjar/weepinbell-${VERSION}.jar target/uberjar/weepinbell-${VERSION}-standalone.jar; do
           if [ -f "$jar" ]; then
             echo "Uploading $jar..."
