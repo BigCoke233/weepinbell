@@ -26,7 +26,7 @@ steps:
           echo "Uploading $jar..."
           curl -X POST \
             "https://codeberg.org/api/v1/repos/eltrac/weepinbell/releases/${RELEASE_ID}/assets?name=$(basename "$jar")" \
-            -H "Authorization: token $FORGEJO_TOKEN" \
+            -H "Authorization: token $$FORGEJO_TOKEN" \
             -F "attachment=@$jar"
           echo ""
         done
