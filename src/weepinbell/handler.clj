@@ -4,6 +4,7 @@
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
             [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.content-type :refer [wrap-content-type]]
+            [ring.middleware.json :refer [wrap-json-response wrap-json-body]]
             [weepinbell.config :refer [get-config]]
             [weepinbell.receiver :refer [receive]]
             [weepinbell.retriever :as retriever]
@@ -49,5 +50,6 @@
   (-> api-routes
       (wrap-resource "static")
       (wrap-defaults api-defaults)
-      (wrap-content-type)))
+      (wrap-json-response)
+      (wrap-json-body)))
 

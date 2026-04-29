@@ -2,7 +2,7 @@
   "Receiver receives Webmention request (a source and a target); verify the request; return error message if any; push Webmention into queue of processor."
   (:require [clojure.string :as string]
             [clojure.core.async :refer [put!]]
-            [weepinbell.utils :refer [validate-urls validate-target respond-json]]
+            [weepinbell.utils :refer [validate-urls validate-target]]
             [weepinbell.config :refer [get-config]]
             [md5.core :refer [string->md5-hex]]
             [cheshire.core :as json]))
@@ -17,9 +17,9 @@
                          ;; if the source URL is the same as the target URL.
                          (= source target) "Source and target are identical."
                          (not (validate-target target)) "Domain of target is not allowed. This receiver does not receive webmention on its behalf.")]
-    (respond-json {:status 400
-                   :body error-msg}
-                  400)))
+    {:status 400
+     :body {:status 400
+            :message error-msg}}))
 
 (defn receive
   "Receive webmention; call verify-request; if verification passed, push webmention into queue."

@@ -92,16 +92,6 @@
 (defn file-exists? [path]
   (.exists (io/file path)))
 
-(defn respond-json
-  ([data]
-    (respond-json data 200))
-  ([data status]
-  (let [json-string (json/generate-string data)
-        status status]
-    {:status status
-     :headers {"Content-Type" "application/json; charset=utf-8"}
-     :body json-string})))
-
 (defn format-list [coll]
   (let [total (count coll)]
     (cond

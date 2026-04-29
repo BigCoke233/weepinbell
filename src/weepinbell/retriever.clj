@@ -1,17 +1,15 @@
 (ns weepinbell.retriever
   (:require [weepinbell.storage :as storage]
-            [weepinbell.utils :refer [get-domain
-                                      get-path
-                                      respond-json]]
+            [weepinbell.utils :refer [get-domain]]
             [weepinbell.microformats-wrapper :as mf-wrapper]))
 
 ;; utilities
 (defn- respond-webmention-json [data]
-  (if data
-    (respond-json data)
-    (respond-json {:status 404
-                   :message "Webmention does not exist or is pending for verification."}
-                  404)))
+  (if data data
+    ;; if no data found, respond 404
+    {:status 404
+     :body {:status 404
+            :message "Webmention does not exist or is pending for verification."}}))
 
 (defn- wrap-response-object [data]
   (let [result {:webmention (:webmention data)}]
@@ -46,8 +44,7 @@
   ([domain typ]
     (cond->> (storage/get-wms-by-domain domain)
              true wrap-response-list
-             typ  (filter-response-by-mftype typ)
-             true respond-json)))
+             typ  (filter-response-by-mftype typ))))
 
 (defn by-url
   "Get webmention sent to a particular URL."
@@ -59,12 +56,11 @@
              true storage/get-wms-by-domain
              true (filter #(= url (get-in % [:webmention :target])))
              true wrap-response-list
-             typ  (filter-response-by-mftype typ)
-             true respond-json)
+             typ  (filter-response-by-mftype typ))
     ;; if no url query is passed
-    (respond-json {:status 400
-                   :message "Missing URL. Specify target URL whose webmentions you are querying."}
-                  400))))
+    {:status 400
+     :body {:status 400
+            :message "Missing URL. Specify target URL whose webmentions you are querying."}})))
 
 (defn by-id
   "Get one specific webmention by ID."
