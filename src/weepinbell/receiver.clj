@@ -4,8 +4,7 @@
             [clojure.core.async :refer [put!]]
             [weepinbell.utils :refer [validate-urls validate-target]]
             [weepinbell.config :refer [get-config]]
-            [md5.core :refer [string->md5-hex]]
-            [cheshire.core :as json]))
+            [md5.core :refer [string->md5-hex]]))
 
 (defn verify-request
   [source target]
@@ -18,6 +17,7 @@
                          (= source target) "Source and target are identical."
                          (not (validate-target target)) "Domain of target is not allowed. This receiver does not receive webmention on its behalf.")]
     {:status 400
+     :headers {"Content-Type" "application/json; charset=utf-8"}
      :body {:status 400
             :message error-msg}}))
 
@@ -52,6 +52,6 @@
           {:status 201
            :headers {"Location" wm-url
                      "Content-Type" "application/json; charset=utf-8"}
-           :body (json/generate-string response)})))))
+           :body response})))))
 
 
