@@ -1,7 +1,8 @@
 (ns weepinbell.core
   (:require [ring.adapter.jetty :refer [run-jetty]]
             [weepinbell.processor :refer [process-webmention]]
-            [weepinbell.handler :refer [app wmc]]
+            [weepinbell.handler :refer [app]]
+            [weepinbell.channel :refer [wmc]]
             [weepinbell.config :refer [get-config]]
             [weepinbell.webhook :as webhook]
             [taoensso.timbre :as timbre])

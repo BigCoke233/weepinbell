@@ -7,11 +7,9 @@
             [weepinbell.config :refer [get-config]]
             [weepinbell.receiver :refer [receive]]
             [weepinbell.retriever :as retriever]
+            [weepinbell.channel :refer [wmc]]
             [weepinbell.ui :as ui]
-            [weepinbell.feed :as feed]
-            [clojure.core.async :refer [chan]]))
-
-(def wmc (chan))
+            [weepinbell.feed :as feed]))
 
 ;; Define API routes
 
