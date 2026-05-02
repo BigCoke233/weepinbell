@@ -3,8 +3,7 @@
             [compojure.route :as route]
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
             [ring.middleware.resource :refer [wrap-resource]]
-            [ring.middleware.content-type :refer [wrap-content-type]]
-            [ring.middleware.json :refer [wrap-json-response wrap-json-body]]
+            [ring.middleware.json :refer [wrap-json-response]]
             [weepinbell.config :refer [get-config]]
             [weepinbell.receiver :refer [receive]]
             [weepinbell.retriever :as retriever]
@@ -50,6 +49,5 @@
   (-> api-routes
       (wrap-resource "static")
       (wrap-defaults api-defaults)
-      (wrap-json-response)
-      (wrap-json-body)))
+      (wrap-json-response)))
 
