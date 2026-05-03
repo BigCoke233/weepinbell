@@ -3,7 +3,7 @@
             [ring.adapter.jetty :refer [run-jetty]]
             [weepinbell.webhook :as webhook]))
 
-(deftest -test
+(deftest webhook-test
   (testing "Test webhooks triggers"
     (let [received (promise)
           handler  (fn [_]
