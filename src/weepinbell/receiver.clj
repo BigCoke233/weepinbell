@@ -17,19 +17,20 @@
     (some #{target-domain} allow-list)))
 
 (defn- verify-request
+  "Verify source and target based on URLs, return error message (string) if any. Return nil if none."
   [source target opts]
-  (when-let [error-msg (cond
-                         ;; The receiver MUST check that source and target are valid URLs [URL]
-                         ;; and are of schemes that are supported by the receiver.
-                         (not (validate-urls source target)) "Invalid URLs. Source and target have to be valid http(s) urls."
-                         ;; The receiver MUST reject the request
-                         ;; if the source URL is the same as the target URL.
-                         (= source target) "Source and target are identical."
-                         (not (validate-target target)) "Domain of target is not allowed. This receiver does not receive webmention on its behalf.")]
-    {:status 400
-     :headers {"Content-Type" "application/json; charset=utf-8"}
-     :body {:status 400
-            :message error-msg}}))
+  (cond
+    ;; The receiver MUST check that source and target are valid URLs [URL]
+    ;; and are of schemes that are supported by the receiver.
+    (not (validate-urls source target)) 
+      "Invalid URLs. Source and target have to be valid http(s) urls."
+    ;; The receiver MUST reject the request
+    ;; if the source URL is the same as the target URL.
+    (= source target) 
+      "Source and target are identical."
+    ;; The receiver only accetps webmentions on behalf of configured domains.
+    (not (validate-target target opts)) 
+      "Domain of target is not allowed. This receiver does not receive webmention on its behalf."))
 
 ;; receiving logic
 
@@ -41,9 +42,12 @@
         source (some-> s (string/replace #"#.*$" ""))
         target (some-> t (string/replace #"#.*$" ""))]
     ;; Request verification
-    (if-let [errror-response (verify-request source target opts)]
+    (if-let [error-msg (verify-request source target opts)]
       ;; respond if request verification failed
-      errror-response
+      {:status 400
+       :headers {"Content-Type" "application/json; charset=utf-8"}
+       :body {:status 400
+              :message error-msg}}
       ;; proceed if request is ok
       (do
         ;; The receiver SHOULD check that target is a valid
