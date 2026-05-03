@@ -18,7 +18,9 @@
 
 ;; webmention queue for testing
 (def test-wmc (chan))
+;; end webmention queue for testing
 
+;; utilities
 (defn- wrap-400-msg [typ]
   (let [msg (typ {:invalid-url "Invalid URLs. Source and target have to be valid http(s) urls."
                   :identical "Source and target are identical."
@@ -27,21 +29,24 @@
      :headers {"Content-Type" "application/json; charset=utf-8"}
      :body {:status 400
      :message msg}}))
+;; end utilities
 
+;; validation tests
 ((deftest happy-path-test
     (testing "Receiver happy paths testing."
         (->> [["https://bob.blog" "https://alice.blog"]
               ["http://bob.blog" "http://alice.blog"]
               ["https://bob.blog/post/123" "https://alice.blog/article/abc"]
               ["http://bob.blog/post/123" "http://alice.blog/article/abc"]]
-        (map (fn [testcase]
-               (let [[s t] testcase]
-                 (is (= 201
-                        (:status (receive {:s s :t t}
-                                  test-wmc
-                                  {:domains ["alice.blog"]})))))))
-        doall))))
-((deftest validation-test
+          (map (fn [testcase]
+                 (let [[s t] testcase]
+                   (is (= 201
+                          (:status (receive {:s s :t t}
+                                    test-wmc
+                                    {:domains ["alice.blog"]})))))))
+          doall))))
+
+((deftest error-response-test
     (testing "Receiver error handling."
         (->> [;; invalid URLs
               ["htt://bob.blog" "https://alice.blog/article/abc" (wrap-400-msg :invalid-url)]
@@ -60,4 +65,13 @@
                           test-wmc
                           {:domains ["alice.blog"]}))))))
         doall))))
+;; end validation tests
 
+;; in-queue test 
+;; see if receiver is able to put webmention request 
+;; into queue for processor to pick up
+((deftest in-queue-test
+      (testing "Receiver putting Webmention in queue."
+        
+        )))
+;; end in-queue test
