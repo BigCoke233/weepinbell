@@ -37,38 +37,40 @@
 
 (defn receive
   "Receive webmention; call verify-request; if verification passed, push webmention into queue."
-  [wm wmc opts]
-  (let [{:keys [s t]} wm
-        ;; remove anchor, #...
-        source (some-> s (string/replace #"#.*$" ""))
-        target (some-> t (string/replace #"#.*$" ""))]
-    ;; Request verification
-    (if-let [error-msg (verify-request source target opts)]
-      ;; respond if request verification failed
-      {:status 400
-       :headers {"Content-Type" "application/json; charset=utf-8"}
-       :body {:status 400
-              :message error-msg}}
-      ;; proceed if request is ok
-      (do
-        ;; The receiver SHOULD check that target is a valid
-        ;; resource for which it can accept Webmentions.
-        ;; This check SHOULD happen synchronously to reject
-        ;; invalid Webmentions before more in-depth verification begins.
-        ;;
-        ;; Webmention verification SHOULD be handled asynchronously
-        ;; to prevent DoS (Denial of Service) attacks.
-        (put! wmc wm)
-        ;; respond with 201 when Webmention passed checks and
-        ;; was sent into queue, include a Location header
-        (let [wm-id (string->md5-hex (str source target))
-              wm-url (str (get-config :base-url) "/api/mention/" wm-id)
-              response {:status 201
-                        :message "Webmention is accepted and pending for verification."
-                        :url wm-url}]
-          {:status 201
-           :headers {"Location" wm-url
-                     "Content-Type" "application/json; charset=utf-8"}
-           :body response})))))
+  ([wm wmc]
+   (receive wm wmc {}))
+  ([wm wmc opts]
+   (let [{:keys [s t]} wm
+         ;; remove anchor, #...
+         source (some-> s (string/replace #"#.*$" ""))
+         target (some-> t (string/replace #"#.*$" ""))]
+     ;; Request verification
+     (if-let [error-msg (verify-request source target opts)]
+       ;; respond if request verification failed
+       {:status 400
+        :headers {"Content-Type" "application/json; charset=utf-8"}
+        :body {:status 400
+               :message error-msg}}
+       ;; proceed if request is ok
+       (do
+         ;; The receiver SHOULD check that target is a valid
+         ;; resource for which it can accept Webmentions.
+         ;; This check SHOULD happen synchronously to reject
+         ;; invalid Webmentions before more in-depth verification begins.
+         ;;
+         ;; Webmention verification SHOULD be handled asynchronously
+         ;; to prevent DoS (Denial of Service) attacks.
+         (put! wmc wm)
+         ;; respond with 201 when Webmention passed checks and
+         ;; was sent into queue, include a Location header
+         (let [wm-id (string->md5-hex (str source target))
+               wm-url (str (get-config :base-url) "/api/mention/" wm-id)
+               response {:status 201
+                         :message "Webmention is accepted and pending for verification."
+                         :url wm-url}]
+           {:status 201
+            :headers {"Location" wm-url
+                      "Content-Type" "application/json; charset=utf-8"}
+            :body response}))))))
 
 
