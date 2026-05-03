@@ -28,14 +28,22 @@
      :body {:status 400
      :message msg}}))
 
-((deftest receive-test
+((deftest happy-path-test
+    (testing "Receiver happy paths testing."
+        (->> [["https://bob.blog" "https://alice.blog"]
+              ["http://bob.blog" "http://alice.blog"]
+              ["https://bob.blog/post/123" "https://alice.blog/article/abc"]
+              ["http://bob.blog/post/123" "http://alice.blog/article/abc"]]
+        (map (fn [testcase]
+               (let [[s t] testcase]
+                 (is (= 201
+                        (:status (receive {:s s :t t}
+                                  test-wmc
+                                  {:domains ["alice.blog"]})))))))
+        doall))))
+((deftest validation-test
     (testing "Receiver error handling."
-        (->> [;; happy paths
-              ["https://bob.blog" "https://alice.blog" nil]
-              ["http://bob.blog" "http://alice.blog" nil]
-              ["https://bob.blog/post/123" "https://alice.blog/article/abc" nil]
-              ["http://bob.blog/post/123" "http://alice.blog/article/abc" nil]
-              ;; invalid URLs
+        (->> [;; invalid URLs
               ["htt://bob.blog" "https://alice.blog/article/abc" (wrap-400-msg :invalid-url)]
               ["ftp://bob.blog/file/x" "https://alice.blog/article/abc" (wrap-400-msg :invalid-url)]
               ["bob.blog/post/123" "https://alice.blog/article/abc" (wrap-400-msg :invalid-url)]
