@@ -50,5 +50,6 @@
                  (is (= expects 
                         (receive {:s s :t t}
                           test-wmc
-                          {:domains ["alice.blog"]})))))))
-        )))
+                          {:domains ["alice.blog"]}))))))
+        doall))))
+
