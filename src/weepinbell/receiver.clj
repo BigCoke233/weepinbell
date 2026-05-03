@@ -11,9 +11,10 @@
 (defn- validate-urls [s t]
   (and (valid-http-url? s) (valid-http-url? t)))
 
-(defn- validate-target [t]
-  (let [allow-list (get-config :allowed-target-domains)
-        target-domain (get-domain t)]
+(defn- validate-target [t opts]
+  (let [target-domain (get-domain t)
+        allow-list (or (:domains opts)
+                       (get-config :allowed-target-domains))]
     (some #{target-domain} allow-list)))
 
 (defn- verify-request
