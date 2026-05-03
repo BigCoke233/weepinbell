@@ -13,12 +13,8 @@
 
 (ns weepinbell.receiver-test
   (:require [clojure.test :refer [deftest testing is]]
-            [clojure.core.async :refer [chan]]
+            [clojure.core.async :refer [chan poll!]]
             [weepinbell.receiver :refer [receive]]))
-
-;; webmention queue for testing
-(def test-wmc (chan))
-;; end webmention queue for testing
 
 ;; utilities
 (defn- wrap-400-msg [typ]
@@ -28,50 +24,76 @@
     {:status 400
      :headers {"Content-Type" "application/json; charset=utf-8"}
      :body {:status 400
-     :message msg}}))
+            :message msg}}))
 ;; end utilities
+
+;; define test cases 
+(def happy-paths [["https://bob.blog" "https://alice.blog"]
+                  ["http://bob.blog" "http://alice.blog"]
+                  ["https://bob.blog/post/123" "https://alice.blog/article/abc"]
+                  ["http://bob.blog/post/123" "http://alice.blog/article/abc"]])
+(def error-cases [;; invalid URLs
+                  ["htt://bob.blog" "https://alice.blog/article/abc" (wrap-400-msg :invalid-url)]
+                  ["ftp://bob.blog/file/x" "https://alice.blog/article/abc" (wrap-400-msg :invalid-url)]
+                  ["bob.blog/post/123" "https://alice.blog/article/abc" (wrap-400-msg :invalid-url)]
+                  ["https://bob.blog/post/123" "alice.blog/article/abc" (wrap-400-msg :invalid-url)]
+                  ["https://bob.blog/post/123" "ftp://alice.blog/file/x" (wrap-400-msg :invalid-url)]
+                  ;; identical URLs 
+                  ["https://alice.blog/article/abc" "https://alice.blog/article/abc" (wrap-400-msg :identical)]
+                  ;; domain not allowed 
+                  ["https://bob.blog/post/123" "https://chris.blog/archive/xxx" (wrap-400-msg :domain-not-allowed)]])
+;; end define test cases
+
+;; webmention queue for testing
+(def test-wmc (chan))
+;; end webmention queue for testing
 
 ;; validation tests
 ((deftest happy-path-test
-    (testing "Receiver happy paths testing."
-        (->> [["https://bob.blog" "https://alice.blog"]
-              ["http://bob.blog" "http://alice.blog"]
-              ["https://bob.blog/post/123" "https://alice.blog/article/abc"]
-              ["http://bob.blog/post/123" "http://alice.blog/article/abc"]]
+   (testing "Receiver happy paths testing."
+     (->> happy-paths
           (map (fn [testcase]
                  (let [[s t] testcase]
                    (is (= 201
                           (:status (receive {:s s :t t}
-                                    test-wmc
-                                    {:domains ["alice.blog"]})))))))
+                                            test-wmc
+                                            {:domains ["alice.blog"]})))))))
           doall))))
 
 ((deftest error-response-test
-    (testing "Receiver error handling."
-        (->> [;; invalid URLs
-              ["htt://bob.blog" "https://alice.blog/article/abc" (wrap-400-msg :invalid-url)]
-              ["ftp://bob.blog/file/x" "https://alice.blog/article/abc" (wrap-400-msg :invalid-url)]
-              ["bob.blog/post/123" "https://alice.blog/article/abc" (wrap-400-msg :invalid-url)]
-              ["https://bob.blog/post/123" "alice.blog/article/abc" (wrap-400-msg :invalid-url)]
-              ["https://bob.blog/post/123" "ftp://alice.blog/file/x" (wrap-400-msg :invalid-url)]
-              ;; identical URLs 
-              ["https://alice.blog/article/abc" "https://alice.blog/article/abc" (wrap-400-msg :identical)]
-              ;; domain not allowed 
-              ["https://bob.blog/post/123" "https://chris.blog/archive/xxx" (wrap-400-msg :domain-not-allowed)]]
-        (map (fn [testcase]
-               (let [[s t expects] testcase]
-                 (is (= expects 
-                        (receive {:s s :t t}
-                          test-wmc
-                          {:domains ["alice.blog"]}))))))
-        doall))))
+   (testing "Receiver error handling."
+     (->> error-cases
+          (map (fn [testcase]
+                 (let [[s t expects] testcase]
+                   (is (= expects
+                          (receive {:s s :t t}
+                                   test-wmc
+                                   {:domains ["alice.blog"]}))))))
+          doall))))
 ;; end validation tests
 
 ;; in-queue test 
 ;; see if receiver is able to put webmention request 
 ;; into queue for processor to pick up
+;; and if it falsely put unvalidated request
 ((deftest in-queue-test
-      (testing "Receiver putting Webmention in queue."
-        
-        )))
+   (testing "Receiver putting Webmention in queue."
+     ;; valid webmention
+     (->> happy-paths
+          (map (fn [testcase]
+                 (let [[s t] testcase
+                       wm {:s s :t t}
+                       test-queue (chan)]
+                   (receive wm test-queue {:domains ["alice.blog"]})
+                   (is (= wm (poll! test-queue))))))
+          doall)
+     ;; invalid webmention 
+     (->> error-cases
+          (map (fn [testcase]
+                 (let [[s t] testcase
+                       wm {:s s :t t}
+                       test-queue (chan)]
+                   (receive wm test-queue {:domains ["alice.blog"]})
+                   (is (not= wm (poll! test-queue))))))
+          doall))))
 ;; end in-queue test
