@@ -2,12 +2,22 @@
   "Receiver receives Webmention request (a source and a target); verify the request; return error message if any; push Webmention into queue of processor."
   (:require [clojure.string :as string]
             [clojure.core.async :refer [put!]]
-            [weepinbell.utils :refer [validate-urls validate-target]]
+            [weepinbell.utils :refer [valid-http-url? get-domain]]
             [weepinbell.config :refer [get-config]]
             [md5.core :refer [string->md5-hex]]))
 
-(defn verify-request
-  [source target]
+;; validation and verification
+
+(defn- validate-urls [s t]
+  (and (valid-http-url? s) (valid-http-url? t)))
+
+(defn- validate-target [t]
+  (let [allow-list (get-config :allowed-target-domains)
+        target-domain (get-domain t)]
+    (some #{target-domain} allow-list)))
+
+(defn- verify-request
+  [source target opts]
   (when-let [error-msg (cond
                          ;; The receiver MUST check that source and target are valid URLs [URL]
                          ;; and are of schemes that are supported by the receiver.
@@ -21,15 +31,17 @@
      :body {:status 400
             :message error-msg}}))
 
+;; receiving logic
+
 (defn receive
   "Receive webmention; call verify-request; if verification passed, push webmention into queue."
-  [wm wmc]
+  [wm wmc opts]
   (let [{:keys [s t]} wm
         ;; remove anchor, #...
         source (some-> s (string/replace #"#.*$" ""))
         target (some-> t (string/replace #"#.*$" ""))]
     ;; Request verification
-    (if-let [errror-response (verify-request source target)]
+    (if-let [errror-response (verify-request source target opts)]
       ;; respond if request verification failed
       errror-response
       ;; proceed if request is ok
