@@ -1,49 +1,26 @@
 (ns weepinbell.processor-test
   (:require [clojure.test :refer [deftest testing is]]
-            [compojure.core :refer [GET defroutes]]
+            [compojure.core :refer [GET routes]]
             [ring.adapter.jetty :refer [run-jetty]]
             [weepinbell.processor :as p]))
 
-;; Test cases
-(def happy-paths
-  [{:source-path "/1"
-    :source-status 200
-    :source-content
-    "Oh I love this post: https://alice.blog/article/abc
-       this is very clever and I find it inspiring"
-    :target "https://alice.blog/article/abc"
-    :expect true}
-   {:source-path "/2"
-    :source-status 206
-    :source-content
-    "Oh I love this post: https://alice.blog/article/abc
-      this is very clever and I fi"
-    :target "https://alice.blog/article/abc"
-    :expect true}])
-;; End test cases
-
-;; Conver test cases to routes
-;; so test server can serve them
-(defmacro make-test-routes [testcases]
-  (doall (map
-   (fn [testcase]
-     `(GET ~(:source-path testcase)
-       [] {:status ~(:source-status testcase)
-           :headers {}
-           :body ~(:source-content testcase)}))
-   @(resolve testcases))))
-
-(defroutes test-routes 
-  (make-test-routes happy-paths))
-;; end defroutes
-
-((deftest verification-test
-   (testing "Test if processor can correctly verifies a Webmention."
-     (let [server (run-jetty test-routes {:port 28888 :join? false})]
-       (->> happy-paths
-            (map #(is (= (:expect %)
-                         (p/verify-mention (str "http://localhost:28888"
-                                                (:source-path %))
-                                           (:target %)))))
-            doall)
-       (.stop server)))))
+(deftest verification-test
+  (testing "Test if processor can correctly verifies a Webmention."
+    (let [handler (routes
+                   (GET "/1" []
+                     {:status 200 :headers {}
+                      :body (str "Oh I love this post:"
+                                 " https://alice.blog/article/abc\n"
+                                 "       this is very clever"
+                                 " and I find it inspiring")})
+                   (GET "/2" []
+                     {:status 206 :headers {}
+                      :body (str "Oh I love this post:"
+                                 " https://alice.blog/article/abc\n"
+                                 "      this is very clever and I fi")}))
+          server (run-jetty handler {:port 28888 :join? false})]
+      (is (= true (p/verify-mention "http://localhost:28888/1"
+                                    "https://alice.blog/article/abc")))
+      (is (= true (p/verify-mention "http://localhost:28888/2"
+                                    "https://alice.blog/article/abc")))
+      (.stop server))))
