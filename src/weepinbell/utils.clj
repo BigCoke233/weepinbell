@@ -43,12 +43,6 @@
     (string/includes? content-type "text/plain") :text
     :else false))
 
-(defn validate-content-types [source target]
-  (let [validate #(-> % get-content-type plain-or-html? boolean)
-        source-valid (validate source)
-        target-valid (validate target)]
-    (and source-valid target-valid)))
-
 (defn javamap->map [map]
   (->> (seq map) (into {}) walk/keywordize-keys))
 

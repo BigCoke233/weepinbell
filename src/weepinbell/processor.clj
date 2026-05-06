@@ -1,28 +1,12 @@
 (ns weepinbell.processor
+  "Process in-coming webmentions.
+   If no such webmention exists and request is verified, create.
+   If exists and verification fails, delete it.
+   If exists and verification passes, update it."
   (:require [clojure.core.async :refer [go-loop <!]]
-            [clojure.string :refer [includes?]]
-            [clj-http.client :as client]
-            [weepinbell.utils :refer [validate-content-types]]
             [weepinbell.wrapper :as wrapper]
+            [weepinbell.verifier :refer [verify-mention verify-content-types]]
             [taoensso.timbre :as timbre]))
-
-(defn verify-mention
-  "Get source and follow redirects to check if target link is present."
-  [source target]
-  (try
-    (timbre/info (str "Verifying mention from: " source))
-    ;; get first 1MB of source URL and verify
-    (let [{:keys [status body]} (client/get source {:throw false
-                                                    :headers {"Range" "bytes=0-1048575"}})]
-      (if (and (>= status 200) (< status 300))
-        ;; TODO needs to be more robust
-        (if (includes? (str body) target)
-          true
-          (do (timbre/error "Target link not found in source body.") false))
-        (do (timbre/error "Source returned status:" status) false)))
-    (catch Exception e
-      (timbre/error "Error verifying mention:" (.getMessage e))
-      false)))
 
 (defn process-new-webmention
   "Store new webmention if verifed. Do nothing otherwise."
@@ -62,7 +46,7 @@
   (let [{:keys [s t]} wm]
    ;; first check Content-Types of both urls
    ;; only proceed when it's HTML or plain text
-    (if (validate-content-types s t)
+    (if (verify-content-types s t)
      ;; second check if such webmention exists
      ;; if so, update it or delete it
      ;; if not, write to data
