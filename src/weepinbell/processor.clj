@@ -50,24 +50,36 @@
       ((:on-delete callbacks))
       (timbre/info "Webmention no longer valid, deleted."))))
 
-(defn process-webmention
+(defn- process-webmention
+  "Process webmention ONCE request found in a specified channel.
+   Validate source's Content-Type, inclusion of target URL.
+   If validated, create webmention when no identical is found,
+   update or delete if webmention already exists.
+   
+   Callbacks and storage are maps of functions, to avoid
+   depending on technical details directly."
+  [wmc callbacks storage]
+  (when-let [webmention (<! wmc)]
+    (timbre/info "Webmention found in queue.")
+    (let [{:keys [s t]} webmention]
+     ;; first check Content-Types of both urls
+     ;; only proceed when it's HTML or plain text
+      (if (validate-content-types s t)
+       ;; second check if such webmention exists
+       ;; if so, update it or delete it
+       ;; if not, write to data
+        (do
+          (if ((:get storage) s t)
+            (process-existing-webmention s t callbacks storage)
+            (process-new-webmention s t callbacks storage))
+          ((:on-receive callbacks)))
+        ;; if content-type check fails
+        (timbre/error "Source or target is not HTML or plain text; or error occurred trying to get content type.")))))
+
+(defn start
+  "Start a go-loop that recursively calls to process-webmention."
   [wmc callbacks storage]
   (go-loop []
-    (when-let [webmention (<! wmc)]
-      (timbre/info "Webmention found in queue.")
-      (let [{:keys [s t]} webmention]
-       ;; first check Content-Types of both urls
-       ;; only proceed when it's HTML or plain text
-        (if (validate-content-types s t)
-         ;; second check if such webmention exists
-         ;; if so, update it or delete it
-         ;; if not, write to data
-          (do
-            (if ((:get storage) s t)
-              (process-existing-webmention s t callbacks storage)
-              (process-new-webmention s t callbacks storage))
-            ((:on-receive callbacks)))
-          ;; if content-type check fails
-          (timbre/error "Source or target is not HTML or plain text; or error occurred trying to get content type."))))
-    (recur)))
+           (process-webmention wmc callbacks storage)
+           (recur)))
 
