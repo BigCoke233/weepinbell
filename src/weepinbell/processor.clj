@@ -50,7 +50,7 @@
       ((:on-delete callbacks))
       (timbre/info "Webmention no longer valid, deleted."))))
 
-(defn- process-webmention
+(defn process-webmention
   "Process webmention one webmention request.
    Validate source's Content-Type, inclusion of target URL.
    If validated, create webmention when no identical is found,
