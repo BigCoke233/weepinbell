@@ -27,27 +27,27 @@
 
 (defn process-new-webmention
   "Store new webmention if verifed. Do nothing otherwise."
-  [source target callbacks]
+  [source target callbacks storage]
   (when (verify-mention source target)
     (timbre/info "\n🙋‍♂️ Valid webmention received: \n"
       "from " source "\n"
       "to " target "\n\n")
     (let [data (wrapper/wrap source target)]
-      (storage/append-wm data)))
+      ((:append storage) data)))
   ((:on-create callbacks)))
 
 (defn process-existing-webmention
   "Update existing Webmention when verified, delete it otherwise."
-  [source target callbacks]
+  [source target callbacks storage]
   (timbre/info "Webmention exists.")
   (if (verify-mention source target)
     (do
-      (storage/update-wm source target
+      ((:update storage) source target
                          (wrapper/wrap source target))
       ((:on-update callbacks))
       (timbre/info "Webmention updated."))
     (do
-      (storage/delete-wm source target)
+      ((:delete storage) source target)
       ((:on-delete callbacks))
       (timbre/info "Webmention no longer valid, deleted."))))
 
@@ -56,7 +56,10 @@
   (go-loop []
     (when-let [webmention (<! wmc)]
       (timbre/info "Webmention found in queue.")
-      (let [{:keys [s t]} webmention]
+      (let [{:keys [s t]} webmention
+            storage       {:update storage/update-wm
+                           :delete storage/delete-wm
+                           :append storage/append-wm}]
        ;; first check Content-Types of both urls
        ;; only proceed when it's HTML or plain text
         (if (validate-content-types s t)
@@ -65,8 +68,8 @@
          ;; if not, write to data
           (do
             (if (storage/get-wm s t)
-              (process-existing-webmention s t callbacks)
-              (process-new-webmention s t callbacks))
+              (process-existing-webmention s t callbacks storage)
+              (process-new-webmention s t callbacks storage))
             ((:on-receive callbacks)))
           ;; if content-type check fails
           (timbre/error "Source or target is not HTML or plain text; or error occurred trying to get content type."))))
