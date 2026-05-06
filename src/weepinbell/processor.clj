@@ -2,7 +2,6 @@
   (:require [clojure.core.async :refer [go-loop <!]]
             [clojure.string :refer [includes?]]
             [clj-http.client :as client]
-            [weepinbell.storage :as storage]
             [weepinbell.utils :refer [validate-content-types]]
             [weepinbell.wrapper :as wrapper]
             [taoensso.timbre :as timbre]))
@@ -52,14 +51,11 @@
       (timbre/info "Webmention no longer valid, deleted."))))
 
 (defn process-webmention
-  [wmc callbacks]
+  [wmc callbacks storage]
   (go-loop []
     (when-let [webmention (<! wmc)]
       (timbre/info "Webmention found in queue.")
-      (let [{:keys [s t]} webmention
-            storage       {:update storage/update-wm
-                           :delete storage/delete-wm
-                           :append storage/append-wm}]
+      (let [{:keys [s t]} webmention]
        ;; first check Content-Types of both urls
        ;; only proceed when it's HTML or plain text
         (if (validate-content-types s t)
@@ -67,7 +63,7 @@
          ;; if so, update it or delete it
          ;; if not, write to data
           (do
-            (if (storage/get-wm s t)
+            (if ((:get storage) s t)
               (process-existing-webmention s t callbacks storage)
               (process-new-webmention s t callbacks storage))
             ((:on-receive callbacks)))
