@@ -1,4 +1,4 @@
-(ns weepinbell.processor-test
+(ns weepinbell.verifier-test
   (:require [clojure.test :refer [deftest testing is]]
             [compojure.core :refer [GET routes]]
             [ring.adapter.jetty :refer [run-jetty]]
