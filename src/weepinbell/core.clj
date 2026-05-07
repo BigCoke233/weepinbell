@@ -9,7 +9,7 @@
             [weepinbell.storage :as storage])
   (:gen-class)) ;; Essential for "lein uberjar"
 
-(defn -main [& args]
+(defn -main [& _]
   ;; Start webmention processor
   (processor/start wmc
                    ;; plug in event hooks
