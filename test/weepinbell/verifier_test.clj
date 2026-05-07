@@ -2,7 +2,7 @@
   (:require [clojure.test :refer [deftest testing is]]
             [compojure.core :refer [GET routes]]
             [ring.adapter.jetty :refer [run-jetty]]
-            [weepinbell.processor :as p]))
+            [weepinbell.verifier :as v]))
 
 (deftest verification-happy-paths-test
   (testing "Test if processor can correctly verifies a Webmention."
@@ -19,9 +19,9 @@
                                  " https://alice.blog/article/abc\n"
                                  "      this is very clever and I fi")}))
           server (run-jetty handler {:port 28888 :join? false})]
-      (is (= true (p/verify-mention "http://localhost:28888/1"
+      (is (= true (v/verify-mention "http://localhost:28888/1"
                                     "https://alice.blog/article/abc")))
-      (is (= true (p/verify-mention "http://localhost:28888/2"
+      (is (= true (v/verify-mention "http://localhost:28888/2"
                                     "https://alice.blog/article/abc")))
       (.stop server))))
 
@@ -51,7 +51,7 @@
       ;; Cases that source respond with an error
       (->> ["a" "b" "c" "d" "e" "f"]
            (map #(is (not
-                      (p/verify-mention (str "http://localhost:28888/" %)
+                      (v/verify-mention (str "http://localhost:28888/" %)
                                         "https://alice.blog/article/abc"))))
            doall)
       (.stop server))))
