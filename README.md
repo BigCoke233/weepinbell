@@ -24,7 +24,7 @@ It *eats up* in-coming Webmention request, *dissolve* the target's HTML and *gro
 
 ## Roadmap
 
-- [-] Unit tests (100% coverage) 🚩
+- [ ] Unit tests (100% coverage) 🚩
 - [ ] Smaller depdency tree
     - [ ] Write own utility functions to replace Apache commons validator
     - [ ] Write own utility functions to replace clj-rss
