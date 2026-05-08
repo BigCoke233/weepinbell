@@ -43,7 +43,7 @@
                       "/target" {:status 200
                                  :headers {"Content-Type" "text/plain"}
                                  :body "Nothing here"}]
-      (is (deref created 1000 nil)))))
+      (is (deref created 100 nil)))))
 
 (deftest new-webmention-content-type-fail-test
   (testing "One of source and target has unsupported Content-Type"
@@ -54,7 +54,7 @@
                       "/target" {:status 200
                                  :headers {"Content-Type" "application/json"}
                                  :body "Nothing here"}]
-      (is (not (deref created 1000 nil))))))
+      (is (not (deref created 100 nil))))))
 
 (deftest new-webmention-no-target-url-fail-test
   (testing "The source does not contain target URL"
@@ -65,7 +65,7 @@
                       "/target" {:status 200
                                  :headers {"Content-Type" "application/json"}
                                  :body "Nothing here"}]
-      (is (not (deref created 1000 nil))))))
+      (is (not (deref created 100 nil))))))
 
 ;; Testing process-existing-webmention
 
