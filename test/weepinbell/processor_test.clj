@@ -1,38 +1,11 @@
 (ns weepinbell.processor-test
   (:require [clojure.test :refer [deftest is testing]]
-            [compojure.core :refer [GET routes]]
-            [ring.adapter.jetty :refer [run-jetty]]
-            [weepinbell.processor :as p]))
-
-(def mock-callbacks {:on-create  (fn [])
-                    :on-delete  (fn [])
-                    :on-update  (fn [])
-                    :on-receive (fn [])})
+            [weepinbell.test-utility :refer [with-webmention]]))
 
 ;; Testing process-new-webmention
 ;; though we're calling a proxy function (process-webmention)
 ;; But the arguments and storage vtables that test cases provide
 ;; should result in a call to process-new-webmention
-
-(defmacro with-webmention [existance [source-route source-resp target-route target-resp] & body]
-  (let [source-url (str "http://localhost:38888" source-route)
-        target-url (str "http://localhost:38888" target-route)]
-    `(let [handler# (routes
-                      (GET ~source-route [] ~source-resp)
-                      (GET ~target-route [] ~target-resp))
-           ~'created (promise)
-           ~'deleted (promise)
-           ~'updated (promise)
-           ~'storage {:append  (fn [~'_] (deliver ~'created true))
-                      :update  (fn [~'_ ~'_ ~'_] (deliver ~'updated true))
-                      :delete  (fn [~'_ ~'_] (deliver ~'deleted true))
-                      :get     (fn [~'_ ~'_] (= ~existance :old))}
-           ~'server (run-jetty handler# {:port 38888 :join? false})]
-       (p/process-webmention {:s ~source-url :t ~target-url}
-                             mock-callbacks
-                             ~'storage)
-       ~@body
-       (.stop ~'server))))
 
 (deftest new-webmention-test
   (testing "Creating a new webmention."
@@ -88,7 +61,7 @@
                            "/target" {:status 200
                                       :headers {"Content-Type" "text/plain"}}]
       (is (deref deleted 100 nil)))))
-
+0
 (deftest old-webmention-source-not-found-delete-test 
   (testing "Deleting exisiting webmention if source is not there."
     (with-webmention :old ["/source" {:status 404
