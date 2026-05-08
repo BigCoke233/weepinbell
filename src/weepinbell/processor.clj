@@ -5,7 +5,7 @@
    If exists and verification passes, update it."
   (:require [clojure.core.async :refer [go-loop <!]]
             [weepinbell.wrapper :as wrapper]
-            [weepinbell.verifier :refer [verify-mention verify-content-types]]
+            [weepinbell.verifier :refer [verify-mention]]
             [taoensso.timbre :as timbre]))
 
 (defn process-new-webmention
@@ -43,20 +43,15 @@
    Callbacks and storage are maps of functions, to avoid
    depending on technical details directly."
   [wm callbacks storage]
-  (let [{:keys [s t]} wm]
-   ;; first check Content-Types of both urls
-   ;; only proceed when it's HTML or plain text
-    (if (verify-content-types s t)
-     ;; second check if such webmention exists
+  (let [{:keys [s t]} wm] 
+     ;; check if such webmention exists
      ;; if so, update it or delete it
      ;; if not, write to data
       (do
         (if ((:get storage) s t)
           (process-existing-webmention s t callbacks storage)
           (process-new-webmention s t callbacks storage))
-        ((:on-receive callbacks)))
-      ;; if content-type check fails
-      (timbre/error "Source or target is not HTML or plain text; or error occurred trying to get content type."))))
+        ((:on-receive callbacks)))))
 
 (defn start
   "Start a go-loop that recursively calls to process-webmention."

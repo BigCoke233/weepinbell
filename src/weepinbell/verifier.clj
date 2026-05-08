@@ -23,12 +23,17 @@
                                                     :headers {"Range" "bytes=0-1048575"}})]
       ;; Verify status code
       (if (and (>= status 200) (< status 300))
-        ;; Verify inclusion of target URL
-        ;; TODO needs to be more robust
-        (if (includes? (str body) target)
-          true
+        ;; Verify Content-Types
+        (if (verify-content-types source target)
+          ;; Verify inclusion of target URL
+          ;; TODO needs to be more robust
+          (if (includes? (str body) target)
+            true
+            (do 
+              (timbre/error "Target link not found in source body.") 
+              false))
           (do 
-            (timbre/error "Target link not found in source body.") 
+            (timbre/error "Source or target is neither HTML nor plain text content.")
             false))
         (do 
           (timbre/error "Source returned status:" status) 
