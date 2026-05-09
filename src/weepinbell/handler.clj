@@ -4,7 +4,6 @@
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
             [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.json :refer [wrap-json-response]]
-            [weepinbell.config :refer [get-config]]
             [weepinbell.receiver :refer [receive]]
             [weepinbell.retriever :as retriever]
             [weepinbell.channel :refer [wmc]]
@@ -20,13 +19,13 @@
      (GET "/:domain" [~'domain ~'page] 
           (retriever/by-domain ~'domain ~mention-type ~'page ~storage))))
 
-(defn api-routes [storage]
+(defn api-routes [storage config]
   (routes
-    (GET "/" [target] (ui/home (get-config :allowed-target-domains)
-                               (get-config :endpoint)
+    (GET "/" [target] (ui/home (:allowed-target-domains config)
+                               (:endpoint config)
                                target))
     ;; receiver endpoint
-    (POST (get-config :endpoint) [source target]
+    (POST (:endpoint config) [source target]
       (receive {:s source :t target} wmc))
     ;; query API routes
     (context "/api" []
@@ -40,14 +39,14 @@
         (GET "/:id" [id] (retriever/by-id id storage))
         (GET "/" [source target] (retriever/by-st-pair source target storage))))
     ;; RSS feed
-    (GET "/feed/:domain" [domain] (feed/rss domain storage))
+    (GET "/feed/:domain" [domain] (feed/rss domain storage config))
     ;; host proxied avatars (microformats photos)
     (route/files "/avatars/" {:root "data/avatars"})
     ;; 404
     (route/not-found "Not Found")))
 
-(defn app [storage]
-  (-> (api-routes storage)
+(defn app [storage config]
+  (-> (api-routes storage config)
       (wrap-resource "static")
       (wrap-defaults api-defaults)
       (wrap-json-response)))

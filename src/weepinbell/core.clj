@@ -3,7 +3,7 @@
             [weepinbell.processor :as processor]
             [weepinbell.handler :refer [app]]
             [weepinbell.channel :refer [wmc]]
-            [weepinbell.config :refer [get-config]]
+            [weepinbell.config :refer [get-config load-config]]
             [weepinbell.webhook :as webhook]
             [taoensso.timbre :as timbre]
             [weepinbell.storage :as storage])
@@ -31,6 +31,6 @@
   ;; Start receiver server
   ;; Check for a PORT environment variable, default to 3000
   (let [port (Integer/parseInt (or (System/getenv "PORT") "3000"))]
-    (run-jetty (app store) 
+    (run-jetty (app store (load-config)) 
                {:port port :join? true})))
 
