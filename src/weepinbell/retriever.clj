@@ -11,6 +11,7 @@
   (let [pages (partition-all size data)
         length (count pages)
         page (cond (keyword? page) page
+                   (= page "")     0
                    (string? page)  (Integer/parseInt page)
                    :else           false)]
     (cond (= page :last) (last pages)
