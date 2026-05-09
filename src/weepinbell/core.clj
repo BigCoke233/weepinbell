@@ -9,6 +9,12 @@
             [weepinbell.storage :as storage])
   (:gen-class)) ;; Essential for "lein uberjar"
 
+(def store {:append storage/append-wm
+                    :update storage/update-wm
+                    :delete storage/delete-wm
+                    :get    storage/get-wm
+                    :get-by-domain storage/get-wms-by-domain})
+
 (defn -main [& _]
   ;; Start webmention processor
   (processor/start wmc
@@ -21,12 +27,10 @@
                                          (webhook/trigger hook webhooks)))
                                   hooks)))
                    ;; plug in storage layer
-                   {:append storage/append-wm
-                    :update storage/update-wm
-                    :delete storage/delete-wm
-                    :get    storage/get-wm})
+                   store)
   ;; Start receiver server
   ;; Check for a PORT environment variable, default to 3000
   (let [port (Integer/parseInt (or (System/getenv "PORT") "3000"))]
-    (run-jetty app {:port port :join? true})))
+    (run-jetty (app store) 
+               {:port port :join? true})))
 
