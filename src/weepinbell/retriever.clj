@@ -1,6 +1,5 @@
 (ns weepinbell.retriever
-  (:require [weepinbell.storage :as storage]
-            [weepinbell.utils :refer [get-domain]]
+  (:require [weepinbell.utils :refer [get-domain]]
             [weepinbell.microformats-wrapper :as mf-wrapper]))
 
 (def default-page-size 12)
@@ -68,8 +67,8 @@
 
 (defn by-domain
   "Get webmentions sent to a particular domain."
-  [domain typ page]
-  (cond->> (storage/get-wms-by-domain domain)
+  [domain typ page storage]
+  (cond->> ((:get-by-domain storage) domain)
     true wrap-response-list
     typ  (filter-response-by-mftype typ)
     page (partition-pages page default-page-size)
@@ -77,10 +76,10 @@
 
 (defn by-url
   "Get webmention sent to a particular URL."
-  [url typ page]
+  [url typ page storage]
   (if url
     (cond->> (get-domain url)
-      true storage/get-wms-by-domain
+      true ((:get-by-domain storage)) 
       true (filter #(= url (get-in % [:webmention :target])))
       true wrap-response-list
       typ  (filter-response-by-mftype typ)
@@ -94,15 +93,15 @@
 
 (defn by-id
   "Get one specific webmention by ID."
-  [id]
-  (-> (storage/get-wm id)
+  [id storage]
+  (-> ((:get storage) id)
       wrap-response-object
       respond-webmention-json))
 
 (defn by-st-pair
   "Get one specific webmention by source and target."
-  [source target]
-  (-> (storage/get-wm source target)
+  [source target storage]
+  (-> ((:get storage) source target)
       wrap-response-object
       respond-webmention-json))
 

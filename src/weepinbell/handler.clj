@@ -12,12 +12,17 @@
             [weepinbell.feed :as feed]
             [weepinbell.storage :as storage]))
 
+(def storage {:get storage/get-wm
+              :get-by-domain storage/get-wms-by-domain})
+
 ;; Define API routes
 
 (defmacro defmention-routes [base-path mention-type]
   `(context ~base-path []
-     (GET "/" [~'url ~'page] (retriever/by-url ~'url ~mention-type ~'page))
-     (GET "/:domain" [~'domain ~'page] (retriever/by-domain ~'domain ~mention-type ~'page))))
+     (GET "/" [~'url ~'page] 
+          (retriever/by-url ~'url ~mention-type ~'page ~storage))
+     (GET "/:domain" [~'domain ~'page] 
+          (retriever/by-domain ~'domain ~mention-type ~'page ~storage))))
 
 (defroutes api-routes
   (GET "/" [target] (ui/home (get-config :allowed-target-domains)
@@ -35,12 +40,10 @@
     (defmention-routes "/replies" :reply)
     ;; query one specific webmention
     (context "/mention" []
-      (GET "/:id" [id] (retriever/by-id id))
-      (GET "/" [source target] (retriever/by-st-pair source target))))
+      (GET "/:id" [id] (retriever/by-id id storage))
+      (GET "/" [source target] (retriever/by-st-pair source target storage))))
   ;; RSS feed
-  (GET "/feed/:domain" [domain] 
-       (feed/rss domain
-                 {:get-by-domain storage/get-wms-by-domain}))
+  (GET "/feed/:domain" [domain] (feed/rss domain storage))
   ;; host proxied avatars (microformats photos)
   (route/files "/avatars/" {:root "data/avatars"})
   ;; 404
