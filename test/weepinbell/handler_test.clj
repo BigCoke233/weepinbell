@@ -61,10 +61,15 @@
       (is (= (:status response) 200)))))
 
 (deftest feed-route-test
-  (testing "RSS feed for allowed domains"
+  (testing "RSS feed for allowed domains and has items"
+    (let [response ((app {:get-by-domain (fn [_] [{:webmention nil}])}
+                         {:allowed-target-domains "valid.com"}) 
+                    (mock/request :get "/feed/valid.com"))]
+      (is (= (:status response) 404))))
+  (testing "RSS feed for allowed domains, but with no webmentions"
     (let [response ((app nil {:allowed-target-domains "valid.com"}) 
                     (mock/request :get "/feed/valid.com"))]
-      (is (= (:status response) 200))))
+      (is (= (:status response) 404))))
   (testing "not found for disallowed domains"
     (let [response ((app nil {}) (mock/request :get "/feed/invalid.com"))]
       (is (= (:status response) 404))))) 
