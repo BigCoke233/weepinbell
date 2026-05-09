@@ -23,14 +23,20 @@
   ([page data]
    (respond-webmention-list-json page default-page-size data))
   ([page page-size data]
-   (let [page (Integer/parseInt page)]
-     {:status 200
-      :headers {"Content-Type" "application/json; charset=utf-8"}
-      :body (if (or (nil? page) (< page 0)) data
+   (if (nil? page) data
               ;; if page number is provided
               ;; partition and return page frame 
-                (-> (partition-all page-size data)
-                    (nth page)))})))
+       (let [pages (partition-all page-size data)
+             length (count pages)
+             page (Integer/parseInt page)]
+         (if (>= page length)
+           {:status 404
+            :headers {"Content-Type" "application/json; charset=utf-8"}
+            :body {:message "No such page. Is page out of range and is it an integer?"}}
+                  ;; return page frame if page exists 
+           {:status 200
+            :headers {"Content-Type" "application/json; charset=utf-8"}
+            :body (nth pages page)})))))
 
 (defn- wrap-response-object [data]
   (let [result {:webmention (:webmention data)}]
