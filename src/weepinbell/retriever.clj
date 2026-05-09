@@ -32,13 +32,12 @@
 
 (defn- respond-webmention-list-json [data]
   (let [base-resp {:status 200
-     :headers {"Content-Type" "application/json; charset=utf-8"}
-     :body []}]
-     (if data 
-       (assoc base-resp :body data)
-       (assoc (assoc base-resp :status 400) 
-              :body {:message "The list is empty, something is wrong with your request."}))
-    ))
+                   :headers {"Content-Type" "application/json; charset=utf-8"}
+                   :body []}]
+    (if data
+      (assoc base-resp :body data)
+      (assoc (assoc base-resp :status 400)
+             :body {:message "The list is empty, something is wrong with your request."}))))
 
 (defn- wrap-response-object [data]
   (let [result {:webmention (:webmention data)}]
