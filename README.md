@@ -24,11 +24,11 @@ It *eats up* in-coming Webmention request, *dissolve* the target's HTML and *gro
 
 ## Roadmap
 
-- [ ] Unit tests (100% coverage) 🚩
+- [x] Unit tests (covers all core business rules) 
+- [ ] API Paging 🚩
 - [ ] Smaller depdency tree
     - [ ] Write own utility functions to replace Apache commons validator
     - [ ] Write own utility functions to replace clj-rss
-- [ ] API Paging
 - [ ] Admin UI 
 
 ## API
