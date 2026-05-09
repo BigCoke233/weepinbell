@@ -7,15 +7,13 @@
 
 ;; utilities
 (defn- respond-webmention-json [data]
-  (if data
-    {:status 200
-     :headers {"Content-Type" "application/json; charset=utf-8"}
-     :body data}
-    ;; if no data found, respond 404
-    {:status 404
-     :headers {"Content-Type" "application/json; charset=utf-8"}
-     :body {:status 404
-            :message "Webmention does not exist or is pending for verification."}}))
+  (let [base-resp {:status 200
+                   :headers {"Content-Type" "application/json; charset=utf-8"}
+                   :body nil}]
+    (if data
+      (assoc base-resp :body data)
+      (assoc (assoc base-resp :status 400)
+             :body "The requested webmention does not exist."))))
 
 (defn- partition-pages
   [page size data]
@@ -33,7 +31,7 @@
 (defn- respond-webmention-list-json [data]
   (let [base-resp {:status 200
                    :headers {"Content-Type" "application/json; charset=utf-8"}
-                   :body []}]
+                   :body nil}]
     (if data
       (assoc base-resp :body data)
       (assoc (assoc base-resp :status 400)
