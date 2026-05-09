@@ -6,15 +6,6 @@
 (def default-page-size 12)
 
 ;; utilities
-(defn- respond-webmention-json [data]
-  (let [base-resp {:status 200
-                   :headers {"Content-Type" "application/json; charset=utf-8"}
-                   :body nil}]
-    (if data
-      (assoc base-resp :body data)
-      (assoc (assoc base-resp :status 400)
-             :body "The requested webmention does not exist."))))
-
 (defn- partition-pages
   [page size data]
   (let [pages (partition-all size data)
@@ -28,14 +19,25 @@
           (not page)     false
           :else          false)))
 
+(defn- respond-webmention-json [data]
+  (let [base-resp {:status 200
+                   :headers {"Content-Type" "application/json; charset=utf-8"}
+                   :body nil}]
+    (if data
+      (assoc base-resp :body data)
+      (-> base-resp
+        (assoc :status 400)
+        (assoc :body "The requested webmention does not exist.")))))
+
 (defn- respond-webmention-list-json [data]
   (let [base-resp {:status 200
                    :headers {"Content-Type" "application/json; charset=utf-8"}
                    :body nil}]
     (if data
       (assoc base-resp :body data)
-      (assoc (assoc base-resp :status 400)
-             :body {:message "The list is empty, something is wrong with your request."}))))
+      (-> base-resp
+        (assoc :status 400)
+        (assoc :body {:message "The list is empty, something is wrong with your request."})))))
 
 (defn- wrap-response-object [data]
   (let [result {:webmention (:webmention data)}]
