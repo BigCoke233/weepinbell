@@ -17,26 +17,28 @@
      :body {:status 404
             :message "Webmention does not exist or is pending for verification."}}))
 
-(defn- respond-webmention-list-json
-  ([data]
-   (respond-webmention-list-json nil nil data))
-  ([page data]
-   (respond-webmention-list-json page default-page-size data))
-  ([page page-size data]
-   (if (nil? page) data
-              ;; if page number is provided
-              ;; partition and return page frame 
-       (let [pages (partition-all page-size data)
-             length (count pages)
-             page (Integer/parseInt page)]
-         (if (>= page length)
-           {:status 404
-            :headers {"Content-Type" "application/json; charset=utf-8"}
-            :body {:message "No such page. Is page out of range and is it an integer?"}}
-                  ;; return page frame if page exists 
-           {:status 200
-            :headers {"Content-Type" "application/json; charset=utf-8"}
-            :body (nth pages page)})))))
+(defn- partition-pages
+  [page size data]
+  (let [pages (partition-all size data)
+        length (count pages)
+        page (cond (keyword? page) page
+                   (string? page)  (Integer/parseInt page)
+                   :else           false)]
+    (cond (= page :last) (last pages)
+          (int? page)    (if (>= page length) false
+                             (nth pages page))
+          (not page)     false
+          :else          false)))
+
+(defn- respond-webmention-list-json [data]
+  (let [base-resp {:status 200
+     :headers {"Content-Type" "application/json; charset=utf-8"}
+     :body []}]
+     (if data 
+       (assoc base-resp :body data)
+       (assoc (assoc base-resp :status 400) 
+              :body {:message "The list is empty, something is wrong with your request."}))
+    ))
 
 (defn- wrap-response-object [data]
   (let [result {:webmention (:webmention data)}]
@@ -70,7 +72,8 @@
   (cond->> (storage/get-wms-by-domain domain)
     true wrap-response-list
     typ  (filter-response-by-mftype typ)
-    true (respond-webmention-list-json page)))
+    page (partition-pages page default-page-size)
+    true respond-webmention-list-json))
 
 (defn by-url
   "Get webmention sent to a particular URL."
@@ -81,7 +84,8 @@
       true (filter #(= url (get-in % [:webmention :target])))
       true wrap-response-list
       typ  (filter-response-by-mftype typ)
-      true (respond-webmention-list-json page))
+      page (partition-pages page default-page-size)
+      true respond-webmention-list-json)
     ;; if no url query is passed
     {:status 400
      :headers {"Content-Type" "application/json; charset=utf-8"}
