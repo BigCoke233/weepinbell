@@ -9,7 +9,8 @@
             [weepinbell.retriever :as retriever]
             [weepinbell.channel :refer [wmc]]
             [weepinbell.ui :as ui]
-            [weepinbell.feed :as feed]))
+            [weepinbell.feed :as feed]
+            [weepinbell.storage :as storage]))
 
 ;; Define API routes
 
@@ -37,7 +38,9 @@
       (GET "/:id" [id] (retriever/by-id id))
       (GET "/" [source target] (retriever/by-st-pair source target))))
   ;; RSS feed
-  (GET "/feed/:domain" [domain] (feed/rss domain))
+  (GET "/feed/:domain" [domain] 
+       (feed/rss domain
+                 {:get-by-domain storage/get-wms-by-domain}))
   ;; host proxied avatars (microformats photos)
   (route/files "/avatars/" {:root "data/avatars"})
   ;; 404

@@ -2,15 +2,14 @@
   (:require [clj-rss.core :as rss]
             [weepinbell.utils :refer [get-domain]]
             [weepinbell.config :refer [get-config]]
-            [weepinbell.storage :as storage]
             [md5.core :refer [string->md5-hex]])
   (:import [java.time Instant]))
 
 (def feed-length (get-config :feed-length))
 
 (defn rss
-  [domain]
-  (let [wms (storage/get-wms-by-domain domain)]
+  [domain storage]
+  (let [wms ((:get-by-domain storage) domain)]
     {:headers {"Content-Type" "application/xml"}
      :body (rss/channel-xml
             {:title "Weepinbell Feed"
