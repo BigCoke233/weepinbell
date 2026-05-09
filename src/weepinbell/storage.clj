@@ -62,13 +62,13 @@
 
 (defn get-wms-by-domain
   ([domain]
-    (get-wms-by-domain domain nil))
+   (get-wms-by-domain domain nil))
   ([domain path]
    (with-webmentions
-      #(cond->> %
-                true         (filter (partial domain-equal domain))
-                (some? path) (filter (partial path-equal path))
-                true         vec))))
+     #(cond->> %
+        true         (filter (partial domain-equal domain))
+        (some? path) (filter (partial path-equal path))
+        true         vec))))
 
 (defn first-line-empty? [path]
   (with-open [rdr (io/reader path)]

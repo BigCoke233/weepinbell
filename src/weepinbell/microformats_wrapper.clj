@@ -31,10 +31,10 @@
   [entry]
   ;; rsvp type is not supported yet
   (or
-    (->> [:like-of :repost-of :in-reply-to]
-         (filter #(get-prop entry %))
-         first)
-    :mention))
+   (->> [:like-of :repost-of :in-reply-to]
+        (filter #(get-prop entry %))
+        first)
+   :mention))
 
 (defn- get-card-info
   "Get essential information of an h-card item and flatten it into a map."

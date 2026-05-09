@@ -32,8 +32,8 @@
         (timbre/error status " error trying to get content type of " url)
         nil))
     (catch Exception e
-        (timbre/error "Error trying to get content type of " url
-                      (.getMessage e))
+      (timbre/error "Error trying to get content type of " url
+                    (.getMessage e))
       nil)))
 
 (defn plain-or-html? [content-type]
@@ -55,9 +55,9 @@
       (when (and parent-dir (not (.exists parent-dir)))
         (.mkdirs parent-dir))
       (let [response (client/get url {:as :stream
-                                     :conn-timeout 10000
-                                     :socket-timeout 30000
-                                     :throw-exceptions true})
+                                      :conn-timeout 10000
+                                      :socket-timeout 30000
+                                      :throw-exceptions true})
             content-length (get-in response [:headers "content-length"])]
         (timbre/info "Downloading [" url "] -> [" dest-path "]")
         (when content-length

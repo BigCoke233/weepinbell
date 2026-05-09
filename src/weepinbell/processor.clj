@@ -13,8 +13,8 @@
   [source target callbacks storage]
   (when (verify-mention source target)
     (timbre/info "\n🙋‍♂️ Valid webmention received: \n"
-      "from " source "\n"
-      "to " target "\n\n")
+                 "from " source "\n"
+                 "to " target "\n\n")
     (let [data (wrapper/wrap source target)]
       ((:append storage) data)))
   ((:on-create callbacks)))
@@ -43,21 +43,21 @@
    Callbacks and storage are maps of functions, to avoid
    depending on technical details directly."
   [wm callbacks storage]
-  (let [{:keys [s t]} wm] 
+  (let [{:keys [s t]} wm]
      ;; check if such webmention exists
      ;; if so, update it or delete it
      ;; if not, write to data
-      (do
-        (if ((:get storage) s t)
-          (process-existing-webmention s t callbacks storage)
-          (process-new-webmention s t callbacks storage))
-        ((:on-receive callbacks)))))
+    (do
+      (if ((:get storage) s t)
+        (process-existing-webmention s t callbacks storage)
+        (process-new-webmention s t callbacks storage))
+      ((:on-receive callbacks)))))
 
 (defn start
   "Start a go-loop that recursively calls to process-webmention."
   [wmc callbacks storage]
   (go-loop [wm (<! wmc)]
-           (timbre/info "Webmention found in queue.")
-           (process-webmention wm callbacks storage)
-           (recur (<! wmc))))
+    (timbre/info "Webmention found in queue.")
+    (process-webmention wm callbacks storage)
+    (recur (<! wmc))))
 

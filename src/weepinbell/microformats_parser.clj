@@ -25,10 +25,10 @@
                          (includes? (lower-case (str msg)) "timeout")))
               (let [wait-time (* attempt 2000)]
                 (timbre/warn (format "MF2 Parsing timeout for %s (attempt %d/%d). Retrying in %dms..."
-                                 url attempt max-retries wait-time))
+                                     url attempt max-retries wait-time))
                 (Thread/sleep wait-time)
                 (recur (inc attempt)))
               (do
                 (timbre/warn (format "MF2 Parsing failed for %s after %d attempts. Error: %s"
-                                 url attempt (or msg "Unknown error")))
+                                     url attempt (or msg "Unknown error")))
                 nil))))))))

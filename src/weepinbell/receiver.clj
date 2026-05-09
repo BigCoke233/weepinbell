@@ -23,15 +23,15 @@
   (cond
     ;; The receiver MUST check that source and target are valid URLs [URL]
     ;; and are of schemes that are supported by the receiver.
-    (not (validate-urls source target)) 
-      "Invalid URLs. Source and target have to be valid http(s) urls."
+    (not (validate-urls source target))
+    "Invalid URLs. Source and target have to be valid http(s) urls."
     ;; The receiver MUST reject the request
     ;; if the source URL is the same as the target URL.
-    (= source target) 
-      "Source and target are identical."
+    (= source target)
+    "Source and target are identical."
     ;; The receiver only accetps webmentions on behalf of configured domains.
-    (not (validate-target target opts)) 
-      "Domain of target is not allowed. This receiver does not receive webmention on its behalf."))
+    (not (validate-target target opts))
+    "Domain of target is not allowed. This receiver does not receive webmention on its behalf."))
 
 ;; receiving logic
 

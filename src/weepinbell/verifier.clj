@@ -29,14 +29,14 @@
           ;; TODO needs to be more robust
           (if (includes? (str body) target)
             true
-            (do 
-              (timbre/error "Target link not found in source body.") 
+            (do
+              (timbre/error "Target link not found in source body.")
               false))
-          (do 
+          (do
             (timbre/error "Source or target is neither HTML nor plain text content.")
             false))
-        (do 
-          (timbre/error "Source returned status:" status) 
+        (do
+          (timbre/error "Source returned status:" status)
           false)))
     (catch Exception e
       (timbre/error "Error verifying mention:" (.getMessage e))
