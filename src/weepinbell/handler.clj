@@ -15,13 +15,13 @@
 
 (defmacro defmention-routes [base-path mention-type]
   `(context ~base-path []
-     (GET "/" [~'url] (retriever/by-url ~'url ~mention-type))
-     (GET "/:domain" [~'domain] (retriever/by-domain ~'domain ~mention-type))))
+     (GET "/" [~'url ~'page] (retriever/by-url ~'url ~mention-type ~'page))
+     (GET "/:domain" [~'domain ~'page] (retriever/by-domain ~'domain ~mention-type ~'page))))
 
 (defroutes api-routes
   (GET "/" [target] (ui/home (get-config :allowed-target-domains)
-                       (get-config :endpoint)
-                       target))
+                             (get-config :endpoint)
+                             target))
   ;; receiver endpoint
   (POST (get-config :endpoint) [source target]
     (receive {:s source :t target} wmc))
