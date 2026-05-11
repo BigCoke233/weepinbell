@@ -171,5 +171,5 @@ This script basically just resends all webmentions to Weepinbell. To avoid being
 
 ## License
 
-MIT License, Copyright © 2026 Eltrac
+Weepinbell is free software licensed under the GNU Affero General Public License.
 
