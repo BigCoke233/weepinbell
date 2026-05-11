@@ -26,6 +26,6 @@
   :profiles {:uberjar {:aot :all}}
   :dev {:dependencies [[javax.servlet/servlet-api "2.5"]
                        [ring/ring-mock "0.3.2"]]}
-  :license {:name "MIT License"
-            :url "https://mit-license.org/"
+  :license {:name "GNU Affero General Public License"
+            :url "https://www.gnu.org/licenses/agpl-3.0.html"
             :distribution :repo})
