@@ -49,51 +49,51 @@
 ;; end webmention queue for testing
 
 ;; validation tests
-((deftest happy-path-test
-   (testing "Receiver happy paths testing."
-     (->> happy-paths
-          (map (fn [testcase]
-                 (let [[s t] testcase]
-                   (is (= 201
-                          (:status (receive {:s s :t t}
-                                            test-wmc
-                                            {:domains ["alice.blog"]})))))))
-          doall))))
+(deftest happy-path-test
+  (testing "Receiver happy paths testing."
+    (->> happy-paths
+         (map (fn [testcase]
+                (let [[s t] testcase]
+                  (is (= 201
+                         (:status (receive {:s s :t t}
+                                           test-wmc
+                                           {:domains ["alice.blog"]})))))))
+         doall)))
 
-((deftest error-response-test
-   (testing "Receiver error handling."
-     (->> error-cases
-          (map (fn [testcase]
-                 (let [[s t expects] testcase]
-                   (is (= expects
-                          (receive {:s s :t t}
-                                   test-wmc
-                                   {:domains ["alice.blog"]}))))))
-          doall))))
+(deftest error-response-test
+  (testing "Receiver error handling."
+    (->> error-cases
+         (map (fn [testcase]
+                (let [[s t expects] testcase]
+                  (is (= expects
+                         (receive {:s s :t t}
+                                  test-wmc
+                                  {:domains ["alice.blog"]}))))))
+         doall)))
 ;; end validation tests
 
 ;; in-queue test 
 ;; see if receiver is able to put webmention request 
 ;; into queue for processor to pick up
 ;; and if it falsely put unvalidated request
-((deftest in-queue-test
-   (testing "Receiver putting Webmention in queue."
+(deftest in-queue-test
+  (testing "Receiver putting Webmention in queue."
      ;; valid webmention
-     (->> happy-paths
-          (map (fn [testcase]
-                 (let [[s t] testcase
-                       wm {:s s :t t}
-                       test-queue (chan)]
-                   (receive wm test-queue {:domains ["alice.blog"]})
-                   (is (= wm (poll! test-queue))))))
-          doall)
+    (->> happy-paths
+         (map (fn [testcase]
+                (let [[s t] testcase
+                      wm {:s s :t t}
+                      test-queue (chan)]
+                  (receive wm test-queue {:domains ["alice.blog"]})
+                  (is (= wm (poll! test-queue))))))
+         doall)
      ;; invalid webmention 
-     (->> error-cases
-          (map (fn [testcase]
-                 (let [[s t] testcase
-                       wm {:s s :t t}
-                       test-queue (chan)]
-                   (receive wm test-queue {:domains ["alice.blog"]})
-                   (is (not= wm (poll! test-queue))))))
-          doall))))
+    (->> error-cases
+         (map (fn [testcase]
+                (let [[s t] testcase
+                      wm {:s s :t t}
+                      test-queue (chan)]
+                  (receive wm test-queue {:domains ["alice.blog"]})
+                  (is (not= wm (poll! test-queue))))))
+         doall)))
 ;; end in-queue test
