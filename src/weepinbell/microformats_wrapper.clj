@@ -1,13 +1,12 @@
 (ns weepinbell.microformats-wrapper
-  (:require [weepinbell.utils :refer [javamap->map]]
-            [weepinbell.storage :as store]))
+  (:require [weepinbell.utils :refer [javamap->map]]))
 
-(defn- find-item
-  "Find specific type of items (like h-entry, h-card) in parsed microformats."
-  [typ mf]
-  (let [items (get mf "items")
-        get-type #(first (get % "type"))]
-    (filter #(= (get-type %) typ) items)))
+;;(defn- find-item
+;;  "Find specific type of items (like h-entry, h-card) in parsed microformats."
+;;  [typ mf]
+;;  (let [items (get mf "items")
+;;        get-type #(first (get % "type"))]
+;;    (filter #(= (get-type %) typ) items)))
 
 (defn- get-prop
   "Use keyword get get a property value from a microformats item."
