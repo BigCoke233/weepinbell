@@ -6,7 +6,6 @@
             [ring.middleware.json :refer [wrap-json-response]]
             [weepinbell.receiver :refer [receive]]
             [weepinbell.retriever :as retriever]
-            [weepinbell.channel :refer [wmc]]
             [weepinbell.ui :as ui]
             [weepinbell.feed :as feed]))
 
@@ -19,7 +18,7 @@
      (GET "/:domain" [~'domain ~'page] 
           (retriever/by-domain ~'domain ~mention-type ~'page ~storage))))
 
-(defn api-routes [storage config]
+(defn api-routes [wmc storage config]
   (routes
     (GET "/" [target] (ui/home (:allowed-target-domains config)
                                (:endpoint config)
@@ -45,8 +44,8 @@
     ;; 404
     (route/not-found "Not Found")))
 
-(defn app [storage config]
-  (-> (api-routes storage config)
+(defn app [wmc storage config]
+  (-> (api-routes wmc storage config)
       (wrap-resource "static")
       (wrap-defaults api-defaults)
       (wrap-json-response)))

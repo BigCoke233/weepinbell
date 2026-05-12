@@ -2,12 +2,14 @@
   (:require [ring.adapter.jetty :refer [run-jetty]]
             [weepinbell.processor :as processor]
             [weepinbell.handler :refer [app]]
-            [weepinbell.channel :refer [wmc]]
             [weepinbell.config :refer [load-config]]
             [weepinbell.webhook :as webhook]
             [taoensso.timbre :as timbre]
-            [weepinbell.storage.edn-storage :as edn])
+            [weepinbell.storage.edn-storage :as edn]
+            [clojure.core.async :refer [chan]])
   (:gen-class)) ;; Essential for "lein uberjar"
+
+(def wmc (chan))
 
 (def config (load-config))
 
@@ -28,6 +30,6 @@
   ;; Check for a PORT environment variable, default to 3000
   (let [port (Integer/parseInt (or (:port config) (System/getenv "PORT") "3000"))]
     (run-jetty 
-      (app store config) 
+      (app wmc store config) 
       {:port port :join? true})))
 
