@@ -9,11 +9,12 @@
             [weepinbell.storage :as storage])
   (:gen-class)) ;; Essential for "lein uberjar"
 
-(def store {:append storage/append-wm
-                    :update storage/update-wm
-                    :delete storage/delete-wm
-                    :get    storage/get-wm
-                    :get-by-domain storage/get-wms-by-domain})
+(def datasource (get-config :data-path))
+(def store {:append (partial storage/append-wm datasource)
+            :update (partial storage/update-wm datasource)
+            :delete (partial storage/delete-wm datasource)
+            :get    (partial storage/get-wm datasource)
+            :get-by-domain (partial storage/get-wms-by-domain datasource)})
 
 (defn -main [& _]
   ;; Start webmention processor

@@ -1,24 +1,14 @@
 (ns weepinbell.storage
   (:require [clojure.edn :as edn]
-            [weepinbell.config :refer [get-config]]
             [weepinbell.utils :refer [get-domain get-target get-path]]
             [clojure.java.io :as io]
             [clojure.string :refer [join]]))
 
-(def data-file (get-config :data-path))
-
-(defn load-data
-  "Read data file and return data as clojure data sturcture, a vector containing Webmention maps in this case. Note that is't extremely costly to load all data at once!"
-  []
-  (with-open [r (io/reader data-file)]
-    (let [string-vector (-> r line-seq vec)]
-      (vec (map edn/read-string string-vector)))))
-
 (defn unload-data
   "Write to data file, replacing everything."
-  [data]
+  [datasource data]
   (when-let [data-with-string (map pr-str data)]
-    (spit data-file (join "\n" data-with-string))))
+    (spit datasource (join "\n" data-with-string))))
 
 ;; predicates used for filtering webmention
 (defn- st-pair-equal-pred [source target wm]
@@ -40,31 +30,33 @@
 
 (defn with-webmentions
   "Opens the data file and applies function f to a lazy sequence of parsed Webmentions."
-  [f]
-  (with-open [r (io/reader data-file)]
+  [datasource f]
+  (with-open [r (io/reader datasource)]
     (->> (line-seq r)
          (map edn/read-string)
          f)))
 
 (defn get-wm
-  ([id] (get-wm id nil))
-  ([source target]
+  ([datasource id] (get-wm datasource id nil))
+  ([datasource source target]
    (let [pred (get-predicate source target)]
-     (with-webmentions
+     (with-webmentions datasource
        #(first (filter pred %))))))
 
 (defn delete-wm
-  ([id] (delete-wm id nil))
-  ([source target]
+  ([datasource id] (delete-wm datasource id nil))
+  ([datasource source target]
    (let [pred (get-predicate source target)]
-     (with-webmentions
-       #(->> % (remove pred) unload-data)))))
+     (with-webmentions datasource
+       #(->> % 
+             (remove pred)
+             (unload-data datasource))))))
 
 (defn get-wms-by-domain
-  ([domain]
-   (get-wms-by-domain domain nil))
-  ([domain path]
-   (with-webmentions
+  ([datasource domain]
+   (get-wms-by-domain datasource domain nil))
+  ([datasource domain path]
+   (with-webmentions datasource
      #(cond->> %
         true         (filter (partial domain-equal domain))
         (some? path) (filter (partial path-equal path))
@@ -77,14 +69,14 @@
 
 (defn append-wm
   "Append an accepted webmention to .edn data file."
-  [data]
-  (let [newline? (if (first-line-empty? data-file) "" "\n")
+  [datasource data]
+  (let [newline? (if (first-line-empty? datasource) "" "\n")
         line (str newline? (pr-str data))]
-    (spit data-file line :append true)))
+    (spit datasource line :append true)))
 
 (defn update-wm
   "Update an existing webmention"
-  [source target new-data]
-  (delete-wm source target)
-  (append-wm new-data))
+  [datasource source target new-data]
+  (delete-wm datasource source target)
+  (append-wm datasource new-data))
 
