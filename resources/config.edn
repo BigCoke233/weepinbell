@@ -1,4 +1,4 @@
-{:port 3000
+{:port "3000"
  :base-url "http://localhost:3000"
  :endpoint "/endpoint"
  :allowed-target-domains ["example.com"]
