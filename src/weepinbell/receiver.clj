@@ -3,7 +3,6 @@
   (:require [clojure.string :as string]
             [clojure.core.async :refer [put!]]
             [weepinbell.utils :refer [valid-http-url? get-domain]]
-            [weepinbell.config :refer [get-config]]
             [md5.core :refer [string->md5-hex]]))
 
 ;; validation and verification
@@ -11,10 +10,8 @@
 (defn- validate-urls [s t]
   (and (valid-http-url? s) (valid-http-url? t)))
 
-(defn- validate-target [t opts]
-  (let [target-domain (get-domain t)
-        allow-list (or (:domains opts)
-                       (get-config :allowed-target-domains))]
+(defn- validate-target [t allow-list]
+  (let [target-domain (get-domain t)]
     (some #{target-domain} allow-list)))
 
 (defn- verify-request
@@ -37,15 +34,14 @@
 
 (defn receive
   "Receive webmention; call verify-request; if verification passed, push webmention into queue."
-  ([wm wmc]
-   (receive wm wmc {}))
-  ([wm wmc opts]
-   (let [{:keys [s t]} wm
+  [wm wmc config]
+  (let [{:keys [s t]} wm
          ;; remove anchor, #...
          source (some-> s (string/replace #"#.*$" ""))
          target (some-> t (string/replace #"#.*$" ""))]
      ;; Request verification
-     (if-let [error-msg (verify-request source target opts)]
+     (if-let [error-msg (verify-request source target 
+                                        (:allowed-target-domains config))]
        ;; respond if request verification failed
        {:status 400
         :headers {"Content-Type" "application/json; charset=utf-8"}
@@ -64,13 +60,13 @@
          ;; respond with 201 when Webmention passed checks and
          ;; was sent into queue, include a Location header
          (let [wm-id (string->md5-hex (str source target))
-               wm-url (str (get-config :base-url) "/api/mention/" wm-id)
+               wm-url (str (:base-url config) "/api/mention/" wm-id)
                response {:status 201
                          :message "Webmention is accepted and pending for verification."
                          :url wm-url}]
            {:status 201
             :headers {"Location" wm-url
                       "Content-Type" "application/json; charset=utf-8"}
-            :body response}))))))
+            :body response})))))
 
 

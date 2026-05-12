@@ -57,7 +57,7 @@
                   (is (= 201
                          (:status (receive {:s s :t t}
                                            test-wmc
-                                           {:domains ["alice.blog"]})))))))
+                                           {:allowed-target-domains ["alice.blog"]})))))))
          doall)))
 
 (deftest error-response-test
@@ -68,7 +68,7 @@
                   (is (= expects
                          (receive {:s s :t t}
                                   test-wmc
-                                  {:domains ["alice.blog"]}))))))
+                                  {:allowed-target-domains ["alice.blog"]}))))))
          doall)))
 ;; end validation tests
 
@@ -84,7 +84,7 @@
                 (let [[s t] testcase
                       wm {:s s :t t}
                       test-queue (chan)]
-                  (receive wm test-queue {:domains ["alice.blog"]})
+                  (receive wm test-queue {:allowed-target-domains ["alice.blog"]})
                   (is (= wm (poll! test-queue))))))
          doall)
      ;; invalid webmention 
@@ -93,7 +93,7 @@
                 (let [[s t] testcase
                       wm {:s s :t t}
                       test-queue (chan)]
-                  (receive wm test-queue {:domains ["alice.blog"]})
+                  (receive wm test-queue {:allowed-target-domains ["alice.blog"]})
                   (is (not= wm (poll! test-queue))))))
          doall)))
 ;; end in-queue test
