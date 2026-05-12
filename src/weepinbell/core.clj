@@ -27,7 +27,9 @@
                                          (webhook/trigger hook webhooks)))
                                   hooks)))
                    ;; plug in storage layer
-                   store)
+                   store
+                   ;; load configuration
+                   (load-config))
   ;; Start receiver server
   ;; Check for a PORT environment variable, default to 3000
   (let [port (Integer/parseInt (or (System/getenv "PORT") "3000"))]

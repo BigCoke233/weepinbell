@@ -2,7 +2,6 @@
   (:require [weepinbell.utils :refer [javamap->map
                                       file-exists?
                                       download-file]]
-            [weepinbell.config :refer [get-config]]
             [weepinbell.microformats-parser :as mf-parser]
             [taoensso.timbre :as timbre]
             [md5.core :refer [string->md5-hex]]))
@@ -15,7 +14,7 @@
           first)
       (-> mf (get-in [:properties "photo"]) first)))
 
-(defn- proxy-mf-photo [raw-photo]
+(defn- proxy-mf-photo [raw-photo base-url]
   (if raw-photo
     (let [photo-url (str raw-photo)
           file-ext (or (re-find #"\.(?:jpg|jpeg|png|gif|webp)" photo-url) ".jpg")
@@ -26,12 +25,12 @@
       (when-not (file-exists? local-path)
         (timbre/info "Downloading microformats photo to proxy external image.")
         (download-file photo-url local-path))
-      (str (get-config :base-url) public-path))
+      (str base-url public-path))
     nil))
 
 (defn wrap
   "Parse microformats and collect essential info. Wrap source, target and collected data into a Clojure map and return it."
-  [source target]
+  [source target base-url]
   (let [mf (-> source
                mf-parser/parse
                javamap->map
@@ -41,7 +40,9 @@
             :target target
             :id (string->md5-hex (str source target))
             :modified (System/currentTimeMillis)}
-        proxied-photo (-> mf find-mf-photo proxy-mf-photo)]
+        proxied-photo (-> mf 
+                          find-mf-photo 
+                          (proxy-mf-photo base-url))]
     {:webmention wm
      :microformats mf
      :extra {:proxied-photo proxied-photo}}))

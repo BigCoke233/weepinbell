@@ -24,7 +24,8 @@
            ~'server (run-jetty handler# {:port 38888 :join? false})]
        (p/process-webmention {:s ~source-url :t ~target-url}
                              mock-callbacks
-                             ~'storage)
+                             ~'storage
+                             {})
        ~@body
        (.stop ~'server))))
 
