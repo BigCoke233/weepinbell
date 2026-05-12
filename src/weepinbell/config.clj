@@ -10,8 +10,8 @@
                           (-> external-file slurp edn/read-string))]
     (merge default-config external-config)))
 
-;;(def config (delay (load-config)))
-;;
-;;(defn get-config [key & keys]
-;;  (get-in @config (cons key keys)))
+(def config (delay (load-config)))
+
+(defn get-config [key & keys]
+  (get-in @config (cons key keys)))
 
