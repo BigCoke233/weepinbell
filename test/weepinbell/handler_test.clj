@@ -5,7 +5,7 @@
 
 (defmacro test-mention-list-by-domain-route [mftype]
   `(testing (str "/api/" ~mftype "/:domain route")
-     (let [~'response ((app {:get-by-domain (fn [~'_]
+     (let [~'response ((app nil {:get-by-domain (fn [~'_]
                                               [{:webmention {:source ""
                                                              :target ""
                                                              :id ""
@@ -16,7 +16,7 @@
 
 (defmacro test-mention-list-by-url-route [mftype]
   `(testing (str "/api/" ~mftype "?url= route")
-     (let [~'response ((app {:get-by-domain (fn [~'_]
+     (let [~'response ((app nil {:get-by-domain (fn [~'_]
                                               [{:webmention {:source ""
                                                              :target "http://localhost/"
                                                              :id ""
@@ -27,7 +27,7 @@
 
 (deftest api-routes-test
   (testing "homepage route"
-    (let [response ((app nil {}) (mock/request :get "/"))]
+    (let [response ((app nil nil {}) (mock/request :get "/"))]
       (is (= (:status response) 200))))
 
   (test-mention-list-by-domain-route "mentions")
@@ -41,7 +41,7 @@
   (test-mention-list-by-url-route "replies")
 
   (testing "/api/mention/:id"
-    (let [response ((app {:get (fn [_]
+    (let [response ((app nil {:get (fn [_]
                                  {:webmention {:source ""
                                                :target ""
                                                :id "xxx"
@@ -51,7 +51,7 @@
       (is (= (:status response) 200))))
 
   (testing "/api/mention/?source=&target="
-    (let [response ((app {:get (fn [_ _]
+    (let [response ((app nil {:get (fn [_ _]
                                  {:webmention {:source "1"
                                                :target "2"
                                                :id "xxx"
@@ -62,20 +62,20 @@
 
 (deftest feed-route-test
   (testing "RSS feed for allowed domains and has items"
-    (let [response ((app {:get-by-domain (fn [_] [{:webmention nil}])}
+    (let [response ((app nil {:get-by-domain (fn [_] [{:webmention nil}])}
                          {:allowed-target-domains "valid.com"})
                     (mock/request :get "/feed/valid.com"))]
       (is (= (:status response) 404))))
   (testing "RSS feed for allowed domains, but with no webmentions"
-    (let [response ((app nil {:allowed-target-domains "valid.com"})
+    (let [response ((app nil nil {:allowed-target-domains "valid.com"})
                     (mock/request :get "/feed/valid.com"))]
       (is (= (:status response) 404))))
   (testing "not found for disallowed domains"
-    (let [response ((app nil {}) (mock/request :get "/feed/invalid.com"))]
+    (let [response ((app nil nil {}) (mock/request :get "/feed/invalid.com"))]
       (is (= (:status response) 404)))))
 
 (deftest not-found-route-test
   (testing "not-found route"
-    (let [response ((app nil {}) (mock/request :get "/invalid"))]
+    (let [response ((app nil nil {}) (mock/request :get "/invalid"))]
       (is (= (:status response) 404)))))
 
