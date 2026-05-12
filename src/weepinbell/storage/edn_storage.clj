@@ -1,4 +1,4 @@
-(ns weepinbell.storage
+(ns weepinbell.storage.edn-storage
   (:require [clojure.edn :as edn]
             [weepinbell.utils :refer [get-domain get-target get-path]]
             [clojure.java.io :as io]
@@ -48,7 +48,7 @@
   ([datasource source target]
    (let [pred (get-predicate source target)]
      (with-webmentions datasource
-       #(->> % 
+       #(->> %
              (remove pred)
              (unload-data datasource))))))
 
@@ -79,4 +79,12 @@
   [datasource source target new-data]
   (delete-wm datasource source target)
   (append-wm datasource new-data))
+
+;; make storage vtable
+(defn use-store [datasource]
+  {:append (partial append-wm datasource)
+   :update (partial update-wm datasource)
+   :delete (partial delete-wm datasource)
+   :get    (partial get-wm datasource)
+   :get-by-domain (partial get-wms-by-domain datasource)})
 

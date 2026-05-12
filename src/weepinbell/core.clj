@@ -6,15 +6,10 @@
             [weepinbell.config :refer [get-config load-config]]
             [weepinbell.webhook :as webhook]
             [taoensso.timbre :as timbre]
-            [weepinbell.storage :as storage])
+            [weepinbell.storage.edn-storage :as edn])
   (:gen-class)) ;; Essential for "lein uberjar"
 
-(def datasource (get-config :data-path))
-(def store {:append (partial storage/append-wm datasource)
-            :update (partial storage/update-wm datasource)
-            :delete (partial storage/delete-wm datasource)
-            :get    (partial storage/get-wm datasource)
-            :get-by-domain (partial storage/get-wms-by-domain datasource)})
+(def store (edn/use-store (get-config :data-path)))
 
 (defn -main [& _]
   ;; Start webmention processor
