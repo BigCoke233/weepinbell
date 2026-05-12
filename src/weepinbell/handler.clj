@@ -26,7 +26,7 @@
                                target))
     ;; receiver endpoint
     (POST (:endpoint config) [source target]
-      (receive {:s source :t target} wmc))
+      (receive {:s source :t target} wmc config))
     ;; query API routes
     (context "/api" []
       ;; query webmention list
