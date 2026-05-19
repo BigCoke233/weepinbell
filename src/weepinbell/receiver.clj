@@ -5,6 +5,13 @@
             [weepinbell.utils :refer [valid-http-url? get-domain]]
             [md5.core :refer [string->md5-hex]]))
 
+;; utilities
+(defn- remove-anchor 
+  "Takes a URL string. Removes anchor (#...)"
+  [url]
+  (string/replace url #"#.*" ""))
+;; end utilities
+
 ;; validation and verification
 
 (defn- validate-urls [s t]
@@ -36,12 +43,14 @@
   "Receive webmention; call verify-request; if verification passed, push webmention into queue."
   [wm wmc config]
   (let [{:keys [s t]} wm
-         ;; remove anchor, #...
-         source (some-> s (string/replace #"#.*$" ""))
-         target (some-> t (string/replace #"#.*$" ""))]
+        source (remove-anchor s)
+        target (remove-anchor t)
+        new-wm {:s source :t target}
+        allowed-domains (:allowed-target-domains config)]
      ;; Request verification
-     (if-let [error-msg (verify-request source target 
-                                        (:allowed-target-domains config))]
+     (if-let [error-msg (verify-request source 
+                                        target 
+                                        allowed-domains)]
        ;; respond if request verification failed
        {:status 400
         :headers {"Content-Type" "application/json; charset=utf-8"}
@@ -56,7 +65,7 @@
          ;;
          ;; Webmention verification SHOULD be handled asynchronously
          ;; to prevent DoS (Denial of Service) attacks.
-         (put! wmc wm)
+         (put! wmc new-wm)
          ;; respond with 201 when Webmention passed checks and
          ;; was sent into queue, include a Location header
          (let [wm-id (string->md5-hex (str source target))
