@@ -22,14 +22,64 @@ It *eats up* in-coming Webmention request, *dissolve* the target's HTML and *gro
 - Webhook
 - Image proxy for microformats photos
 
-## Roadmap
+## Installation
 
-- [x] Unit tests (covers all core business rules) 
-- [ ] API Paging 🚩
-- [ ] Smaller depdency tree
-    - [ ] Write own utility functions to replace Apache commons validator
-    - [ ] Write own utility functions to replace clj-rss
-- [ ] Admin UI 
+### Requirements
+
+- JDK (Java), >= 17
+- [Leiningen](https://codeberg.org/leiningen/leiningen) (optional, only if you want to build from source)
+
+### Download
+
+Weepinbell is provided as a `.jar` file. You can download the latest version in [Releases](https://codeberg.org/eltrac/weepinbell/releases) page.
+
+```shell
+java -jar weepinbell-v0.x.x-standalone.jar
+```
+
+### Build from source
+
+Make sure you have [Leinigen](https://leiningen.org/) installed.
+
+```shell
+git clone https://codeberg.org/eltrac/weepinbell
+cd weepinbell
+lein uberjar
+java -jar target/weepinbell-v0.x.x-standalone.jar
+```
+
+### Docker
+
+[Dockerfile](Dockerfile) and [docker-compose.yml](docker-compose.yml) are included in the repository.
+
+```shell
+git clone https://codeberg.org/eltrac/weepinbell
+cd weepinbell
+docker compose up -d
+```
+
+Podman should work as well, but it's not tested.
+
+## Configuration
+
+Configure weepinbell by creating a `config.edn`, the defaults:
+
+```edn
+{:port "3000"
+ :base-url "http://localhost:3000"
+ :endpoint "/endpoint"
+ :allowed-target-domains ["example.com"]
+ :data-path "data/webmention.edn"
+ :webhook {:on-receive []
+           :on-create []
+           :on-update []
+           :on-delete []}
+ :feed-length 8}
+```
+
+If you're not familiar with this format, see [edn](https://github.com/edn-format/edn). In short, it's Clojure's equivalent of JSON, but more extensible.
+
+Port can also be configured with enviroment variable `PORT`. Config overrides enviroment variable.
 
 ## API
 
@@ -97,65 +147,6 @@ Special mentions `/api/{likes|replies|reposts}` works, too.
 `/feed/:domain`
 
 Subscribe to Webmentions sent to a specific domain.
-
-## Installation
-
-### Requirements
-
-- JDK (Java), >= 17
-- [Leiningen](https://codeberg.org/leiningen/leiningen) (optional, only if you want to build from source)
-
-### Download
-
-Weepinbell is provided as a `.jar` file. You can download the latest version in [Releases](https://codeberg.org/eltrac/weepinbell/releases) page.
-
-```shell
-java -jar weepinbell-v0.x.x-standalone.jar
-```
-
-### Build from source
-
-Make sure you have [Leinigen](https://leiningen.org/) installed.
-
-```shell
-git clone https://codeberg.org/eltrac/weepinbell
-cd weepinbell
-lein uberjar
-java -jar target/weepinbell-v0.x.x-standalone.jar
-```
-
-### Docker
-
-[Dockerfile](Dockerfile) and [docker-compose.yml](docker-compose.yml) are included in the repository.
-
-```shell
-git clone https://codeberg.org/eltrac/weepinbell
-cd weepinbell
-docker compose up -d
-```
-
-Podman should work as well, but it's not tested.
-
-## Configuration
-
-Configure weepinbell by creating a `config.edn`, the defaults:
-
-```edn
-{:base-url "https://localhost:3000"
- :endpoint "/endpoint" ;; POST route that receives webmention request
- :allowed-target-domains ["example.com"] ;; domains that this receiver receives webmention on behalf of
- :data-path "data/webmention.edn"
- :webhook {:on-receive [] ;; sends GET requests to these URLs
-           :on-create []  ;; when certain events occur
-           :on-delete []
-           :on-update []}
- :feed-length 8 ;; number of RSS feed items
-}
-```
-
-If you're not familiar with this format, see [edn](https://github.com/edn-format/edn). In short, it's Clojure's equivalent of JSON, but more extensible.
-
-Port can be configured with enviroment variable `PORT`.
 
 ## Migration
 
