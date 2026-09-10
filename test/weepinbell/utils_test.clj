@@ -22,6 +22,7 @@
 
 (deftest valid-http-url-test
   (testing "Testing valid-http-url?"
+    ;; invalid cases
     (is (= (utils/valid-http-url? "ssh://example.com/http/")
            false))
     (is (= (utils/valid-http-url? "shttp://example.com/")
@@ -34,9 +35,14 @@
            false))
     (is (= (utils/valid-http-url? "http://localhost/path")
            false))
+    (is (= (utils/valid-http-url? "http://example.com/测试")
+           false))
+    ;; valid cases
     (is (= (utils/valid-http-url? "https://www.example.com/path?query=string#anchor")
            true))
     (is (= (utils/valid-http-url? "http://simple.top")
+           true))
+    (is (= (utils/valid-http-url? "https://example.com/%2F%E5%8C%85%E5%90%AB%E9%9D%9EASCII%E5%AD%97%E7%AC%A6%E7%9A%84%E4%BE%8B%E5%AD%90")
            true))))
 
 (deftest format-list-test
