@@ -45,6 +45,9 @@
     (route/not-found "Not Found")))
 
 (defn app [wmc storage config]
+  (when (= :clojure.spec.alpha/invalid storage)
+    (println "Invalid storage. Check your database configuration or submit an issue.")
+    (System/exit 1))
   (-> (api-routes wmc storage config)
       (wrap-resource "static")
       (wrap-defaults api-defaults)

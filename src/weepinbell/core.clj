@@ -1,19 +1,22 @@
 (ns weepinbell.core
   (:require [ring.adapter.jetty :refer [run-jetty]]
+            [clojure.spec.alpha :as s]
             [weepinbell.processor :as processor]
             [weepinbell.handler :refer [app]]
             [weepinbell.config :refer [load-config]]
             [weepinbell.webhook :as webhook]
             [taoensso.timbre :as timbre]
             [weepinbell.storage.edn-storage :as edn]
-            [clojure.core.async :refer [chan]])
+            [clojure.core.async :refer [chan]]
+            [weepinbell.spec])
   (:gen-class)) ;; Essential for "lein uberjar"
 
 (def wmc (chan))
 
 (def config (load-config))
 
-(def store (edn/use-store (:data-path config)))
+(def store (s/conform :weepinbell.spec/storage
+                      (edn/use-store (:data-path config))))
 
 (def hooks (let [hooks [:on-receive :on-update :on-delete :on-create]
                  webhooks (:webhook config)]
