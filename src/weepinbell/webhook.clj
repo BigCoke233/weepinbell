@@ -1,5 +1,5 @@
 (ns weepinbell.webhook
-  (:require [clj-http.client :as client]
+  (:require [hato.client :as hc]
             [taoensso.timbre :as timbre]
             [weepinbell.utils :refer [valid-http-url?]]))
 
@@ -15,7 +15,7 @@
                              (filter string?)
                              (filter valid-http-url?)))]
      (->> hooks
-          (map #((client/post %)
+          (map #((hc/post %)
                  (timbre/info "Webhook triggered: " %)))
           doall))))
 

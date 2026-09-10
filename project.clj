@@ -11,7 +11,7 @@
                  [ring/ring-jetty-adapter "1.15.3"]
                  [cheshire "6.1.0"]
                  [commons-validator "1.10.1"]
-                 [clj-http "3.13.1"]
+                 [hato "1.0.0"]
                  [com.kylewm/mf2j "0.0.4"]
                  [com.taoensso/timbre "6.8.0"]
                  [hiccup "2.0.0"]

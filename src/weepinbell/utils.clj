@@ -1,7 +1,7 @@
 (ns weepinbell.utils
   (:import [org.apache.commons.validator.routines UrlValidator]
            [java.net URI])
-  (:require [clj-http.client :as client]
+  (:require [hato.client :as hc]
             [clojure.string :as string]
             [clojure.walk :as walk]
             [clojure.java.io :as io]
@@ -23,26 +23,6 @@
         validator (UrlValidator. schemes)]
     (.isValid validator url)))
 
-(defn get-content-type [url]
-  (try
-    (let [response (client/head url)]
-      (get-in response [:headers "Content-Type"]))
-    (catch clojure.lang.ExceptionInfo e
-      (let [status (:status (ex-data e))]
-        (timbre/error status " error trying to get content type of " url)
-        nil))
-    (catch Exception e
-      (timbre/error "Error trying to get content type of " url
-                    (.getMessage e))
-      nil)))
-
-(defn plain-or-html? [content-type]
-  (cond
-    (nil? content-type) false
-    (string/includes? content-type "text/html") :html
-    (string/includes? content-type "text/plain") :text
-    :else false))
-
 (defn javamap->map [map]
   (->> (seq map) (into {}) walk/keywordize-keys))
 
@@ -54,10 +34,8 @@
           parent-dir (.getParentFile file)]
       (when (and parent-dir (not (.exists parent-dir)))
         (.mkdirs parent-dir))
-      (let [response (client/get url {:as :stream
-                                      :conn-timeout 10000
-                                      :socket-timeout 30000
-                                      :throw-exceptions true})
+      (let [response (hc/get url {:as :stream
+                                  :timeout 30000})
             content-length (get-in response [:headers "content-length"])]
         (timbre/info "Downloading [" url "] -> [" dest-path "]")
         (when content-length

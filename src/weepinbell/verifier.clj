@@ -4,14 +4,12 @@
    1) source contains target URL.
    2) source respond with 2** status code.
    3) source's Content-Type is either HTML or plain text."
-  (:require [weepinbell.utils :refer [get-content-type plain-or-html?]]
-            [clojure.string :refer [includes?]]
-            [clj-http.client :as client]
+  (:require [clojure.string :refer [includes?]]
+            [hato.client :as hc]
             [taoensso.timbre :as timbre]))
 
-(defn verify-content-types [source target]
-  (let [validate #(-> % get-content-type plain-or-html? boolean)]
-    (and (validate source) (validate target))))
+(defn- verify-content-type [content-type]
+  (#{:text/html :text/plain} content-type))
 
 (defn verify-mention
   "Get source and follow redirects to check if target link is present."
@@ -19,12 +17,13 @@
   (try
     (timbre/info (str "Verifying mention from: " source))
     ;; get first 1MB of source URL and verify
-    (let [{:keys [status body]} (client/get source {:throw false
-                                                    :headers {"Range" "bytes=0-1048575"}})]
+    (let [{:keys [status body content-type]} (hc/get source {:headers {"Range" "bytes=0-1048575"}})
+          target-content-type (:content-type (hc/head target))]
       ;; Verify status code
       (if (and (>= status 200) (< status 300))
         ;; Verify Content-Types
-        (if (verify-content-types source target)
+        (if (and (verify-content-type content-type)
+                 (verify-content-type target-content-type))
           ;; Verify inclusion of target URL
           ;; TODO needs to be more robust
           (if (includes? (str body) target)
