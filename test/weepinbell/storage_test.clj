@@ -6,5 +6,6 @@
 
 (deftest edn-storage-conformity-test 
   (testing "edn-storage should conform storage spec."
+    (spit "source.edn" "")
     (is (s/valid? :weepinbell.spec/storage 
                   (edns/use-store "source.edn")))))
