@@ -1,6 +1,6 @@
 (ns weepinbell.feed
   (:require [clj-rss.core :as rss]
-            [weepinbell.utils :refer [get-domain]]
+            [weepinbell.utils.url :refer [get-domain]]
             [weepinbell.utils.digest :refer [md5-hash]])
   (:import [java.time Instant]))
 

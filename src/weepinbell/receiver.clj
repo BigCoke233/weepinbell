@@ -2,7 +2,7 @@
   "Receiver receives Webmention request (a source and a target); verify the request; return error message if any; push Webmention into queue of processor."
   (:require [clojure.string :as string]
             [clojure.core.async :refer [put!]]
-            [weepinbell.utils :refer [valid-http-url? get-domain]]
+            [weepinbell.utils.url :refer [get-domain valid-http-url?]]
             [weepinbell.utils.digest :refer [md5-hash]]))
 
 ;; utilities

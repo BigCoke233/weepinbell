@@ -1,27 +1,9 @@
 (ns weepinbell.utils
-  (:import [org.apache.commons.validator.routines UrlValidator]
-           [java.net URI])
   (:require [org.httpkit.client :as hk]
             [clojure.string :as string]
             [clojure.walk :as walk]
             [clojure.java.io :as io]
             [taoensso.timbre :as timbre]))
-
-(defn get-domain [url]
-  (when (some? url)
-    (-> url URI/create .getHost)))
-
-(defn get-path [url]
-  (when (some? url)
-    (-> url URI/create .getPath)))
-
-(defn get-target [wm]
-  (get-in wm [:webmention :target]))
-
-(defn valid-http-url? [url]
-  (let [schemes (into-array String ["http" "https"])
-        validator (UrlValidator. schemes)]
-    (.isValid validator url)))
 
 (defn javamap->map [map]
   (->> (seq map) (into {}) walk/keywordize-keys))

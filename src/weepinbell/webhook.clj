@@ -1,7 +1,7 @@
 (ns weepinbell.webhook
   (:require [org.httpkit.client :as hk]
             [taoensso.timbre :as timbre]
-            [weepinbell.utils :refer [valid-http-url?]]))
+            [weepinbell.utils.url :refer [valid-http-url?]]))
 
 (defn trigger
   "Send requests to a list of webhooks."

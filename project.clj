@@ -10,7 +10,6 @@
                  [http-kit "2.3.0"]
                  [ring/ring-json "0.5.1"]
                  [cheshire "6.1.0"]
-                 [commons-validator "1.10.1"]
                  [com.kylewm/mf2j "0.0.4"]
                  [com.taoensso/timbre "6.8.0"]
                  [hiccup "2.0.0"]
