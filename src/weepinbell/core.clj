@@ -1,5 +1,5 @@
 (ns weepinbell.core
-  (:require [ring.adapter.jetty :refer [run-jetty]]
+  (:require [org.httpkit.server :refer [run-server]]
             [clojure.spec.alpha :as s]
             [weepinbell.processor :as processor]
             [weepinbell.handler :refer [app]]
@@ -32,7 +32,5 @@
   ;; Start receiver server
   ;; Check for a PORT environment variable, default to 3000
   (let [port (Integer/parseInt (or (:port config) (System/getenv "PORT") "3000"))]
-    (run-jetty 
-      (app wmc store config) 
-      {:port port :join? true})))
+    (run-server (app wmc store config) {:port port :join? true})))
 
