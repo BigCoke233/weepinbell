@@ -15,7 +15,6 @@
                  [com.taoensso/timbre "6.8.0"]
                  [hiccup "2.0.0"]
                  [clj-rss "0.4.0"]
-                 [com.fzakaria/slf4j-timbre "0.4.1"]
                  [ring/ring-mock "0.6.2"]]
   :plugins [[lein-ancient "0.6.15"]
             [lein-ring "0.12.6"]]
