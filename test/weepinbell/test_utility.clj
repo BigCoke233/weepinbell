@@ -1,6 +1,6 @@
 (ns weepinbell.test-utility
   (:require [compojure.core :refer [GET routes]]
-            [ring.adapter.jetty :refer [run-jetty]]
+            [org.httpkit.server :refer [run-server]]
             [weepinbell.processor :as p]))
 
 (def mock-callbacks {:on-create  (fn [])
@@ -21,11 +21,11 @@
                       :update  (fn [~'_ ~'_ ~'_] (deliver ~'updated true))
                       :delete  (fn [~'_ ~'_] (deliver ~'deleted true))
                       :get     (fn [~'_ ~'_] (= ~existance :old))}
-           ~'server (run-jetty handler# {:port 38888 :join? false})]
+           ~'server (run-server handler# {:port 38888 :join? false})]
        (p/process-webmention {:s ~source-url :t ~target-url}
                              mock-callbacks
                              ~'storage
                              {})
        ~@body
-       (.stop ~'server))))
+       (~'server))))
 

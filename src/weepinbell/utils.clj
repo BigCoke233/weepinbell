@@ -1,7 +1,7 @@
 (ns weepinbell.utils
   (:import [org.apache.commons.validator.routines UrlValidator]
            [java.net URI])
-  (:require [hato.client :as hc]
+  (:require [org.httpkit.client :as hk]
             [clojure.string :as string]
             [clojure.walk :as walk]
             [clojure.java.io :as io]
@@ -34,14 +34,14 @@
           parent-dir (.getParentFile file)]
       (when (and parent-dir (not (.exists parent-dir)))
         (.mkdirs parent-dir))
-      (let [response (hc/get url {:as :stream
+      (let [response (hk/get url {:as :stream
                                   :timeout 30000})
-            content-length (get-in response [:headers "content-length"])]
+            content-length (get-in @response [:headers "content-length"])]
         (timbre/info "Downloading [" url "] -> [" dest-path "]")
         (when content-length
           (timbre/info "File size:" content-length "bytes"))
         ;; write to output stream
-        (with-open [in (:body response)
+        (with-open [in (:body @response)
                     out (io/output-stream file)]
           (io/copy in out))
         (timbre/info "Download success.")
