@@ -85,11 +85,7 @@
 ;; make storage vtable
 (defn use-store [datasource]
   (when (not (file-exists? datasource))
-    (timbre/error "Datasource is not found. File does not exist.")
-    (System/exit 1))
-  (when (not (ends-with? datasource ".edn"))
-    (timbre/error "Datasource is not valid. It must be an .edn file.")
-    (System/exit 1))
+    (spit datasource ""))
   {:append (partial append-wm datasource)
    :update (partial update-wm datasource)
    :delete (partial delete-wm datasource)
