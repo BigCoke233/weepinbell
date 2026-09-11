@@ -7,7 +7,7 @@
                  [compojure "1.7.2"]
                  [ring/ring-core "1.15.4"]
                  [ring/ring-defaults "0.7.0"]
-                 [http-kit "2.3.0"]
+                 [http-kit "2.9.0-beta4"]
                  [ring/ring-json "0.5.1"]
                  [cheshire "6.1.0"]
                  [com.kylewm/mf2j "0.0.4"]
