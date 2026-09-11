@@ -14,15 +14,13 @@
                  [com.kylewm/mf2j "0.0.4"]
                  [com.taoensso/timbre "6.8.0"]
                  [hiccup "2.0.0"]
-                 [clj-rss "0.4.0"]
-                 [ring/ring-mock "0.6.2"]]
+                 [clj-rss "0.4.0"]]
   :plugins [[lein-ancient "0.6.15"]
             [lein-ring "0.12.6"]]
   :ring {:handler weepinbell.handler/app}
   :main ^:skip-aot weepinbell.core
-  :profiles {:uberjar {:aot :all}}
-  :dev {:dependencies [[javax.servlet/servlet-api "2.5"]
-                       [ring/ring-mock "0.3.2"]]}
+  :profiles {:uberjar {:aot :all}
+             :test {:dependencies [[ring/ring-mock "0.3.2"]]}}
   :license {:name "GNU Affero General Public License"
             :url "https://www.gnu.org/licenses/agpl-3.0.html"
             :distribution :repo})
