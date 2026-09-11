@@ -160,6 +160,10 @@ Get `<token>` in [webmention.io settings](https://webmention.io/settings). `<new
 
 This script basically just resends all webmentions to Weepinbell. To avoid being mistaken as attacks, webmentions are resent every 0.5 seconds, so it might take a long time.
 
+## Contributing 
+
+See [CONTRIBUTING.md](/CONTRIBUTING.md)
+
 ## License
 
 Weepinbell is free software licensed under the GNU Affero General Public License.
