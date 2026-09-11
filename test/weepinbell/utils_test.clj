@@ -1,48 +1,49 @@
 (ns weepinbell.utils-test
   (:require [weepinbell.utils :as utils]
+            [weepinbell.utils.url :refer [valid-http-url? get-domain get-path]]
             [clojure.test :refer [deftest testing is]]))
 
 (deftest get-domain-test
   (testing "Testing utils/get-domain"
-    (is (= (utils/get-domain "https://example.com/era23#123")
+    (is (= (get-domain "https://example.com/era23#123")
            "example.com"))
-    (is (= (utils/get-domain "http://sub.example.com/era23?quer#123")
+    (is (= (get-domain "http://sub.example.com/era23?quer#123")
            "sub.example.com"))
-    (is (= (utils/get-domain "https://eada.xasdw/wada")
+    (is (= (get-domain "https://eada.xasdw/wada")
            "eada.xasdw"))))
 
 (deftest get-path-test
   (testing "Testing utils/get-path"
-    (is (= (utils/get-path "https://neodb.social/tv/season/1m09Jn4wPIyzC2m2J1ERGE")
+    (is (= (get-path "https://neodb.social/tv/season/1m09Jn4wPIyzC2m2J1ERGE")
            "/tv/season/1m09Jn4wPIyzC2m2J1ERGE"))
-    (is (= (utils/get-path "https://eltr.ac/")
+    (is (= (get-path "https://eltr.ac/")
            "/"))
-    (is (= (utils/get-path "https://www.example.com/path/some.html?flag=true")
+    (is (= (get-path "https://www.example.com/path/some.html?flag=true")
            "/path/some.html"))))
 
 (deftest valid-http-url-test
   (testing "Testing valid-http-url?"
     ;; invalid cases
-    (is (= (utils/valid-http-url? "ssh://example.com/http/")
+    (is (= (valid-http-url? "ssh://example.com/http/")
            false))
-    (is (= (utils/valid-http-url? "shttp://example.com/")
+    (is (= (valid-http-url? "shttp://example.com/")
            false))
-    (is (= (utils/valid-http-url? "http//example.com")
+    (is (= (valid-http-url? "http//example.com")
            false))
-    (is (= (utils/valid-http-url? "example.com/path/to/post")
+    (is (= (valid-http-url? "example.com/path/to/post")
            false))
-    (is (= (utils/valid-http-url? "https://www.example")
+    (is (= (valid-http-url? "http://localhost/path")
            false))
-    (is (= (utils/valid-http-url? "http://localhost/path")
-           false))
-    (is (= (utils/valid-http-url? "http://example.com/测试")
+    (is (= (valid-http-url? "https://www.example")
            false))
     ;; valid cases
-    (is (= (utils/valid-http-url? "https://www.example.com/path?query=string#anchor")
+    (is (= (valid-http-url? "https://www.example.com/path?query=string#anchor")
            true))
-    (is (= (utils/valid-http-url? "http://simple.top")
+    (is (= (valid-http-url? "http://simple.top")
            true))
-    (is (= (utils/valid-http-url? "https://example.com/%2F%E5%8C%85%E5%90%AB%E9%9D%9EASCII%E5%AD%97%E7%AC%A6%E7%9A%84%E4%BE%8B%E5%AD%90")
+    (is (= (valid-http-url? "http://中文.域名")
+           true))
+    (is (= (valid-http-url? "https://example.com/%2F%E5%8C%85%E5%90%AB%E9%9D%9EASCII%E5%AD%97%E7%AC%A6%E7%9A%84%E4%BE%8B%E5%AD%90")
            true))))
 
 (deftest format-list-test

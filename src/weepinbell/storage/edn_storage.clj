@@ -1,6 +1,6 @@
 (ns weepinbell.storage.edn-storage
   (:require [clojure.edn :as edn]
-            [weepinbell.utils :refer [get-domain get-target get-path]]
+            [weepinbell.utils.url :refer [get-domain get-target get-path]]
             [clojure.java.io :as io]
             [clojure.string :refer [join]]))
 
