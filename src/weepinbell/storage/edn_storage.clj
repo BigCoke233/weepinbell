@@ -1,8 +1,10 @@
 (ns weepinbell.storage.edn-storage
   (:require [clojure.edn :as edn]
+            [taoensso.timbre :as timbre]
+            [weepinbell.utils :refer [file-exists?]]
             [weepinbell.utils.url :refer [get-domain get-target get-path]]
             [clojure.java.io :as io]
-            [clojure.string :refer [join]]))
+            [clojure.string :refer [join ends-with?]]))
 
 (defn unload-data
   "Write to data file, replacing everything."
@@ -82,6 +84,12 @@
 
 ;; make storage vtable
 (defn use-store [datasource]
+  (when (not (file-exists? datasource))
+    (timbre/error "Datasource is not found. File does not exist.")
+    (System/exit 1))
+  (when (not (ends-with? datasource ".edn"))
+    (timbre/error "Datasource is not valid. It must be an .edn file.")
+    (System/exit 1))
   {:append (partial append-wm datasource)
    :update (partial update-wm datasource)
    :delete (partial delete-wm datasource)
