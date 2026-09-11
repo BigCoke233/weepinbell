@@ -3,7 +3,7 @@
   (:require [clojure.string :as string]
             [clojure.core.async :refer [put!]]
             [weepinbell.utils.url :refer [get-domain valid-http-url?]]
-            [weepinbell.utils.digest :refer [md5-hash]]))
+            [weepinbell.utils.digest :refer [digest]]))
 
 ;; utilities
 (defn- remove-anchor 
@@ -68,7 +68,7 @@
          (put! wmc new-wm)
          ;; respond with 201 when Webmention passed checks and
          ;; was sent into queue, include a Location header
-         (let [wm-id (md5-hash (str source target))
+         (let [wm-id (digest (str source target))
                wm-url (str (:base-url config) "/api/mention/" wm-id)
                response {:status 201
                          :message "Webmention is accepted and pending for verification."
