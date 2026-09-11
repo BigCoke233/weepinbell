@@ -5,11 +5,13 @@
    2) source respond with 2** status code.
    3) source's Content-Type is either HTML or plain text."
   (:require [clojure.string :refer [includes?]]
-            [hato.client :as hc]
+            [org.httpkit.client :as hk]
             [taoensso.timbre :as timbre]))
 
-(defn- verify-content-type [content-type]
-  (#{:text/html :text/plain} content-type))
+(defn- verify-headers [headers]
+  (#{"text/html" "text/plain"} (:content-type headers)))
+
+(verify-headers {:content-type "text/html"})
 
 (defn verify-mention
   "Get source and follow redirects to check if target link is present."
@@ -17,13 +19,13 @@
   (try
     (timbre/info (str "Verifying mention from: " source))
     ;; get first 1MB of source URL and verify
-    (let [{:keys [status body content-type]} (hc/get source {:headers {"Range" "bytes=0-1048575"}})
-          target-content-type (:content-type (hc/head target))]
+    (let [{:keys [status body headers]} @(hk/get source {:headers {"Range" "bytes=0-1048575"}})
+          target-headers (:headers @(hk/head target))]
       ;; Verify status code
       (if (and (>= status 200) (< status 300))
         ;; Verify Content-Types
-        (if (and (verify-content-type content-type)
-                 (verify-content-type target-content-type))
+        (if (and (verify-headers headers)
+                 (verify-headers target-headers))
           ;; Verify inclusion of target URL
           ;; TODO needs to be more robust
           (if (includes? (str body) target)
