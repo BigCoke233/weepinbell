@@ -150,10 +150,10 @@ Subscribe to Webmentions sent to a specific domain.
 
 ## Migration
 
-You can migrate from [webmention.io](https://webmention.io/) with [this Babashka script](migrate-from-webmentionio.clj). Make sure you have [Babashka](https://babashka.org/) installed and:
+You can migrate from [webmention.io](https://webmention.io/) with [this Babashka script](script/migrate-from-webmentionio.clj). Make sure you have [Babashka](https://babashka.org/) installed and:
 
 ```shell
-./migrate-from-webmentionio.clj <token> <new_endpoint>
+./script/migrate-from-webmentionio.clj <token> <new_endpoint>
 ```
 
 Get `<token>` in [webmention.io settings](https://webmention.io/settings). `<new_endpoint>` is your current Weepinbell endpoint (default: `localhost:3000/endpoint`).
