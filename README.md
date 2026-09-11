@@ -162,7 +162,7 @@ This script basically just resends all webmentions to Weepinbell. To avoid being
 
 ## Contributing 
 
-See [CONTRIBUTING.md](/CONTRIBUTING.md)
+See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## License
 
