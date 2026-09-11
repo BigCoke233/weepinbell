@@ -1,14 +1,14 @@
 (ns weepinbell.feed
   (:require [clj-rss.core :as rss]
             [weepinbell.utils :refer [get-domain]]
-            [md5.core :refer [string->md5-hex]])
+            [weepinbell.utils.digest :refer [md5-hash]])
   (:import [java.time Instant]))
 
 (defn make-feed-items [wms config]
   (->> wms
        (map #(let [wm (:webmention %)
                    id (if-let [id (:id wm)] id
-                              (string->md5-hex (str (:source wm) (:target wm))))
+                              (md5-hash (str (:source wm) (:target wm))))
                    permalink (str (:base-url config) "/api/mention/" id)
                    modified (:modified wm)
                    pub-date (when modified
