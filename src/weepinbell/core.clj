@@ -5,7 +5,6 @@
             [weepinbell.handler :refer [app]]
             [weepinbell.config :refer [load-config]]
             [weepinbell.webhook :as webhook]
-            [taoensso.timbre :as timbre]
             [weepinbell.storage.edn-storage :as edn]
             [clojure.core.async :refer [chan]]
             [weepinbell.spec])
@@ -21,9 +20,7 @@
 (def hooks (let [hooks [:on-receive :on-update :on-delete :on-create]
                  webhooks (:webhook config)]
              (zipmap hooks
-                     (map (fn [hook]
-                            #(do (timbre/info (name hook) "callback triggered.")
-                                 (webhook/trigger hook webhooks)))
+                     (map (fn [hook] #(webhook/trigger hook webhooks))
                           hooks))))
 
 (defn -main [& _]

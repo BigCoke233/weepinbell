@@ -17,3 +17,6 @@
         (take length)
         (apply str))))
 
+(defn digest-short [s]
+  (digest s :sha-256 8))
+

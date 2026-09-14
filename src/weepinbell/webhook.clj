@@ -3,19 +3,29 @@
             [taoensso.timbre :as timbre]
             [weepinbell.utils.url :refer [valid-http-url?]]))
 
+(defn- send-webhook [url]
+  (hk/post url
+    {:timeout 15000}
+    (fn async-callback [{:keys [status _ _ error]}]
+      (cond 
+        error (timbre/error "error ocurred sending webhook to" url ":" error)
+        (>= status 500) (timbre/error "something's wrong with webhook server of" url)
+        (>= status 400) (timbre/error "webhook url is invalid:" url)
+        :else (timbre/info "request sent to" url)))))
+
 (defn trigger
-  "Send requests to a list of webhooks."
+  "Send requests to a list of webhooks.
+  Given a vector/list of URLs, it sends plain POST request to each URL. 
+  Given a keyword and a map of URL vectors/list, it sends request to each URL in (:keyword map)."
   ([urls]
    (trigger urls nil))
-  ([keyw webhooks]
-   (when-let [hooks (if (nil? webhooks) keyw
-                         ;; if webhook list provided
-                         ;; retrieve from config
-                        (->> (get webhooks keyw)
-                             (filter string?)
-                             (filter valid-http-url?)))]
-     (->> hooks
-          (map #(@(hk/post %)
-                 (timbre/info "Webhook triggered: " %)))
-          doall))))
+  ([keyw-or-urls webhooks]
+   (when-let [hooks (if (nil? webhooks) 
+                      keyw-or-urls
+                      (->> (get webhooks keyw-or-urls)
+                           (filter string?)
+                           (filter valid-http-url?)))]
+     (when (keyword? keyw-or-urls) 
+       (timbre/info "Webhook" (name keyw-or-urls) "triggered."))
+     (->> hooks (map send-webhook) doall))))
 
