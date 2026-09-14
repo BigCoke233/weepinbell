@@ -8,7 +8,7 @@ Once you find an issue you think you'll be able to help with, read the conversat
 
 ## Commits and Pull Requests 
 
-1. Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+1. Use [Scoped Commits](https://scopedcommits.com/).
 2. **Squash** your changes to a few large, standalone commits, and **rebase** `master` before you create a PR. This keeps the history clean.
 3. Make sure you've run `lein test` and manually verified your changes before submitting PR. 
 4. Keep description simple and concise.
@@ -67,5 +67,4 @@ Also, refer to Codeberg's [Terms of Use](https://codeberg.org/Codeberg/org/commi
 
 > 7. You must not share projects that mostly consist of code written by "generative AI"-tools (including services such as *Claude*, *OpenAI Codex*). Such projects having an unclear copyright status (see requirements § 2 (1) 1 and § 2 (1) 3) and furthermore have little safeguards to ensure that they do not include harmful code (c.f. § 2 (1) 5).
 
-Generated code, especially by an LLM, is not the prompter's to license. Such code may not be compatible with our GNU Affero General Public License.
-
+Generated code, especially by an LLM, is not the prompter's to license. Such code may not be compatible with our GNU Affero General Public License. LLM usage for research, validation and code review is tolerated.
