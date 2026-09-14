@@ -1,5 +1,5 @@
 (ns weepinbell.utils
-  (:require [org.httpkit.client :as hk]
+  (:require [weepinbell.http.client :as client]
             [clojure.string :as string]
             [clojure.walk :as walk]
             [clojure.java.io :as io]
@@ -16,9 +16,8 @@
           parent-dir (.getParentFile file)]
       (when (and parent-dir (not (.exists parent-dir)))
         (.mkdirs parent-dir))
-      (let [response (hk/get url {:as :stream
-                                  :timeout 30000})
-            content-length (get-in @response [:headers "content-length"])]
+      (let [response (client/get! url {:as :stream})
+            content-length (get-in response [:headers "content-length"])]
         (timbre/info "Downloading [" url "] -> [" dest-path "]")
         (when content-length
           (timbre/info "File size:" content-length "bytes"))

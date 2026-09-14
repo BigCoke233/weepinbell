@@ -1,10 +1,10 @@
 (ns weepinbell.webhook
-  (:require [org.httpkit.client :as hk]
-            [taoensso.timbre :as timbre]
-            [weepinbell.utils.url :refer [valid-http-url?]]))
+  (:require [taoensso.timbre :as timbre]
+            [weepinbell.utils.url :refer [valid-http-url?]]
+            [weepinbell.http.client :as client]))
 
 (defn- send-webhook [url]
-  (hk/post url
+  (client/post url
     {:timeout 15000}
     (fn async-callback [{:keys [status _ _ error]}]
       (cond 

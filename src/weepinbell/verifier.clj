@@ -5,7 +5,7 @@
    2) source respond with 2** status code.
    3) source's Content-Type is either HTML or plain text."
   (:require [clojure.string :refer [includes? trim lower-case split]]
-            [org.httpkit.client :as hk]
+            [weepinbell.http.client :as client]
             [weepinbell.utils.digest :refer [digest-short]]
             [taoensso.timbre :as timbre]))
 
@@ -23,8 +23,8 @@
   [source target]
   (try
     ;; get first 1MB of source URL and verify
-    (let [{:keys [status body headers]} @(hk/get source {:headers {"Range" "bytes=0-1048575"}})
-          target-headers (:headers @(hk/head target))
+    (let [{:keys [status body headers]} (client/get! source {:headers {"Range" "bytes=0-1048575"}})
+          target-headers (:headers (client/head! target))
           id (digest-short (str source target))]
       (timbre/info "verifying webmention" id 
                    (str "(" "source: " source ", target: " target ")"))
