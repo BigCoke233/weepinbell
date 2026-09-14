@@ -1,7 +1,8 @@
 (ns weepinbell.test-utility
   (:require [compojure.core :refer [GET routes]]
             [org.httpkit.server :refer [run-server]]
-            [weepinbell.processor :as p]))
+            [weepinbell.processor :as p]
+            [taoensso.timbre :refer [merge-config!]]))
 
 (def mock-callbacks {:on-create  (fn [])
                      :on-delete  (fn [])
@@ -28,4 +29,7 @@
                              {})
        ~@body
        (~'server))))
+
+(defn disable-logging []
+  (merge-config! {:min-level :report}))
 

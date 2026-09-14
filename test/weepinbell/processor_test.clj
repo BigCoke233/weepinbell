@@ -1,6 +1,8 @@
 (ns weepinbell.processor-test
   (:require [clojure.test :refer [deftest is testing]]
-            [weepinbell.test-utility :refer [with-webmention]]))
+            [weepinbell.test-utility :refer [with-webmention disable-logging]]))
+
+(disable-logging)
 
 ;; Testing process-new-webmention
 ;; though we're calling a proxy function (process-webmention)
