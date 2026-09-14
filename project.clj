@@ -16,7 +16,8 @@
                  [clj-rss "0.4.0"]]
   :managed-dependencies [[org.clojure/tools.reader "1.5.2"]]
   :plugins [[lein-ancient "0.6.15"]
-            [lein-ring "0.12.6"]]
+            [lein-ring "0.12.6"]
+            [lein-cloverage "1.2.2"]]
   :ring {:handler weepinbell.handler/app}
   :main ^:skip-aot weepinbell.core
   :profiles {:uberjar {:aot :all}
