@@ -8,18 +8,18 @@
 (deftest verification-happy-paths-test
   (testing "Test if processor can correctly verifies a Webmention."
     (with-webmention :new ["/source" {:status 200
-                                      :headers {"Content-Type" "text/plain"}
+                                      :headers {"Content-Type" "text/plain; charset=utf-8"}
                                       :body (str "Oh I love this post:"
                                                  " http://localhost:38888/target\n"
                                                  "       this is very clever"
                                                  " and I find it inspiring")}
                            "/target" {:status 200
-                                      :headers {"Content-Type" "text/plain"}}]
+                                      :headers {"Content-Type" "text/html"}}]
       (is (= true (v/verify-mention "http://localhost:38888/source"
                                     "http://localhost:38888/target")))))
   (testing "Test if processor can correctly verifies a Webmention."
     (with-webmention :new ["/source" {:status 206
-                                      :headers {"Content-Type" "text/plain"}
+                                      :headers {"Content-Type" "text/html"}
                                       :body (str "Oh I love this post:"
                                                  " http://localhost:38888/target\n"
                                                  "       this is very clev")}
@@ -28,7 +28,7 @@
       (is (= true (v/verify-mention "http://localhost:38888/source"
                                     "http://localhost:38888/target"))))))
 
-(deftest verification-error-cases-test
+(deftest verification-exceptional-cases-test
   (testing "source is not found"
     (with-webmention :new ["/source" {:status 404
                                       :headers {"Content-Type" "text/plain"}
@@ -77,5 +77,23 @@
                                                  "https://alice.blog/article/efg")}
                            "/target" {:status 200}]
       (is (not (v/verify-mention "http://localhost:38888/source"
+                                 "http://localhost:38888/target")))))
+  (testing "source response has unsupported Content-Type"
+    (with-webmention :new ["/source" {:status 200
+                                      :headers {"Content-Type" "image/png"}}
+                           "/target" {:status 200}]
+      (is (not (v/verify-mention "http://localhost:38888/source"
+                                 "http://localhost:38888/target"))))))
+
+(deftest verification-error-test 
+  (testing "Host is not found"
+    (with-webmention :new ["/source" {}
+                           "/target" {:status 200}]
+      (is (not (v/verify-mention "http://localh/source" ;; invalid host
+                                 "http://localhost:38888/target")))))
+  (testing "Host is not found"
+    (with-webmention :new ["/source" {}
+                           "/target" {:status 200}]
+      (is (not (v/verify-mention "http://localh/source" ;; invalid host
                                  "http://localhost:38888/target"))))))
 
