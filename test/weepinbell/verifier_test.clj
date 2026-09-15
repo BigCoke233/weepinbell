@@ -1,9 +1,7 @@
 (ns weepinbell.verifier-test
   (:require [clojure.test :refer [deftest testing is]]
             [weepinbell.verifier :as v]
-            [weepinbell.test-utility :refer [with-webmention disable-logging]]))
-
-(disable-logging)
+            [weepinbell.test-utility :refer [with-webmention]]))
 
 (deftest verification-happy-paths-test
   (testing "Test if processor can correctly verifies a Webmention."
