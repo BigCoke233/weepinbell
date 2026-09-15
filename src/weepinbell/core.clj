@@ -7,14 +7,14 @@
             [weepinbell.webhook :as webhook]
             [weepinbell.storage.edn-storage :as edn]
             [clojure.core.async :refer [chan]]
-            [weepinbell.spec])
+            [weepinbell.storage.spec])
   (:gen-class)) ;; Essential for "lein uberjar"
 
 (def wmc (chan))
 
 (def config (load-config))
 
-(def store (s/conform :weepinbell.spec/storage
+(def store (s/conform :weepinbell.storage.spec/vtable
                       (edn/use-store (:data-path config))))
 
 (def hooks (let [hooks [:on-receive :on-update :on-delete :on-create]

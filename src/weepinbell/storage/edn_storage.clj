@@ -1,10 +1,9 @@
 (ns weepinbell.storage.edn-storage
   (:require [clojure.edn :as edn]
-            [taoensso.timbre :as timbre]
             [weepinbell.utils :refer [file-exists?]]
             [weepinbell.utils.url :refer [get-domain get-target get-path]]
             [clojure.java.io :as io]
-            [clojure.string :refer [join ends-with?]]))
+            [clojure.string :refer [join]]))
 
 (defn unload-data
   "Write to data file, replacing everything."

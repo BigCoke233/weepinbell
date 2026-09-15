@@ -2,10 +2,36 @@
   (:require [weepinbell.utils :refer [javamap->map
                                       file-exists?
                                       download-file]]
-            [weepinbell.microformats-parser :as mf-parser]
+            [weepinbell.utils.url :refer [valid-http-url?]]
+            [weepinbell.microformats.parser :as mf-parser]
             [taoensso.timbre :as timbre]
-            [weepinbell.utils.digest :refer [digest]]))
+            [weepinbell.utils.digest :refer [digest]]
+            [clojure.spec.alpha :as s]))
 
+;;;; spec definitions
+(s/def ::source valid-http-url?)
+(s/def ::target valid-http-url?)
+(s/def ::id (s/and string?
+                   #(let [len (count %)]
+                      (or (= len 32)
+                          (= len 8)))))
+(s/def ::modified int?)
+(s/def ::webmention
+  (s/keys :req-un [::source ::target ::id ::modified]))
+
+;; NOTE current microformats parser is unstable
+;; will have to postpone microformats spec definition
+(s/def ::microformats map?)
+
+(s/def ::proxied-photo valid-http-url?)
+(s/def ::extra
+  (s/keys :opt-un [::proxied-photo]))
+
+(s/def ::webmention-wrapped
+  (s/keys :req-un [::webmention]
+          :opt-un [::microformats ::extra]))
+
+;;;; utilities
 (defn- find-mf-photo [mf]
   (or (-> mf
           (get-in [:properties "author"])
@@ -28,6 +54,7 @@
       (str base-url public-path))
     nil))
 
+;;;; main function
 (defn wrap
   "Parse microformats and collect essential info. Wrap source, target and collected data into a Clojure map and return it."
   [source target base-url]
@@ -42,8 +69,11 @@
             :modified (System/currentTimeMillis)}
         proxied-photo (-> mf
                           find-mf-photo
-                          (proxy-mf-photo base-url))]
-    {:webmention wm
-     :microformats mf
-     :extra {:proxied-photo proxied-photo}}))
+                          (proxy-mf-photo base-url))
+        data {:webmention wm
+              :microformats mf
+              :extra {:proxied-photo proxied-photo}}]
+    (when-not (s/valid? ::webmention-wrapped data)
+      (timbre/warn "webmention data corrupted before writing to storage"))
+    data))
 

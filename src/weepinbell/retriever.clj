@@ -1,6 +1,6 @@
 (ns weepinbell.retriever
   (:require [weepinbell.utils.url :refer [get-domain]]
-            [weepinbell.microformats-wrapper :as mf-wrapper]))
+            [weepinbell.microformats.wrapper :as mf-wrapper]))
 
 (def default-page-size 12)
 

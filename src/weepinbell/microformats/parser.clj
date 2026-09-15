@@ -1,4 +1,4 @@
-(ns weepinbell.microformats-parser
+(ns weepinbell.microformats.parser
   (:require [clojure.string :refer [includes? lower-case]]
             [taoensso.timbre :as timbre])
   (:import [com.kylewm.mf2j Mf2Parser]
