@@ -1,17 +1,31 @@
 # Contributing to Weepinbell
 
+Contributions are welcome and greatly appreciated, as long as you follow the rules.
+
 ## First step
 
 Go to [Issues](https://codeberg.org/eltrac/weepinbell/issues) and find ones labeled [contribution welcome](https://codeberg.org/eltrac/weepinbell/issues?q=&type=all&state=open&labels=2145577&milestone=0&assignee=0&poster=0), or [good first issue](https://codeberg.org/eltrac/weepinbell/issues?q=&type=all&state=open&labels=2145589&milestone=0&assignee=0&poster=0) if you're contributing for the first time. 
 
 Once you find an issue you think you'll be able to help with, read the conversation and ask if anyone else has already been working on it. If not, you can fork the repository and work on your fork! 
 
-## Commits and Pull Requests 
+Don't create a PR if it hasn't been discussed and approved in an issue yet!
+
+## Style Guide 
+
+### Code style 
+
+1. Functions should be small and does one thing only.
+2. A file should have less than 100 lines of code. 
+3. Test-Driven Development is not enforced, but committing tests alongside your code is encouraged.
+4. Use utility functions and `->`/`->>` macros to reduce layers of indentation.
+5. Format your code using [cljfmt](https://github.com/weavejester/cljfmt). (run `lein cljfmt fix`)
+
+### Commits and Pull Requests 
 
 1. Use [Scoped Commits](https://scopedcommits.com/).
 2. **Squash** your changes to a few large, standalone commits, and **rebase** `master` before you create a PR. This keeps the history clean.
 3. Make sure you've run `lein test` and manually verified your changes before submitting PR. 
-4. Keep description simple and concise.
+4. Keep description simple and concise. Highlight affected scopes, things other contributors should look out for.
 
 ## Set up environment
 
