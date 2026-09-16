@@ -7,4 +7,5 @@
            :on-create []
            :on-update []
            :on-delete []}
+ :webhook-request-fn nil
  :feed-length 8}

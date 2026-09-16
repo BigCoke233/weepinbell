@@ -23,15 +23,11 @@
 (def ^{:doc "Storage middle layer, a map of data-manipulating functions.
        Supports various storage as long as the map conforms storage.spec."}
   store (s/conform :weepinbell.storage.spec/vtable
-                      (edn/use-store (:data-path config))))
+                   (edn/use-store (:data-path config))))
 
 (def ^{:doc "Hooks, a map of callback functions that processor calls 
        on certain events. Can be used for webhooks and more."}
-  hooks (let [hooks [:on-receive :on-update :on-delete :on-create]
-                 webhooks (:webhook config)]
-             (zipmap hooks
-                     (map (fn [hook] #(webhook/trigger hook webhooks))
-                          hooks))))
+  hooks (webhook/make-hooks config))
 
 (defn -main [& _]
   ;; Start webmention processor

@@ -15,23 +15,26 @@
   (when (verify-mention source target)
     (timbre/info "new webmention" id "received.")
     (let [data (wrapper/wrap source target (:base-url config))]
-      ((:append storage) data)))
-  ((:on-create callbacks)))
+      ((:append storage) data)
+      ((:on-create callbacks) data))))
 
 (defn process-existing-webmention
   "Update existing Webmention when verified, delete it otherwise."
-  [id source target callbacks storage config]
-  (timbre/info "webmention" id "already exists.")
-  (if (verify-mention source target)
-    (do
-      ((:update storage) source target
-                         (wrapper/wrap source target (:base-url config)))
-      ((:on-update callbacks))
-      (timbre/info "webmention" id "updated."))
-    (do
-      ((:delete storage) source target)
-      ((:on-delete callbacks))
-      (timbre/warn "webmention" id "no longer valid, deleted."))))
+  [wm-data callbacks storage config]
+  (let [webmention (:webmention wm-data)
+        id (:id webmention)
+        source (:source webmention)
+        target (:target webmention)]
+    (timbre/info "webmention" id "already exists.")
+    (if (verify-mention source target)
+      (let [data (wrapper/wrap source target (:base-url config))]
+        ((:update storage) source target data)
+        ((:on-update callbacks) data)
+        (timbre/info "webmention" id "updated."))
+      (do
+        ((:delete storage) source target)
+        ((:on-delete callbacks) wm-data)
+        (timbre/warn "webmention" id "no longer valid, deleted.")))))
 
 (defn process-webmention
   "Process webmention one webmention request.
@@ -44,13 +47,13 @@
   [wm callbacks storage config]
   (let [{:keys [s t]} wm
         id (digest-short (str s t))]
+    ((:on-receive callbacks) {:webmention {:id id :source s :target t}})
     ;; check if such webmention exists
-    (if ((:get storage) s t)
+    (if-let [wm-data ((:get storage) s t)]
       ;; if so, update it or delete it
-      (process-existing-webmention id s t callbacks storage config)
+      (process-existing-webmention wm-data callbacks storage config)
       ;; if not, write to data
-      (process-new-webmention id s t callbacks storage config))
-    ((:on-receive callbacks))))
+      (process-new-webmention id s t callbacks storage config))))
 
 (defn start
   "Start a go-loop that recursively calls to process-webmention."
