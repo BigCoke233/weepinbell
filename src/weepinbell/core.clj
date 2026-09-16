@@ -7,6 +7,7 @@
             [weepinbell.webhook :as webhook]
             [weepinbell.storage.edn-storage :as edn]
             [clojure.core.async :refer [chan]]
+            [taoensso.timbre :as timbre]
             [weepinbell.storage.spec])
   (:gen-class)) ;; Essential for "lein uberjar"
 
@@ -29,5 +30,6 @@
   ;; Start receiver server
   ;; Check for a PORT environment variable, default to 3000
   (let [port (Integer/parseInt (or (:port config) (System/getenv "PORT") "3000"))]
-    (run-server (app wmc store config) {:port port :join? true})))
+    (run-server (app wmc store config) {:port port :join? true})
+    (timbre/info "weepinbell started, listening on" port)))
 

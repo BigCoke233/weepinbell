@@ -74,6 +74,6 @@
               :microformats mf
               :extra {:proxied-photo proxied-photo}}]
     (when-not (s/valid? ::webmention-wrapped data)
-      (timbre/warn "webmention data corrupted before writing to storage"))
+      (timbre/warn "webmention data corrupted before writing to storage" data))
     data))
 
