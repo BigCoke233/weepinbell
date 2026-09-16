@@ -26,8 +26,8 @@
     (if data
       (assoc base-resp :body data)
       (-> base-resp
-        (assoc :status 400)
-        (assoc :body "The requested webmention does not exist.")))))
+          (assoc :status 400)
+          (assoc :body "The requested webmention does not exist.")))))
 
 (defn- respond-webmention-list-json [data]
   (let [base-resp {:status 200
@@ -36,8 +36,8 @@
     (if data
       (assoc base-resp :body data)
       (-> base-resp
-        (assoc :status 400)
-        (assoc :body {:message "The list is empty, something is wrong with your request."})))))
+          (assoc :status 400)
+          (assoc :body {:message "The list is empty, something is wrong with your request."})))))
 
 (defn- wrap-response-object [data]
   (let [result {:webmention (:webmention data)}]
@@ -79,7 +79,7 @@
   [url typ page storage]
   (if url
     (cond->> (get-domain url)
-      true ((:get-by-domain storage)) 
+      true ((:get-by-domain storage))
       true (filter #(= url (get-in % [:webmention :target])))
       true wrap-response-list
       typ  (filter-response-by-mftype typ)

@@ -6,10 +6,10 @@
 (defmacro test-mention-list-by-domain-route [mftype]
   `(testing (str "/api/" ~mftype "/:domain route")
      (let [~'response ((app nil {:get-by-domain (fn [~'_]
-                                              [{:webmention {:source ""
-                                                             :target ""
-                                                             :id ""
-                                                             :modified 0}}])}
+                                                  [{:webmention {:source ""
+                                                                 :target ""
+                                                                 :id ""
+                                                                 :modified 0}}])}
                             {})
                        (mock/request :get (str "/api/" ~mftype "/www.example")))]
        (is (= (:status ~'response) 200)))))
@@ -17,10 +17,10 @@
 (defmacro test-mention-list-by-url-route [mftype]
   `(testing (str "/api/" ~mftype "?url= route")
      (let [~'response ((app nil {:get-by-domain (fn [~'_]
-                                              [{:webmention {:source ""
-                                                             :target "http://localhost/"
-                                                             :id ""
-                                                             :modified 0}}])}
+                                                  [{:webmention {:source ""
+                                                                 :target "http://localhost/"
+                                                                 :id ""
+                                                                 :modified 0}}])}
                             {})
                        (mock/request :get (str "/api/" ~mftype "?url=http://localhost")))]
        (is (= (:status ~'response) 200)))))
@@ -42,20 +42,20 @@
 
   (testing "/api/mention/:id"
     (let [response ((app nil {:get (fn [_]
-                                 {:webmention {:source ""
-                                               :target ""
-                                               :id "xxx"
-                                               :modified 0}})}
+                                     {:webmention {:source ""
+                                                   :target ""
+                                                   :id "xxx"
+                                                   :modified 0}})}
                          {})
                     (mock/request :get "/api/mention/xxx"))]
       (is (= (:status response) 200))))
 
   (testing "/api/mention/?source=&target="
     (let [response ((app nil {:get (fn [_ _]
-                                 {:webmention {:source "1"
-                                               :target "2"
-                                               :id "xxx"
-                                               :modified 0}})}
+                                     {:webmention {:source "1"
+                                                   :target "2"
+                                                   :id "xxx"
+                                                   :modified 0}})}
                          {})
                     (mock/request :get "/api/mention/?source=1&?target=2"))]
       (is (= (:status response) 200)))))

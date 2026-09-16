@@ -101,27 +101,27 @@
 ;; anchor removing test
 (deftest anchor-remove-test
   (testing "Receiver should remove anchor in URL before pushing it into queue"
-    (let [cases [{:has    ["https://bob.blog/page/1#heading-a" 
+    (let [cases [{:has    ["https://bob.blog/page/1#heading-a"
                            "https://alice.blog/"]
-                 :expects ["https://bob.blog/page/1" 
-                           "https://alice.blog/"]}
-                 {:has    ["https://bob.blog/page/1" 
+                  :expects ["https://bob.blog/page/1"
+                            "https://alice.blog/"]}
+                 {:has    ["https://bob.blog/page/1"
                            "https://alice.blog/archive/a#heading-1"]
-                 :expects ["https://bob.blog/page/1" 
-                           "https://alice.blog/archive/a"]}
-                 {:has    ["https://bob.blog/page/1#heading-a" 
+                  :expects ["https://bob.blog/page/1"
+                            "https://alice.blog/archive/a"]}
+                 {:has    ["https://bob.blog/page/1#heading-a"
                            "https://alice.blog/archive/a#heading-1"]
-                 :expects ["https://bob.blog/page/1" 
-                           "https://alice.blog/archive/a"]}
-                 {:has    ["https://bob.blog/page/1" 
+                  :expects ["https://bob.blog/page/1"
+                            "https://alice.blog/archive/a"]}
+                 {:has    ["https://bob.blog/page/1"
                            "https://alice.blog/archive/a"]
-                 :expects ["https://bob.blog/page/1" 
-                           "https://alice.blog/archive/a"]}
-                 {:has    ["https://bob.blog/?page=1&key=value#heading-1" 
+                  :expects ["https://bob.blog/page/1"
+                            "https://alice.blog/archive/a"]}
+                 {:has    ["https://bob.blog/?page=1&key=value#heading-1"
                            "https://alice.blog/archive/a"]
-                 :expects ["https://bob.blog/?page=1&key=value" 
-                           "https://alice.blog/archive/a"]}]]
-      (->> cases 
+                  :expects ["https://bob.blog/?page=1&key=value"
+                            "https://alice.blog/archive/a"]}]]
+      (->> cases
            (map (fn [case]
                   (let [hs (get-in case [:has 0])
                         ht (get-in case [:has 1])
@@ -133,4 +133,4 @@
                     (let [{:keys [s t]} (<!! test-queue)]
                       (is (= s es))
                       (is (= t et))))))
-           doall)))) 
+           doall))))

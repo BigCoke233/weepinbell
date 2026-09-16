@@ -5,8 +5,8 @@
             [weepinbell.utils]
             [weepinbell.spec]))
 
-(deftest edn-storage-conformity-test 
+(deftest edn-storage-conformity-test
   (testing "edn-storage should conform storage spec."
     (with-redefs [weepinbell.utils/file-exists? (fn [_] true)]
-      (is (s/valid? :weepinbell.spec/storage 
+      (is (s/valid? :weepinbell.spec/storage
                     (edns/use-store "source.edn"))))))

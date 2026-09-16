@@ -3,7 +3,7 @@
   (:require [clojure.string :as string]))
 
 (defn valid-http-url? [url-string]
-  (try 
+  (try
     (let [url (URL. url-string)
           uri (.toURI url)
           scheme (.getScheme uri)

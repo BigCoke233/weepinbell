@@ -25,12 +25,12 @@
   (let [{:keys [status body headers error]} (client/get! source {:headers {"Range" "bytes=0-1048575"}})
         target-headers (:headers (client/head! target))
         id (digest-short (str source target))]
-    (timbre/info "verifying webmention" id 
+    (timbre/info "verifying webmention" id
                  (str "(" "source: " source ", target: " target ")"))
-    (cond 
+    (cond
       ;; handle error 
-      error 
-      (do 
+      error
+      (do
         (timbre/error "error verifying webmention:" error)
         false)
       ;; verify HTTP status

@@ -6,7 +6,7 @@
             [weepinbell.utils.digest :refer [digest]]))
 
 ;; utilities
-(defn- remove-anchor 
+(defn- remove-anchor
   "Takes a URL string. Removes anchor (#...)"
   [url]
   (string/replace url #"#.*" ""))
@@ -48,16 +48,16 @@
         new-wm {:s source :t target}
         allowed-domains (:allowed-target-domains config)]
      ;; Request verification
-     (if-let [error-msg (verify-request source 
-                                        target 
-                                        allowed-domains)]
+    (if-let [error-msg (verify-request source
+                                       target
+                                       allowed-domains)]
        ;; respond if request verification failed
-       {:status 400
-        :headers {"Content-Type" "application/json; charset=utf-8"}
-        :body {:status 400
-               :message error-msg}}
+      {:status 400
+       :headers {"Content-Type" "application/json; charset=utf-8"}
+       :body {:status 400
+              :message error-msg}}
        ;; proceed if request is ok
-       (do
+      (do
          ;; The receiver SHOULD check that target is a valid
          ;; resource for which it can accept Webmentions.
          ;; This check SHOULD happen synchronously to reject
@@ -65,17 +65,17 @@
          ;;
          ;; Webmention verification SHOULD be handled asynchronously
          ;; to prevent DoS (Denial of Service) attacks.
-         (put! wmc new-wm)
+        (put! wmc new-wm)
          ;; respond with 201 when Webmention passed checks and
          ;; was sent into queue, include a Location header
-         (let [wm-id (digest (str source target))
-               wm-url (str (:base-url config) "/api/mention/" wm-id)
-               response {:status 201
-                         :message "Webmention is accepted and pending for verification."
-                         :url wm-url}]
-           {:status 201
-            :headers {"Location" wm-url
-                      "Content-Type" "application/json; charset=utf-8"}
-            :body response})))))
+        (let [wm-id (digest (str source target))
+              wm-url (str (:base-url config) "/api/mention/" wm-id)
+              response {:status 201
+                        :message "Webmention is accepted and pending for verification."
+                        :url wm-url}]
+          {:status 201
+           :headers {"Location" wm-url
+                     "Content-Type" "application/json; charset=utf-8"}
+           :body response})))))
 
 

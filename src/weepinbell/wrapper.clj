@@ -40,8 +40,8 @@
             :target target
             :id (digest (str source target))
             :modified (System/currentTimeMillis)}
-        proxied-photo (-> mf 
-                          find-mf-photo 
+        proxied-photo (-> mf
+                          find-mf-photo
                           (proxy-mf-photo base-url))]
     {:webmention wm
      :microformats mf

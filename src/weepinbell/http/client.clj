@@ -6,7 +6,7 @@
   (:refer-clojure :exclude [get])
   (:require [org.httpkit.client :as hk]))
 
-(def default-options 
+(def default-options
   {:user-agent "WebmentionBot"
    :timeout 15000})
 
@@ -17,25 +17,25 @@
 (defn- wrap-promise [promised-response]
   (future (wrap-response @promised-response)))
 
-(defn post 
+(defn post
   "Sends POST request asynchronously. Returns a promise/future."
   ([url]
    (post url nil))
   ([url options]
    (post url options nil))
   ([url options callbacks]
-   (-> url 
+   (-> url
        (hk/post (merge default-options options) callbacks)
        wrap-promise)))
 
-(defn get 
+(defn get
   "Sends GET request asynchronously. Returns a promise/future."
   ([url]
    (get url nil))
   ([url options]
    (get url options nil))
   ([url options callbacks]
-   (-> url 
+   (-> url
        (hk/get (merge default-options options) callbacks)
        wrap-promise)))
 
@@ -48,7 +48,7 @@
   ([url options callbacks]
    @(get url options callbacks)))
 
-(defn head 
+(defn head
   "Sends HEAD request asynchronously. Returns a promise/future."
   ([url]
    (head url nil))
@@ -59,7 +59,7 @@
        (hk/head (merge default-options options) callbacks)
        wrap-promise)))
 
-(defn head! 
+(defn head!
   "Sends HEAD request synchronously. Returns a response."
   ([url]
    @(head url nil))
