@@ -22,7 +22,7 @@
         (when content-length
           (timbre/info "File size:" content-length "bytes"))
         ;; write to output stream
-        (with-open [in (:body @response)
+        (with-open [in (:body response)
                     out (io/output-stream file)]
           (io/copy in out))
         (timbre/info "Download success.")

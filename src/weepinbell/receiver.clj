@@ -9,7 +9,8 @@
 (defn- remove-anchor
   "Takes a URL string. Removes anchor (#...)"
   [url]
-  (string/replace url #"#.*" ""))
+  (when (string? url)
+    (string/replace url #"#.*" "")))
 ;; end utilities
 
 ;; validation and verification

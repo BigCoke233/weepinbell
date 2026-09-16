@@ -53,7 +53,6 @@
 (defn- get-card-info
   "Get essential information of an h-card item and flatten it into a map."
   [card]
-  {:post [(s/valid? ::mf-h-card %)]}
   (when (and card
              (= (get-mf-type card) "h-card"))
     (let [data {:name (get-prop-first card :name)
@@ -61,13 +60,12 @@
                 :photo (get-prop-first card :photo)
                 :url (get-prop-first card :url)}]
       (when-not (s/valid? ::mf-h-card data)
-        (timbre/warn "microformats h-card in bad form"))
+        (timbre/warn "microformats h-card in bad form:" data))
       data)))
 
 (defn wrap-entry
   "Wrap parsed raw microformats (h-entry) data. If no h-entry found, return nil."
   [entry]
-  {:post [(s/valid? ::mf-h-entry %)]}
   ;; make sure it's h-entry
   (when (and entry
              (= (get-mf-type entry) "h-entry"))
@@ -76,6 +74,6 @@
                 :published (get-prop-first entry :published)
                 :content (javamap->map (get-prop-first entry :content))}]
       (when-not (s/valid? ::mf-h-entry data)
-        (timbre/warn "microformats h-entry in bad form"))
+        (timbre/warn "microformats h-entry in bad form:" data))
       data)))
 
