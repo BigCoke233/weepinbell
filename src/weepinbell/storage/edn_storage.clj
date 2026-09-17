@@ -84,6 +84,7 @@
 ;; make storage vtable
 (defn use-store [datasource]
   (when (not (file-exists? datasource))
+    (io/make-parents datasource)
     (spit datasource ""))
   {:append (partial append-wm datasource)
    :update (partial update-wm datasource)
