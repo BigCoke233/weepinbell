@@ -10,6 +10,7 @@
           host (. IDN toASCII (-> url .getHost (string/replace "www." "")))]
       (and (string/includes? host ".") ;; do not accept localhost and other non-TLD names
            (or (= scheme "http") (= scheme "https"))))
+    (catch ClassCastException _ false) ;; not string
     (catch MalformedURLException _ false)
     (catch URISyntaxException _ false)))
 
