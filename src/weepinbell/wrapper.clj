@@ -1,4 +1,6 @@
 (ns weepinbell.wrapper
+  "Wrapper component wraps a qualified webmention while processing, used by processor.
+  It adds microformats and extra data and return complete webmention map ready for storage."
   (:require [weepinbell.utils :refer [javamap->map
                                       file-exists?
                                       download-file]]
@@ -56,7 +58,8 @@
 
 ;;;; main function
 (defn wrap
-  "Parse microformats and collect essential info. Wrap source, target and collected data into a Clojure map and return it."
+  "Parse microformats and collect essential info. 
+  Wrap source, target and collected data into a map and return it."
   [source target base-url]
   (let [mf (-> source
                mf-parser/parse

@@ -1,4 +1,8 @@
+;; DEPRECATED !!!
+
 (ns weepinbell.utils
+  "This componets is deprecated.
+  All functions in this namespace will be moved or rewritten."
   (:require [weepinbell.http.client :as client]
             [clojure.string :as string]
             [clojure.walk :as walk]

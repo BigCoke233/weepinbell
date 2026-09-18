@@ -1,4 +1,6 @@
 (ns weepinbell.retriever
+  "Handler of routes /api/mention/:id, /api/mentions/...
+  Retriever gets webmention form storage and wraps it in a response."
   (:require [weepinbell.utils.url :refer [get-domain]]
             [weepinbell.microformats.wrapper :as mf-wrapper]))
 

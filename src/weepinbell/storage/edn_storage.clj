@@ -1,4 +1,6 @@
 (ns weepinbell.storage.edn-storage
+  "EDN file-based storage middle layer.
+  Entry function is use-store, which makes a valid storage vtable."
   (:require [clojure.edn :as edn]
             [weepinbell.utils :refer [file-exists?]]
             [weepinbell.utils.url :refer [get-domain get-target get-path]]

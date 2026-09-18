@@ -1,4 +1,8 @@
+;; DEPRECATED !!!
+
 (ns weepinbell.ui
+  "This component is deprecated.
+  Frontend will be refactored. See issue #8"
   (:require [hiccup2.core :as h]
             [weepinbell.utils :refer [format-list]]))
 

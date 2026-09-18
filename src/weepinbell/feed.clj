@@ -1,10 +1,11 @@
 (ns weepinbell.feed
+  "Handler of route /feed/:domain. Generating RSS feed for each domain."
   (:require [clj-rss.core :as rss]
             [weepinbell.utils.url :refer [get-domain]]
             [weepinbell.utils.digest :refer [digest]])
   (:import [java.time Instant]))
 
-(defn make-feed-items [wms config]
+(defn- make-feed-items [wms config]
   (->> wms
        (map #(let [wm (:webmention %)
                    id (if-let [id (:id wm)] id
@@ -20,7 +21,7 @@
        (take-last (:feed-length config))
        doall))
 
-(defn make-feed-channel [title desc link wms config]
+(defn- make-feed-channel [title desc link wms config]
   (rss/channel-xml
    {:title title
     :link link
@@ -28,6 +29,7 @@
    (when wms (make-feed-items wms config))))
 
 (defn rss
+  "Generate RSS XML response, or 404 JSON response when not found."
   [domain storage config]
   (if ((set (:allowed-target-domains config)) domain)
     (let [wms ((:get-by-domain storage) domain)]

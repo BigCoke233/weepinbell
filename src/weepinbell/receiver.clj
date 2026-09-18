@@ -1,5 +1,6 @@
 (ns weepinbell.receiver
-  "Receiver receives Webmention request (a source and a target); verify the request; return error message if any; push Webmention into queue of processor."
+  "Handler of route /endpoint or any other route the user configured. 
+  Receiver receives Webmention request (a source and a target); verify the request; return error message if any; push Webmention into webbmention channel for processor to take."
   (:require [clojure.string :as string]
             [clojure.core.async :refer [put!]]
             [weepinbell.utils.url :refer [get-domain valid-http-url?]]
@@ -41,7 +42,8 @@
 ;; receiving logic
 
 (defn receive
-  "Receive webmention; call verify-request; if verification passed, push webmention into queue."
+  "Receive webmention; call verify-request; if verification passed, push webmention into queue.
+  Return JSON response of pending notification, rejection or error."
   [wm wmc config]
   (let [{:keys [s t]} wm
         source (remove-anchor s)

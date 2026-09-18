@@ -1,4 +1,8 @@
+;; DEPRECATED !!!
+
 (ns weepinbell.microformats.wrapper
+  "Deprecated. See issue #20
+  https://codeberg.org/eltrac/weepinbell/issues/20"
   (:require [weepinbell.utils :refer [javamap->map]]
             [taoensso.timbre :as timbre]
             [clojure.spec.alpha :as s]))

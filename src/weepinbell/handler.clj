@@ -1,4 +1,6 @@
 (ns weepinbell.handler
+  "Handler define routes and wrap responses. It pass request to other specific handlers.
+  Other handlers are receiver, retriever and feed."
   (:require [compojure.core :refer [routes POST GET context]]
             [compojure.route :as route]
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]

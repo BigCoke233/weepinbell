@@ -1,4 +1,5 @@
 (ns weepinbell.core
+  "Main component that loads resources and start other components."
   (:require [org.httpkit.server :refer [run-server]]
             [clojure.spec.alpha :as s]
             [weepinbell.processor :as processor]
@@ -11,14 +12,22 @@
             [weepinbell.storage.spec])
   (:gen-class)) ;; Essential for "lein uberjar"
 
-(def wmc (chan))
+(def ^{:doc "Webmention channel.
+       Receiver puts webmention requests in. Processor takes them out."}
+  wmc (chan))
 
-(def config (load-config))
+(def ^{:doc "Weepinbell configuration, 
+       loaded from config.edn and merged with defaults."}
+  config (load-config))
 
-(def store (s/conform :weepinbell.storage.spec/vtable
+(def ^{:doc "Storage middle layer, a map of data-manipulating functions.
+       Supports various storage as long as the map conforms storage.spec."}
+  store (s/conform :weepinbell.storage.spec/vtable
                       (edn/use-store (:data-path config))))
 
-(def hooks (let [hooks [:on-receive :on-update :on-delete :on-create]
+(def ^{:doc "Hooks, a map of callback functions that processor calls 
+       on certain events. Can be used for webhooks and more."}
+  hooks (let [hooks [:on-receive :on-update :on-delete :on-create]
                  webhooks (:webhook config)]
              (zipmap hooks
                      (map (fn [hook] #(webhook/trigger hook webhooks))

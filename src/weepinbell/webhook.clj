@@ -1,4 +1,7 @@
 (ns weepinbell.webhook
+  "Makes hooks for sending webhook requests to certain endpoints on certain events.
+  This component does not care about specific event types or endpoints.
+  It takes them from its caller (core.clj) and makes a map of hook functions."
   (:require [taoensso.timbre :as timbre]
             [weepinbell.utils.url :refer [valid-http-url?]]
             [weepinbell.http.client :as client]))

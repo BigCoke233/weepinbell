@@ -1,4 +1,8 @@
+;; DEPRECATED !!!
+
 (ns weepinbell.microformats.parser
+  "Deprecated. See issue #20
+  https://codeberg.org/eltrac/weepinbell/issues/20"
   (:require [clojure.string :refer [includes? lower-case]]
             [taoensso.timbre :as timbre])
   (:import [com.kylewm.mf2j Mf2Parser]
