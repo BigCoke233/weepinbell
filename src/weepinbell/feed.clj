@@ -22,11 +22,13 @@
        doall))
 
 (defn- make-feed-channel [title desc link wms config]
-  (rss/channel-xml
-   {:title title
-    :link link
-    :description desc}
-   (when wms (make-feed-items wms config))))
+  (let [metadata {:title title
+                  :link link
+                  :description desc}
+        gen (partial rss/channel-xml metadata)]
+    (if-let [items (make-feed-items wms config)]
+      (gen items)
+      (gen))))
 
 (defn rss
   "Generate RSS XML response, or 404 JSON response when not found."
