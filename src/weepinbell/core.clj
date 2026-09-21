@@ -2,7 +2,7 @@
   "Main component that loads resources and start other components."
   (:require [org.httpkit.server :refer [run-server]]
             [clojure.spec.alpha :as s]
-            [weepinbell.processor :as processor]
+            [weepinbell.processor.starter :refer [start-processor]]
             [weepinbell.handler :refer [app]]
             [weepinbell.config :refer [load-config]]
             [weepinbell.webhook :as webhook]
@@ -31,7 +31,11 @@
 
 (defn -main [& _]
   ;; Start webmention processor
-  (processor/start wmc hooks store config)
+  (start-processor 
+    {:wmc wmc 
+     :callbacks hooks 
+     :storage store 
+     :config config})
   ;; Start receiver server
   ;; Check for a PORT environment variable, default to 3000
   (let [port (Integer/parseInt (or (:port config) (System/getenv "PORT") "3000"))]

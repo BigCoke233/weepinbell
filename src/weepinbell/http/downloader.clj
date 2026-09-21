@@ -1,16 +1,7 @@
-;; DEPRECATED !!!
-
-(ns weepinbell.utils
-  "This componets is deprecated.
-  All functions in this namespace will be moved or rewritten."
-  (:require [weepinbell.http.client :as client]
-            [clojure.string :as string]
-            [clojure.walk :as walk]
+(ns weepinbell.http.downloader 
+  (:require [taoensso.timbre :as timbre]
             [clojure.java.io :as io]
-            [taoensso.timbre :as timbre]))
-
-(defn javamap->map [map]
-  (->> (seq map) (into {}) walk/keywordize-keys))
+            [weepinbell.http.client :as client]))
 
 (defn download-file
   "Download file to destination. Return true if success, false if failed."
@@ -35,16 +26,4 @@
     (catch Exception e
       (timbre/error "Download error:" (.getMessage e))
       false)))
-
-(defn file-exists? [path]
-  (.exists (io/file path)))
-
-(defn format-list [coll]
-  (let [total (count coll)]
-    (cond
-      (= total 0) ""
-      (= total 1) (first coll)
-      :else (str (clojure.string/join ", " (butlast coll))
-                 " and "
-                 (last coll)))))
 

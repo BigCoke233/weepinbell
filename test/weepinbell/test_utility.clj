@@ -1,12 +1,6 @@
 (ns weepinbell.test-utility
   (:require [compojure.core :refer [GET routes]]
-            [org.httpkit.server :refer [run-server]]
-            [weepinbell.processor :as p]))
-
-(def mock-callbacks {:on-create  (fn [_])
-                     :on-delete  (fn [_])
-                     :on-update  (fn [_])
-                     :on-receive (fn [_])})
+            [org.httpkit.server :refer [run-server]]))
 
 (defmacro with-webmention [existance [source-route source-resp target-route target-resp] & body]
   (let [source-url (str "http://localhost:38888" source-route)
@@ -27,10 +21,6 @@
                                                  :target ~target-url}}))}
            ~'server (run-server handler# {:port 38888 :join? false})]
        (try
-         (p/process-webmention {:s ~source-url :t ~target-url}
-                               mock-callbacks
-                               ~'storage
-                               {})
          ~@body
          (finally (~'server))))))
 

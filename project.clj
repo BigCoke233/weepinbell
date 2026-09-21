@@ -10,7 +10,7 @@
                  [http-kit "2.9.0-beta4"]
                  [ring/ring-json "0.5.1"]
                  [cheshire "6.2.0"]
-                 [com.kylewm/mf2j "0.0.4"]
+                 [ac.eltr/mf2clj "0.0.3"]
                  [com.taoensso/timbre "6.8.0"]
                  [hiccup "2.0.0"]
                  [clj-rss "0.4.0"]]

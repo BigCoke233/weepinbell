@@ -3,8 +3,7 @@
 (ns weepinbell.microformats.wrapper
   "Deprecated. See issue #20
   https://codeberg.org/eltrac/weepinbell/issues/20"
-  (:require [weepinbell.utils :refer [javamap->map]]
-            [taoensso.timbre :as timbre]
+  (:require [taoensso.timbre :as timbre]
             [clojure.spec.alpha :as s]))
 
 ;; spec definition
@@ -31,9 +30,7 @@
   "Use keyword get get a property value from a microformats item."
   [entry prop]
   (-> entry
-      javamap->map
       :properties
-      javamap->map
       (get prop)))
 
 (defn- get-prop-first
@@ -76,7 +73,7 @@
     (let [data {:author (get-card-info (get-prop-first entry :author))
                 :type (get-entry-type entry)
                 :published (get-prop-first entry :published)
-                :content (javamap->map (get-prop-first entry :content))}]
+                :content (get-prop-first entry :content)}]
       (when-not (s/valid? ::mf-h-entry data)
         (timbre/warn "microformats h-entry in bad form:" data))
       data)))

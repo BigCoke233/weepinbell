@@ -4,7 +4,7 @@
   "This component is deprecated.
   Frontend will be refactored. See issue #8"
   (:require [hiccup2.core :as h]
-            [weepinbell.utils :refer [format-list]]))
+            [clojure.string :as string]))
 
 (defn- page-response [page]
   {:body page
@@ -17,6 +17,15 @@
                  [:link {:rel "stylesheet" :href "/main.css"}]
                  [:title "Weepinbell - Webmention Receiver"]]
                 [:body slot]])))
+
+(defn- format-list [coll]
+  (let [total (count coll)]
+    (cond
+      (= total 0) ""
+      (= total 1) (first coll)
+      :else (str (string/join ", " (butlast coll))
+                 " and "
+                 (last coll)))))
 
 (defn home [domains endpoint preset-target]
   (->

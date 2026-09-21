@@ -2,9 +2,8 @@
   "EDN file-based storage middle layer.
   Entry function is use-store, which makes a valid storage vtable."
   (:require [clojure.edn :as edn]
-            [weepinbell.utils :refer [file-exists?]]
-            [weepinbell.utils.url :refer [get-domain get-target get-path]]
             [clojure.java.io :as io]
+            [weepinbell.utils.url :refer [get-domain get-target get-path]]
             [clojure.string :refer [join]]))
 
 (defn unload-data
@@ -79,11 +78,15 @@
 
 (defn update-wm
   "Update an existing webmention"
-  [datasource source target new-data]
-  (delete-wm datasource source target)
-  (append-wm datasource new-data))
+  ([datasource id new-data]
+   (delete-wm datasource id)
+   (append-wm datasource new-data))
+  ([datasource source target new-data]
+   (delete-wm datasource source target)
+   (append-wm datasource new-data)))
 
 ;; make storage vtable
+(def file-exists? #(.exists (io/file %)))
 (defn use-store [datasource]
   (when (not (file-exists? datasource))
     (io/make-parents datasource)
