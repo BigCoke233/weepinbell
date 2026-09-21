@@ -1,0 +1,4 @@
+[tools]
+java = "latest"
+leiningen = "latest"
+clojure = "latest"
