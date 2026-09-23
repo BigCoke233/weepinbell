@@ -2,7 +2,7 @@
   "Handler of routes /api/mention/:id, /api/mentions/...
   Retriever gets webmention form storage and wraps it in a response."
   (:require [weepinbell.utils.url :refer [get-domain]]
-            [weepinbell.microformats.wrapper :as mf-wrapper]))
+            [weepinbell.microformats.reducer :refer [reduce-mf]]))
 
 (def default-page-size 12)
 
@@ -45,9 +45,7 @@
   (let [result {:webmention (:webmention data)}]
     (cond-> result
       (not (empty? (:microformats data)))
-      (assoc :microformats (-> data
-                               :microformats
-                               mf-wrapper/wrap-entry))
+      (assoc :microformats (-> data :microformats reduce-mf))
       (:extra data)
       (assoc :extra (:extra data)))))
 
