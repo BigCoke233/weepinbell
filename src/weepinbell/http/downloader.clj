@@ -25,5 +25,6 @@
     ;; when download failed
     (catch Exception e
       (timbre/error "Download error:" (.getMessage e))
+      (io/delete-file (io/file dest-path))
       false)))
 
