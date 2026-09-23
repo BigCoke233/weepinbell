@@ -11,16 +11,13 @@
           parent-dir (.getParentFile file)]
       (when (and parent-dir (not (.exists parent-dir)))
         (.mkdirs parent-dir))
-      (let [response (client/get! url {:as :stream})
-            content-length (get-in response [:headers "content-length"])]
+      (let [response (client/get! url {:as :stream})]
         (timbre/info "Downloading [" url "] -> [" dest-path "]")
-        (when content-length
-          (timbre/info "File size:" content-length "bytes"))
         ;; write to output stream
         (with-open [in (:body response)
                     out (io/output-stream file)]
           (io/copy in out))
-        (timbre/info "Download success.")
+        (timbre/info "Download success. File size:" (.length file) "bytes")
         true))
     ;; when download failed
     (catch Exception e
