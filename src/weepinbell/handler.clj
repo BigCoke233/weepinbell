@@ -15,10 +15,12 @@
 
 (defmacro defmention-routes [base-path mention-type storage]
   `(context ~base-path []
-     (GET "/" [~'url ~'page]
-       (retriever/by-url ~'url ~mention-type ~'page ~storage))
-     (GET "/:domain" [~'domain ~'page]
-       (retriever/by-domain ~'domain ~mention-type ~'page ~storage))))
+     (GET "/" [~'url ~'page ~'microformats]
+       (retriever/by-url ~'url ~mention-type ~'page ~storage 
+                         {:microformats ~'microformats}))
+     (GET "/:domain" [~'domain ~'page ~'microformats]
+       (retriever/by-domain ~'domain ~mention-type ~'page ~storage 
+                            {:microformats ~'microformats}))))
 
 (defn api-routes [wmc storage config]
   (routes
@@ -36,9 +38,11 @@
      (defmention-routes "/reposts" :repost storage)
      (defmention-routes "/replies" :reply storage)
       ;; query one specific webmention
-     (context "/mention" []
-       (GET "/:id" [id] (retriever/by-id id storage))
-       (GET "/" [source target] (retriever/by-st-pair source target storage))))
+     (context "/mention" [microformats]
+       (GET "/:id" [id] (retriever/by-id id storage 
+                                         {:microformats microformats}))
+       (GET "/" [source target] (retriever/by-st-pair source target storage
+                                                      {:microformats microformats}))))
     ;; RSS feed
    (GET "/feed/:domain" [domain] (feed/rss domain storage config))
     ;; host proxied avatars (microformats photos)

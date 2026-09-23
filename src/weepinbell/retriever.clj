@@ -41,16 +41,18 @@
           (assoc :status 400)
           (assoc :body {:message "The list is empty, something is wrong with your request."})))))
 
-(defn- wrap-response-object [data]
+(defn- wrap-response-object [data opts]
   (let [result {:webmention (:webmention data)}]
     (cond-> result
       (not (empty? (:microformats data)))
-      (assoc :microformats (-> data :microformats reduce-mf))
+      (assoc :microformats (cond-> data 
+                             true :microformats 
+                             (not= "raw" (:microformats opts)) reduce-mf))
       (:extra data)
       (assoc :extra (:extra data)))))
 
-(defn- wrap-response-list [data]
-  (map wrap-response-object data))
+(defn- wrap-response-list [data opts]
+  (map #(wrap-response-object % opts) data))
 
 (defn- get-mftype-key [typ]
   (get {:like :like-of
@@ -67,21 +69,21 @@
 
 (defn by-domain
   "Get webmentions sent to a particular domain."
-  [domain typ page storage]
+  [domain typ page storage opts]
   (cond->> ((:get-by-domain storage) domain)
-    true wrap-response-list
+    true (wrap-response-list opts)
     typ  (filter-response-by-mftype typ)
     page (partition-pages page default-page-size)
     true respond-webmention-list-json))
 
 (defn by-url
   "Get webmention sent to a particular URL."
-  [url typ page storage]
+  [url typ page storage opts]
   (if url
     (cond->> (get-domain url)
       true ((:get-by-domain storage))
       true (filter #(= url (get-in % [:webmention :target])))
-      true wrap-response-list
+      true (wrap-response-list opts)
       typ  (filter-response-by-mftype typ)
       page (partition-pages page default-page-size)
       true respond-webmention-list-json)
@@ -93,15 +95,15 @@
 
 (defn by-id
   "Get one specific webmention by ID."
-  [id storage]
+  [id storage opts]
   (-> ((:get storage) id)
-      wrap-response-object
+      (wrap-response-object opts)
       respond-webmention-json))
 
 (defn by-st-pair
   "Get one specific webmention by source and target."
-  [source target storage]
+  [source target storage opts]
   (-> ((:get storage) source target)
-      wrap-response-object
+      (wrap-response-object opts)
       respond-webmention-json))
 
