@@ -4,6 +4,7 @@
   (:require [clojure.java.io :as io]
             [weepinbell.http.downloader :refer [download-file]]
             [weepinbell.utils.url :refer [valid-http-url?]]
+            [weepinbell.microformats.searcher :refer [use-items search-photo find-h-entry find-h-card]]
             [mf2clj.core :as mf-parser]
             [taoensso.timbre :as timbre]
             [weepinbell.utils.digest :refer [digest]]
@@ -33,22 +34,9 @@
           :opt-un [::microformats ::extra]))
 
 ;;;; utilities
-(def h-entry? #(some #{"h-entry"} (:type %)))
-(def h-card? #(some #{"h-card"} (:type %)))
-
-(defn- find-photo-in-card [h-card]
-  (if-not (some #{"h-card"} (:type h-card)) nil 
-    (let [photo (-> h-card :properties :photo first )]
-      (if (map? photo) (:value photo) photo))))
-
 (defn- find-mf-photo [mf]
-  (let [h-entries (filter h-entry? mf)
-        h-cards (filter h-card? mf)]
-    (cond 
-      h-cards (-> h-cards first find-photo-in-card)
-      h-entries (->> h-cards first 
-                     :properties :author first 
-                     find-photo-in-card))))
+  (or (->> mf use-items find-h-entry search-photo)
+      (->> mf use-items find-h-card search-photo)))
 
 (defn- proxy-mf-photo [raw-photo base-url]
   (if raw-photo
