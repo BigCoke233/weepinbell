@@ -1,8 +1,7 @@
 (ns weepinbell.microformats.reducer
   (:require [weepinbell.microformats.searcher :refer [use-items find-h-card find-h-entry 
                                                       search-photo use-prop]]
-            [clojure.spec.alpha :as s]
-            [taoensso.timbre :as timbre]))
+            [clojure.spec.alpha :as s]))
 
 (s/def ::author 
   (s/keys :req-un [::name]
@@ -24,14 +23,11 @@
         author (or (->> entry (use-prop :author))
                    card)
         photo (or (search-photo author)
-                  (search-photo card))
-        data {:author {:name  (use-prop :name author) 
+                  (search-photo card))]
+    {:author {:name  (use-prop :name author) 
                        :url   (use-prop :url author)
                        :photo photo}
               :type (find-type entry)
               :published (use-prop :published entry)
-              :content (use-prop :content entry)}]
-    (when (not (s/valid? ::reduced-microformats data))
-      (timbre/warn "Microformats weren't properly reduced: " mf))
-    data))
+              :content (use-prop :content entry)}))
 

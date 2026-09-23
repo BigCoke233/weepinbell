@@ -18,7 +18,7 @@
                      :config {:base-url "https://test.com"
                               :allowed-target-domains ["test.com"]}})
 
-(deftest start-processor-test 
+(deftest start-processor-test
   (testing "starting processor and putting a fake webmention in queue"
     (start-processor processor-meta)
     (put! test-wmc {:s "s" :t "t"})

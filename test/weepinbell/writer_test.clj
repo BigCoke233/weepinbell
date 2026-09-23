@@ -20,7 +20,7 @@
       (is (deref updated 10 false)
           (deref update-callbacked 10 false)))))
 
-(deftest writer-test 
+(deftest writer-test
   (testing "Append new webmentin"
     (test-write {:ok? true :new? true :id "1" :new-data {}} :should-append))
   (testing "Update old webmentin"

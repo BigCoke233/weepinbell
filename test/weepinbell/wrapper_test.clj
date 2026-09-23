@@ -4,7 +4,7 @@
             [weepinbell.utils.digest :refer [digest]]
             [weepinbell.processor.wrapper :refer [wrap]]))
 
-(def normal-source-html 
+(def normal-source-html
   "<div class=h-entry>
     <div class=e-content>test</div>
     <div class=\"p-author h-card\">
@@ -12,13 +12,13 @@
     </div>
   </div>")
 
-(deftest happy-path-wrap 
+(deftest happy-path-wrap
   (testing "Wrapping a normal webmention"
-    (let [wrapped (:new-data (wrap {:ok? true 
-           :wm {:s "https://source.net"
-                :t "https://target.org"}
-           :source-html normal-source-html}
-          {:base-url "https://resource.com"}))]
+    (let [wrapped (:new-data (wrap {:ok? true
+                                    :wm {:s "https://source.net"
+                                         :t "https://target.org"}
+                                    :source-html normal-source-html}
+                                   {:base-url "https://resource.com"}))]
       (is (= "https://source.net" (get-in wrapped [:webmention :source])))
       (is (= "https://target.org" (get-in wrapped [:webmention :target])))
       (is (= "b36497f812ccfde649996e21f8df83a6" (get-in wrapped [:webmention :id])))
