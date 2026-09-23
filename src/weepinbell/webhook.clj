@@ -28,8 +28,10 @@
     (keyword? request-fn)
     ((get request-presets request-fn) event-key data)
       ;; use custom fn
-    (symbol? request-fn)
-    (request-fn event-key data)))
+    (fn? request-fn)
+    (request-fn event-key data)
+    ;; 
+    :else (timbre/warn "unknown request-fn type")))
 
 ;; NOTE this looks ugly but it gets the job done
 ;; will use an extensible function if we need to
