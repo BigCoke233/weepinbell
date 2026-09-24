@@ -1,5 +1,5 @@
 when:
-  - event: [release, manual]
+  - event: [release]
 
 steps:
   - name: Build

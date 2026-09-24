@@ -1,0 +1,28 @@
+when:
+  - event: [manual]
+    branch: [master, test_coverage]
+    path:
+      include: ['.woodpecker/run-test.yaml', 'src/**', 'test/**', 'resources/**']
+      exclude: ['*.md', 'docs/**']
+
+steps:
+  - name: run cloverage
+    image: clojure:latest
+    commands:
+      - lein cloverage
+  - name: extract coverage and update README
+    image: babashka/babashka:latest
+    commands:
+      - apt-get update && apt-get install -y --no-install-recommends default-jre-headless
+      - bb -m ci.coverage-badge
+  - name: commit changes
+    image: alpine/git:latest
+    environment:
+      FORGEJO_TOKEN:
+        from_secret: FORGEJO_TOKEN
+    commands:
+      - git config user.name "coverage-bot"
+      - git config user.email "coverage-bot@eltr.ac"
+      - git add README.md
+      - 'git diff --cached --quiet || git commit -m "README: update coverage badge"'
+      - git diff HEAD^ HEAD --quiet README.md || git push "https://eltrac:$${FORGEJO_TOKEN}@codeberg.org/${CI_REPO}.git" "HEAD:${CI_COMMIT_BRANCH}"
