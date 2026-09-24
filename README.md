@@ -6,6 +6,9 @@
 # weepinbell
 
 ![pipeline status](https://ci.codeberg.org/api/badges/16777/status.svg)
+<!--COVERAGE_BADGE:START-->
+<img src="https://img.shields.io/badge/forms%20coverage-77.42%25-green" alt="test coverage 77.42%">
+<!--COVERAGE_BADGE:END-->
 
 > "When hungry, it swallows anything that moves. Its hapless prey is dissolved by strong acids."
 
