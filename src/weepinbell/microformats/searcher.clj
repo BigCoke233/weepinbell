@@ -10,17 +10,19 @@
 ;; use: make sure the data node passed to it is indeed of a specific type, reduce it or return nil otherwise
 
 (defn use-items [data]
-  (cond 
+  (cond
+    (not (coll? data))  nil
+    (empty? data)       nil
     (contains? data :items) (:items data)
-    (vector? data)  data 
-    (list? data)    data
-    :else           nil))
+    (sequential? data)  data
+    :else               nil))
 
 (defn use-prop [property data]
   (cond
-    (contains? data :properties) (first (get-in data [:properties property]))
-    (get data property)       (get data property)
-    :else                     nil))
+    (not (map? data))             nil
+    (contains? data :properties)  (first (get-in data [:properties property]))
+    (get data property)           (first (get data property))
+    :else                         nil))
 
 (defn find-type [mftype items]
   (filter #(some #{mftype} (:type %)) items))
@@ -35,9 +37,10 @@
 (defn search-photo [node]
   (if-let [photo (use-prop :photo node)]
     (if (map? photo) (:value photo) photo)
-    (cond
-      (use-prop :author node) (->> node (use-prop :author)
-                                   search-photo)
-      (use-prop :org node) (->> node (use-prop :author)
-                                search-photo))))
+    (let [author-photo (when-let [card (use-prop :author node)]
+                         (search-photo card))]
+      (if author-photo author-photo
+          (when-let [card (use-prop :org node)]
+            (search-photo card))))))
+
 
