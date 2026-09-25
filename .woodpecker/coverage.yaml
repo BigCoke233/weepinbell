@@ -1,5 +1,5 @@
 when:
-  - event: [manual]
+  - event: [manual, tag]
     branch: [master, test_coverage]
     path:
       include: ['.woodpecker/run-test.yaml', 'src/**', 'test/**', 'resources/**']
