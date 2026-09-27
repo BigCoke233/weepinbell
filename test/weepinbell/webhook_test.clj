@@ -101,3 +101,11 @@
     (is (= (webhook/make-actions nil nil) []))
     (is (= (webhook/make-actions :default []) []))))
 
+(deftest make-hooks-test 
+  (testing "Still need all four event keys even if config has less than four. (:on-create, :on-delete, :on-receive, :on-update)"
+    (let [config {:webhook {:on-create ["https://test.url/"]}}
+          hooks (webhook/make-hooks config)
+          hook-keys (set (keys hooks))
+          expected (set [:on-create :on-delete :on-receive :on-update])]
+      (is (= hook-keys expected)))))
+

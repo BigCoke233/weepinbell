@@ -1,7 +1,5 @@
 (ns weepinbell.webhook
-  "Makes hooks for sending webhook requests to certain endpoints on certain events.
-  This component does not care about specific event types or endpoints.
-  It takes them from its caller (core.clj) and makes a map of hook functions."
+  "Makes hooks for sending webhook requests to certain endpoints on certain events."
   (:require [taoensso.timbre :as timbre]
             [clojure.string :as string]
             [clojure.spec.alpha :as s]
@@ -9,6 +7,9 @@
             [weepinbell.utils.url :refer [valid-http-url? get-domain]]
             [weepinbell.http.client :as client]
             [weepinbell.webhook-presets :refer [request-presets]]))
+
+(s/def ::hooks-map 
+  (s/keys :req-un [::on-create ::on-update ::on-delete ::on-receive]))
 
 ;; utilities
 (defn- send-webhook [url opts]
@@ -72,10 +73,14 @@
                            (make-request event-key data (:request-fn %))))
        doall))
 
+(def empty-hooks 
+  (zipmap [:on-receive :on-create :on-delete :on-update]
+          (repeat 4 (fn [& _]))))
 (defn make-hooks
   "Given config (:webhook and :webhook-request-fn), it makes a vtable of hook functions
   that processor calls when certain events are triggered."
   [config]
+  {:post [(s/valid? ::hooks-map %)]}
   (let [webhooks (:webhook config)
         event-keys (keys webhooks)
         default-request-fn (:webhook-request-fn config)]
@@ -85,5 +90,6 @@
                       event-actions (make-actions
                                      default-request-fn (last webhook))]
                   (partial trigger event-key event-actions))))
-         (zipmap event-keys))))
+         (zipmap event-keys)
+         (merge empty-hooks))))
 
