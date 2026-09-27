@@ -107,5 +107,6 @@
           hooks (webhook/make-hooks config)
           hook-keys (set (keys hooks))
           expected (set [:on-create :on-delete :on-receive :on-update])]
-      (is (= hook-keys expected)))))
+      (is (= hook-keys expected))
+      (is (every? fn? (vals hooks))))))
 
