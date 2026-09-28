@@ -20,7 +20,7 @@ Don't create a PR if it hasn't been discussed and approved in an issue yet!
 4. Use utility functions and `->`/`->>` macros to reduce layers of indentation.
 5. Format your code using [cljfmt](https://github.com/weavejester/cljfmt). (run `lein cljfmt fix`)
 
-### Commits and Pull Requests 
+### :git: Commits and Pull Requests 
 
 1. Use [Scoped Commits](https://scopedcommits.com/).
 2. **Squash** your changes to a few large, standalone commits, and **rebase** `master` before you create a PR. This keeps the history clean.

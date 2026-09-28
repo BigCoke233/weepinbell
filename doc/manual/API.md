@@ -1,8 +1,3 @@
---- 
-weepinbell_version: v0.6.0
-modified: 2026-09-28
----
-
 # HTTP API Referrence
 
 ## Notations used in this page 
@@ -21,12 +16,12 @@ Receiver endpoint is where people send their webmentions to. It's a route that a
 
 | Method | Path                                                  |
 | ------ | ----------------------------------------------------- |
-| `POST` | `/endpoint` (Configurable, see [./configuration.md]) |
+| `POST` | `/endpoint` (Configurable, see [configuration](./configuration.md)) |
 
 | Post Params | Description                                                                                                                                               | Default |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
 | `source`    | Where webmention is coming from. The page that mentioned `target`.                                                                                        | None    |
-| `target`    | Where webmention is sent to. The page that was mentioned by `source`. Target's domain should be in the allow list of receiver. (see [./configuration.md]) | None    |
+| `target`    | Where webmention is sent to. The page that was mentioned by `source`. Target's domain should be in the allow list of receiver. (see [configuration](./configuration.md)) | None    |
 
 The endpoint responds with status code `201` and a `Location` header pointing to the webmention. It'll take some time for weepinbell to verify, process and store webmention. Senders should check the `Location` URL a few minutes after.
 
