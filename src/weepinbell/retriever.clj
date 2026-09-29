@@ -35,7 +35,7 @@
   (let [base-resp {:status 200
                    :headers {"Content-Type" "application/json; charset=utf-8"}
                    :body nil}]
-    (if (and data (some? (:webmention data)))
+    (if data
       (assoc base-resp :body data)
       (-> base-resp
           (assoc :status 404)
