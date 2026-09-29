@@ -25,21 +25,21 @@
   (let [base-resp {:status 200
                    :headers {"Content-Type" "application/json; charset=utf-8"}
                    :body nil}]
-    (if data
+    (if (and data (some? (:webmention data)))
       (assoc base-resp :body data)
       (-> base-resp
-          (assoc :status 400)
-          (assoc :body "The requested webmention does not exist.")))))
+          (assoc :status 404)
+          (assoc :body {:message "The requested webmention does not exist."})))))
 
 (defn- respond-webmention-list-json [data]
   (let [base-resp {:status 200
                    :headers {"Content-Type" "application/json; charset=utf-8"}
                    :body nil}]
-    (if data
+    (if (and data (some? (:webmention data)))
       (assoc base-resp :body data)
       (-> base-resp
-          (assoc :status 400)
-          (assoc :body {:message "The list is empty, something is wrong with your request."})))))
+          (assoc :status 404)
+          (assoc :body {:message "The requested webmention list does not exist."})))))
 
 (defn- wrap-response-object [data opts]
   (let [result {:webmention (:webmention data)}]
