@@ -8,7 +8,6 @@
             [ring.middleware.json :refer [wrap-json-response]]
             [weepinbell.receiver :refer [receive]]
             [weepinbell.retriever :as retriever]
-            [weepinbell.ui :as ui]
             [weepinbell.feed :as feed]))
 
 ;; Define API routes
@@ -22,12 +21,8 @@
        (retriever/by-domain ~'domain ~mention-type ~'page ~storage 
                             {:microformats ~'microformats}))))
 
-(defn api-routes [wmc storage config]
-  (routes
-   (GET "/" [target] (ui/home (:allowed-target-domains config)
-                              (:endpoint config)
-                              target))
-    ;; receiver endpoint
+(defn make-api [wmc storage config]
+  [;; receiver endpoint
    (POST (:endpoint config) [source target]
      (receive {:s source :t target} wmc config))
     ;; query API routes
@@ -47,14 +42,22 @@
    (GET "/feed/:domain" [domain] (feed/rss domain storage config))
     ;; host proxied avatars (microformats photos)
    (route/files "/avatars/" {:root "data/avatars"})
+    ;; frontend
+   (when-let [fe (:frontend config)]
+     (when (= (:source fe) :disk)
+       (route/files "/" {:root (:dir fe)})))
     ;; 404
-   (route/not-found "Not Found")))
+   (route/not-found "Not Found")])
+
+(defn- make-handler [api]
+  (->> api (remove nil?) (apply routes)))
 
 (defn app [wmc storage config]
   (when (= :clojure.spec.alpha/invalid storage)
     (println "Invalid storage. Check your database configuration or submit an issue.")
     (System/exit 1))
-  (-> (api-routes wmc storage config)
+  (-> (make-api wmc storage config)
+      make-handler
       (wrap-resource "static")
       (wrap-defaults api-defaults)
       (wrap-json-response)))

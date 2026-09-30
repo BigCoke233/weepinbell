@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/pico.min.css" rel="stylesheet" type="text/css">
+    <link rel="icon" href="/bellsprout.png">
+    <title>Bellsprout</title>
+    <style>
+    :host(:not([data-theme=dark])), :root:not([data-theme=dark]), [data-theme=light] {
+        --pico-primary: #7EB784;
+        --pico-primary-background: #7EB784;
+        --pico-primary-hover: #6B9A6F;
+        --pico-primary-hover-background: #6B9A6F;
+    }
+    .card {
+        padding: 1rem;
+        border: 1px solid #CFD5E2;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+    .card a {
+        vertical-align: middle;
+        display: inline-block;
+        max-width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+    .card-photo {
+        width: 1rem;
+        height: 1rem;
+        border-radius: 100%;
+    }
+    .card-footer {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    </style>
+  </head>
+  <body>
+    <main class="container" style="max-width: 700px; display: flex; flex-direction: column; justify-content: center; min-height: 100dvh;">
+        <noscript>
+            <p>⚠️ "Send" works without JavaScript; but "Find" won't work and webmention won't display if not enabled.</p>
+        </noscript>
+        <section>
+            <h3>Send or find a webmention</h3>
+            <!-- 
+                For now it sends to /endpoint, oblivious about user's custom endpoint URL
+                Later it will uses weepinbell's sender API.
+            -->
+            <form method="post" action="/endpoint">
+                <div class="grid">
+                    <input id="input-wm-source" name="source" placeholder="source" />
+                    <input id="input-wm-target" name="target" placeholder="target" />
+                </div>
+                <div class="grid">
+                    <button id="find-wm" type="button">Find</button>
+                    <button type="submit">Send</button>
+                </div>
+            </form>
+        </section>
+        <section id="cards"></section>
+        <hr/>
+        <footer class="grid">
+            <small>Bellsprout, frontend of <a href="https://codeberg.org/eltrac/weepinbell">weepinbell</a></small>
+            <small style="text-align: right;"><a href="https://indieweb.org/Webmention">What is Webmention?</a></small>
+        </footer>
+    </main>
+    <script src="js/compiled/bellsprout.js" type="text/javascript"></script>
+  </body>
+</html>

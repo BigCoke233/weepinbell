@@ -17,3 +17,5 @@ pom.xml.asc
 /config.edn
 /data/webmention.edn
 /data/avatars
+/bellsprout/.clj-kondo/.cache/v1
+/bellsprout/.lsp/.cache
