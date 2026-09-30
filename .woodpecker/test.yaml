@@ -4,9 +4,10 @@ when:
     path:
       include: ['.woodpecker/run-test.yaml', 'src/**', 'test/**', 'resources/**']
       exclude: ['*.md', 'docs/**']
+  - event: [pull_request]
 
 steps:
-  - name: run tests
+  - name: run clojure tests
     image: clojure:latest
     commands:
       - lein test
