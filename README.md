@@ -8,7 +8,9 @@
 <p>
 <img src="https://img.shields.io/badge/clojure-1.12.6-brightgreen?logo=clojure" alt="clojure version">
 <!--COVERAGE_BADGE:START--><img src="https://img.shields.io/badge/coverage-71.17%25-green" alt="test coverage 71.17%"><!--COVERAGE_BADGE:END-->
-<a href="https://ci.codeberg.org/repos/16777"><img src="https://ci.codeberg.org/api/badges/16777/status.svg" alt="pipeline status"></a>
+<a href="https://ci.codeberg.org/repos/16777" target="_blank">
+  <img src="https://ci.codeberg.org/api/badges/16777/status.svg?workflow=test" alt="status-badge" />
+</a>
 </p>
 
 > "When hungry, it swallows anything that moves. Its hapless prey is dissolved by strong acids."
