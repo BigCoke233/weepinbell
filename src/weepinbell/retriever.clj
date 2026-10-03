@@ -51,7 +51,7 @@
       (:extra data)
       (assoc :extra (:extra data)))))
 
-(defn- wrap-response-list [data opts]
+(defn- wrap-response-list [opts data]
   (map #(wrap-response-object % opts) data))
 
 (defn- get-mftype-key [typ]
