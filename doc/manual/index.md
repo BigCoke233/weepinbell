@@ -5,6 +5,7 @@
 1. [Installation](./installation.md)
 2. [Configuration](./configuration.md)
 3. [API Referrence](./API.md)
+4. [Migration](./migration.md)
 
 ## Ask a question 
 
