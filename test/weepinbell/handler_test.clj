@@ -4,45 +4,33 @@
             [weepinbell.handler :refer [app]]
             [cheshire.core :refer [parse-string]]))
 
-(defmacro test-mention-list-by-domain-route [mftype]
-  `(testing (str "/api/" ~mftype "/:domain route")
-     (let [~'response ((app nil {:get-by-domain (fn [~'_]
+(deftest api-routes-test
+  (testing "/api/mentions/:domain route"
+     (let [response ((app nil {:get-by-domain (fn [_]
                                                   [{:webmention {:source ""
                                                                  :target ""
                                                                  :id ""
                                                                  :modified 0}}])}
                             {})
-                       (mock/request :get (str "/api/" ~mftype "/www.example")))]
-       (is (= (:status ~'response) 200))
-       (is (some? (:body ~'response))))))
+                       (mock/request :get "/api/mentions/www.example"))]
+       (is (= (:status response) 200))
+       (is (some? (:body response)))))
 
-(defmacro test-mention-list-by-url-route [mftype]
-  `(testing (str "/api/" ~mftype "?url= route")
-     (let [~'response ((app nil 
+  (testing "/api/mentions?url= route"
+     (let [response ((app nil 
                             {:get-by-domain
-                             (fn [~'_]
+                             (fn [_]
                                 [{:webmention {:source "https://source.net"
                                                :target "http://localhost"
                                                :id "123456789123456789"
                                                :modified 0}
                                   :microformats {:type :like-of}}])}
                             {})
-                       (mock/request :get (str "/api/" ~mftype "?url=http://localhost")))]
-       (is (= (:status ~'response) 200))
-       (is (some? (:body ~'response)))
-       (when-not (-> ~'response :body parse-string empty?)
-         (is (-> ~'response :body parse-string first (get "webmention") some?))))))
-
-(deftest api-routes-test
-  (test-mention-list-by-domain-route "mentions")
-  (test-mention-list-by-domain-route "likes")
-  (test-mention-list-by-domain-route "reposts")
-  (test-mention-list-by-domain-route "replies")
-
-  (test-mention-list-by-url-route "mentions")
-  (test-mention-list-by-url-route "likes")
-  (test-mention-list-by-url-route "reposts")
-  (test-mention-list-by-url-route "replies")
+                       (mock/request :get "/api/mentions?url=http://localhost"))]
+       (is (= (:status response) 200))
+       (is (some? (:body response)))
+       (when-not (-> response :body parse-string empty?)
+         (is (-> response :body parse-string first (get "webmention") some?)))))
 
   (testing "/api/mention/:id"
     (let [response ((app nil {:get (fn [_]

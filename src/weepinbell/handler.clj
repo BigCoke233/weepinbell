@@ -12,26 +12,22 @@
 
 ;; Define API routes
 
-(defmacro defmention-routes [base-path mention-type storage]
-  `(context ~base-path []
-     (GET "/" [~'url ~'page ~'microformats]
-       (retriever/by-url ~'url ~mention-type ~'page ~storage 
-                         {:microformats ~'microformats}))
-     (GET "/:domain" [~'domain ~'page ~'microformats]
-       (retriever/by-domain ~'domain ~mention-type ~'page ~storage 
-                            {:microformats ~'microformats}))))
-
 (defn make-api [wmc storage config]
   [;; receiver endpoint
    (POST (:endpoint config) [source target]
      (receive {:s source :t target} wmc config))
     ;; query API routes
    (context "/api" []
-      ;; query webmention list
-     (defmention-routes "/mentions" nil storage)
-     (defmention-routes "/likes" :like storage)
-     (defmention-routes "/reposts" :repost storage)
-     (defmention-routes "/replies" :reply storage)
+     ;; query webmention list
+     (context "/mentions" [page microformats mftype]
+       (GET "/" [url]
+         (retriever/by-url url page storage 
+                           {:microformats microformats
+                            :type mftype}))
+       (GET "/:domain" [domain]
+         (retriever/by-domain domain page storage 
+                              {:microformats microformats
+                               :type mftype})))
       ;; query one specific webmention
      (context "/mention" [microformats]
        (GET "/:id" [id] (retriever/by-id id storage 

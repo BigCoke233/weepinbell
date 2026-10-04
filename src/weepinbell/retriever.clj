@@ -54,37 +54,28 @@
 (defn- wrap-response-list [opts data]
   (map #(wrap-response-object % opts) data))
 
-(defn- get-mftype-key [typ]
-  (get {:like :like-of
-        :repost :repost-of
-        :reply :in-reply-to
-        :rsvp :rsvp} typ))
-
 (defn- filter-response-by-mftype [typ data]
-  (when typ
-    (filter #(= (-> % :microformats :type)
-                (get-mftype-key typ))
-            data)))
+  (filter #(= typ (get-in % [:microformats :type])) data))
 ;; end utilities
 
 (defn by-domain
   "Get webmentions sent to a particular domain."
-  [domain typ page storage opts]
+  [domain page storage opts]
   (cond->> ((:get-by-domain storage) domain)
     true (wrap-response-list opts)
-    typ  (filter-response-by-mftype typ)
+    (:type opts) (filter-response-by-mftype (:type opts))
     page (partition-pages page default-page-size)
     true respond-webmention-list-json))
 
 (defn by-url
   "Get webmention sent to a particular URL."
-  [url typ page storage opts]
+  [url page storage opts]
   (if url
     (cond->> (get-domain url)
       true ((:get-by-domain storage))
       true (filter #(= url (get-in % [:webmention :target])))
       true (wrap-response-list opts)
-      typ  (filter-response-by-mftype typ)
+      (:type opts) (filter-response-by-mftype (:type opts))
       page (partition-pages page default-page-size)
       true respond-webmention-list-json)
     ;; if no url query is passed
