@@ -9,23 +9,56 @@
 ;; search: searching for s specific key in a map
 ;; use: make sure the data node passed to it is indeed of a specific type, reduce it or return nil otherwise
 
+(defn- get-key [data k]
+  (cond
+    (not (map? data))  nil
+    (contains? data k) (get data k)
+    (keyword? k)       (get data (name k))
+    (string? k)        (get data (keyword k))
+    :else              nil))
+
+(defn- has-key? [data k]
+  (cond
+    (not (map? data))  false
+    (contains? data k) true
+    (keyword? k)       (contains? data (name k))
+    (string? k)        (contains? data (keyword k))
+    :else              false))
+
+;; a property value is usually a vector; unwrap it but leave scalars and
+;; unwrapped maps as they are.
+(defn- first-value [value]
+  (if (and (coll? value) (not (map? value)))
+    (first value)
+    value))
+
+(defn- type-vector [item]
+  (let [t (get-key item :type)]
+    (cond
+      (nil? t)     []
+      (coll? t)    t
+      (string? t)  [t]
+      (keyword? t) [(name t)]
+      :else        [t])))
+
 (defn use-items [data]
   (cond
-    (not (coll? data))  nil
-    (empty? data)       nil
-    (contains? data :items) (:items data)
-    (sequential? data)  data
-    :else               nil))
+    (not (coll? data))      nil
+    (empty? data)           nil
+    (has-key? data :items)  (get-key data :items)
+    (sequential? data)      data
+    (has-key? data :type)   [data]
+    :else                   nil))
 
 (defn use-prop [property data]
   (cond
-    (not (map? data))             nil
-    (contains? data :properties)  (first (get-in data [:properties property]))
-    (get data property)           (first (get data property))
-    :else                         nil))
+    (not (map? data))            nil
+    (has-key? data :properties)  (first-value (get-key (get-key data :properties) property))
+    (has-key? data property)     (first-value (get-key data property))
+    :else                        nil))
 
 (defn find-type [mftype items]
-  (filter #(some #{mftype} (:type %)) items))
+  (filter #(some #{mftype} (type-vector %)) items))
 (def find-h-entries (partial find-type "h-entry"))
 (def find-h-cards (partial find-type "h-card"))
 
@@ -36,11 +69,9 @@
 
 (defn search-photo [node]
   (if-let [photo (use-prop :photo node)]
-    (if (map? photo) (:value photo) photo)
+    (if (map? photo) (get-key photo :value) photo)
     (let [author-photo (when-let [card (use-prop :author node)]
                          (search-photo card))]
       (if author-photo author-photo
           (when-let [card (use-prop :org node)]
             (search-photo card))))))
-
-
