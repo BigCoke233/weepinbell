@@ -1,7 +1,8 @@
 (ns weepinbell.handler-test
   (:require [clojure.test :refer [testing is deftest]]
             [ring.mock.request :as mock]
-            [weepinbell.handler :refer [app]]))
+            [weepinbell.handler :refer [app]]
+            [cheshire.core :refer [parse-string]]))
 
 (defmacro test-mention-list-by-domain-route [mftype]
   `(testing (str "/api/" ~mftype "/:domain route")
@@ -12,18 +13,25 @@
                                                                  :modified 0}}])}
                             {})
                        (mock/request :get (str "/api/" ~mftype "/www.example")))]
-       (is (= (:status ~'response) 200)))))
+       (is (= (:status ~'response) 200))
+       (is (some? (:body ~'response))))))
 
 (defmacro test-mention-list-by-url-route [mftype]
   `(testing (str "/api/" ~mftype "?url= route")
-     (let [~'response ((app nil {:get-by-domain (fn [~'_]
-                                                  [{:webmention {:source ""
-                                                                 :target "http://localhost/"
-                                                                 :id ""
-                                                                 :modified 0}}])}
+     (let [~'response ((app nil 
+                            {:get-by-domain
+                             (fn [~'_]
+                                [{:webmention {:source "https://source.net"
+                                               :target "http://localhost"
+                                               :id "123456789123456789"
+                                               :modified 0}
+                                  :microformats {:type :like-of}}])}
                             {})
                        (mock/request :get (str "/api/" ~mftype "?url=http://localhost")))]
-       (is (= (:status ~'response) 200)))))
+       (is (= (:status ~'response) 200))
+       (is (some? (:body ~'response)))
+       (when-not (-> ~'response :body parse-string empty?)
+         (is (-> ~'response :body parse-string first (get "webmention") some?))))))
 
 (deftest api-routes-test
   (testing "homepage route"
