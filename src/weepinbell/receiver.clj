@@ -1,18 +1,9 @@
 (ns weepinbell.receiver
   "Handler of route /endpoint or any other route the user configured. 
   Receiver receives Webmention request (a source and a target); verify the request; return error message if any; push Webmention into webbmention channel for processor to take."
-  (:require [clojure.string :as string]
-            [clojure.core.async :refer [put!]]
-            [weepinbell.utils.url :refer [get-domain valid-http-url?]]
+  (:require [clojure.core.async :refer [put!]]
+            [weepinbell.utils.url :refer [get-domain valid-http-url? normalize url=]]
             [weepinbell.utils.digest :refer [digest]]))
-
-;; utilities
-(defn- remove-anchor
-  "Takes a URL string. Removes anchor (#...)"
-  [url]
-  (when (string? url)
-    (string/replace url #"#.*" "")))
-;; end utilities
 
 ;; validation and verification
 
@@ -23,7 +14,7 @@
   (let [target-domain (get-domain t)]
     (some #{target-domain} allow-list)))
 
-(defn- verify-request
+(defn- check-request
   "Verify source and target based on URLs, return error message (string) if any. Return nil if none."
   [source target opts]
   (cond
@@ -33,7 +24,7 @@
     "Invalid URLs. Source and target have to be valid http(s) urls."
     ;; The receiver MUST reject the request
     ;; if the source URL is the same as the target URL.
-    (= source target)
+    (url= source target)
     "Source and target are identical."
     ;; The receiver only accetps webmentions on behalf of configured domains.
     (not (validate-target target opts))
@@ -46,14 +37,12 @@
   Return JSON response of pending notification, rejection or error."
   [wm wmc config]
   (let [{:keys [s t]} wm
-        source (remove-anchor s)
-        target (remove-anchor t)
+        source (normalize s)
+        target (normalize t)
         new-wm {:s source :t target}
-        allowed-domains (:allowed-target-domains config)]
+        allowlist (:allowed-target-domains config)]
      ;; Request verification
-    (if-let [error-msg (verify-request source
-                                       target
-                                       allowed-domains)]
+    (if-let [error-msg (check-request source target allowlist)]
        ;; respond if request verification failed
       {:status 400
        :headers {"Content-Type" "application/json; charset=utf-8"}

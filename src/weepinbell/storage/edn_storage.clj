@@ -3,7 +3,7 @@
   Entry function is use-store, which makes a valid storage vtable."
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [weepinbell.utils.url :refer [get-domain get-target get-path]]
+            [weepinbell.utils.url :refer [get-domain get-target get-path url=]]
             [clojure.string :refer [join]]))
 
 (defn unload-data
@@ -14,8 +14,8 @@
 
 ;; predicates used for filtering webmention
 (defn- st-pair-equal-pred [source target wm]
-  (and (= source (get-in wm [:webmention :source]))
-       (= target (get-in wm [:webmention :target]))))
+  (and (url= source (get-in wm [:webmention :source]))
+       (url= target (get-in wm [:webmention :target]))))
 (defn- id-equal-pred [id wm]
   (= id (get-in wm [:webmention :id])))
 (defn- get-predicate [source target]

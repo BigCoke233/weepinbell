@@ -17,7 +17,8 @@
                  [cheshire "6.2.0"]
                  [ac.eltr/mf2clj "0.0.3"]
                  [com.taoensso/timbre "6.8.0"]
-                 [clj-rss "0.4.0"]]
+                 [clj-rss "0.4.0"]
+                 [org.nibor.autolink/autolink "0.12.0"]]
   :managed-dependencies [[org.clojure/tools.reader "1.6.0"]
                          [org.ow2.asm/asm "9.8"]] 
   :profiles {:uberjar {:aot :all}

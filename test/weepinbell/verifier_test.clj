@@ -83,6 +83,14 @@
                            "/target" {:status 200}]
       (is (not (test-verify "http://localhost:38888/source"
                             "http://localhost:38888/target")))))
+  (testing "unsupported content type"
+    (with-webmention :new ["/source" {:status 200
+                                      :headers {"Content-Type" "application/json"}
+                                      :body "{\"message\": \"I mentioned alice's other post\n https://alice.blog/article/efg\"}"}
+                           "/target" {:status 200
+                                      :headers {"Content-Type" "text/plain"}}]
+      (is (not (test-verify "http://localhost:38888/source"
+                            "http://localhost:38888/target")))))
   (testing "responses have no status"
     (with-webmention :new ["/source" {:status nil
                                       :headers {"Content-Type" "text/plain"}

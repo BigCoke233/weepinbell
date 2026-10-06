@@ -13,7 +13,7 @@
 
 (ns weepinbell.receiver-test
   (:require [clojure.test :refer [deftest testing is]]
-            [clojure.core.async :refer [chan poll! <!!]]
+            [clojure.core.async :refer [chan poll!]]
             [weepinbell.receiver :refer [receive]]))
 
 ;; utilities
@@ -40,6 +40,9 @@
                   ["https://bob.blog/post/123" "ftp://alice.blog/file/x" (wrap-400-msg :invalid-url)]
                   ;; identical URLs 
                   ["https://alice.blog/article/abc" "https://alice.blog/article/abc" (wrap-400-msg :identical)]
+                  ["https://alice.blog/article/abc/" "https://alice.blog/article/abc" (wrap-400-msg :identical)]
+                  ["https://alice.blog/article/abc#anchor" "https://alice.blog/article/abc" (wrap-400-msg :identical)]
+                  ["https://alice.blog/article/abc?a=1&b=2" "https://alice.blog/article/abc?b=2&a=1" (wrap-400-msg :identical)]
                   ;; domain not allowed 
                   ["https://bob.blog/post/123" "https://chris.blog/archive/xxx" (wrap-400-msg :domain-not-allowed)]])
 ;; end define test cases
@@ -98,39 +101,3 @@
          doall)))
 ;; end in-queue test
 
-;; anchor removing test
-(deftest anchor-remove-test
-  (testing "Receiver should remove anchor in URL before pushing it into queue"
-    (let [cases [{:has    ["https://bob.blog/page/1#heading-a"
-                           "https://alice.blog/"]
-                  :expects ["https://bob.blog/page/1"
-                            "https://alice.blog/"]}
-                 {:has    ["https://bob.blog/page/1"
-                           "https://alice.blog/archive/a#heading-1"]
-                  :expects ["https://bob.blog/page/1"
-                            "https://alice.blog/archive/a"]}
-                 {:has    ["https://bob.blog/page/1#heading-a"
-                           "https://alice.blog/archive/a#heading-1"]
-                  :expects ["https://bob.blog/page/1"
-                            "https://alice.blog/archive/a"]}
-                 {:has    ["https://bob.blog/page/1"
-                           "https://alice.blog/archive/a"]
-                  :expects ["https://bob.blog/page/1"
-                            "https://alice.blog/archive/a"]}
-                 {:has    ["https://bob.blog/?page=1&key=value#heading-1"
-                           "https://alice.blog/archive/a"]
-                  :expects ["https://bob.blog/?page=1&key=value"
-                            "https://alice.blog/archive/a"]}]]
-      (->> cases
-           (map (fn [case]
-                  (let [hs (get-in case [:has 0])
-                        ht (get-in case [:has 1])
-                        es (get-in case [:expects 0])
-                        et (get-in case [:expects 1])
-                        wm {:s hs :t ht}
-                        test-queue (chan)]
-                    (receive wm test-queue {:allowed-target-domains ["alice.blog"]})
-                    (let [{:keys [s t]} (<!! test-queue)]
-                      (is (= s es))
-                      (is (= t et))))))
-           doall))))

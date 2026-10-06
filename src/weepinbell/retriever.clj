@@ -1,7 +1,7 @@
 (ns weepinbell.retriever
   "Handler of routes /api/mention/:id, /api/mentions/...
   Retriever gets webmention form storage and wraps it in a response."
-  (:require [weepinbell.utils.url :refer [get-domain]]
+  (:require [weepinbell.utils.url :refer [get-domain url=]]
             [weepinbell.microformats.reducer :refer [reduce-mf]]))
 
 (def default-page-size 12)
@@ -73,7 +73,7 @@
   (if url
     (cond->> (get-domain url)
       true ((:get-by-domain storage))
-      true (filter #(= url (get-in % [:webmention :target])))
+      true (filter #(url= url (get-in % [:webmention :target])))
       true (wrap-response-list opts)
       (:type opts) (filter-response-by-mftype (:type opts))
       page (partition-pages page default-page-size)
