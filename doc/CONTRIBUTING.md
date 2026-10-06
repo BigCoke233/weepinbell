@@ -43,10 +43,10 @@ To start REPL:
 lein repl 
 ```
 
-To start a dev server: 
+To start a dev server (and an REPL): 
 
 ``` 
-lein ring server 
+lein dev
 ```
 
 To run project: 

@@ -19,39 +19,20 @@
                  [com.taoensso/timbre "6.8.0"]
                  [clj-rss "0.4.0"]]
   :managed-dependencies [[org.clojure/tools.reader "1.6.0"]
-                         [org.ow2.asm/asm "9.8"]]
+                         [org.ow2.asm/asm "9.8"]] 
   :profiles {:uberjar {:aot :all}
              :test {:dependencies [[ring/ring-mock "0.6.2"]]}
-             :cljsbuild {:dependencies [[org.clojure/clojurescript "1.11.132"]]}}
+             :dev {:source-paths ["dev"]
+                   :repl-options {:init-ns user
+                                  :init (do (start) (watch))}
+                   :dependencies [[io.github.tonsky/clj-reload "1.0.0"]
+                                  [com.nextjournal/beholder "1.0.3"]]}}
+  :aliases {"dev" ["with-profile" "+dev" "repl"]}
   :main ^:skip-aot weepinbell.core
   ;; plugins
   :plugins [[lein-ancient "0.6.15"]
-            [lein-ring "0.12.6"]
             ;; latest commits of cloverage were "co-authored" by Claude
             ;; we'll keep it on this version for now
             [lein-cloverage "1.2.2"] 
-            [dev.weavejester/lein-cljfmt "0.16.5"]
-            ;; for frontend
-            [lein-cljsbuild "1.1.8"]]
-  :ring {:handler weepinbell.handler/app}
-  :cljsbuild
-  {:builds
-   {:dev
-    {:source-paths ["src-fe"]
-     :compiler
-     {:main bellsprout.core
-      :output-to "resources/public/js/main.js"
-      :output-dir "resources/public/js/out"
-      :asset-path "js/out"
-      :optimizations :none
-      :source-map true
-      :target :browser}}
-    :prod
-    {:source-paths ["src-fe"]
-     :compiler
-     {:main bellsprout.core
-      :output-to "resources/public/js/main.js"
-      :output-dir "target/cljsbuild"
-      :optimizations :advanced
-      :pretty-print false}}}})
+            [dev.weavejester/lein-cljfmt "0.16.5"]])
 
