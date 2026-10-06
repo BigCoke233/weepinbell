@@ -1,6 +1,6 @@
 (ns weepinbell.processor.starter
   (:require [clojure.spec.alpha :as s]
-            [clojure.core.async :refer [go-loop <!]]
+            [clojure.core.async :refer [go-loop <! put!]]
             [taoensso.timbre :as timbre]
             [weepinbell.utils.digest :refer [digest]]
             [weepinbell.storage.spec]
@@ -23,17 +23,24 @@
   [metadata]
   {:pre [(s/valid? ::processor-meta metadata)]}
   (let [{:keys [wmc callbacks storage config]} metadata]
+    ;; start processing loop
     (go-loop [wm (<! wmc)]
-      (let [{:keys [s t]} wm
+      (let [{:keys [s t stop?]} wm
             id (digest (str s t))]
-        (timbre/info "webmention found in queue, processing.")
-        ((:on-receive callbacks) {:webmention {:id id :source s :target t}})
-        (-> {:id id
-             :wm wm 
-             :ok? true}
-            (check-storage storage)
-            verify
-            (clean storage callbacks)
-            (wrap config)
-            (write storage callbacks))
-        (recur (<! wmc))))))
+        (if stop? 
+          (timbre/warn "processor stopped on stop signal.")
+          ;; process found webmention
+          (do
+            (timbre/info "webmention found in queue, processing.")
+            ((:on-receive callbacks) {:webmention {:id id :source s :target t}})
+            (-> {:id id
+                 :wm wm 
+                 :ok? true}
+                (check-storage storage)
+                verify
+                (clean storage callbacks)
+                (wrap config)
+                (write storage callbacks))
+            (recur (<! wmc))))))
+    ;; return a function that stops the loop 
+    (fn [] (put! wmc {:stop? true}))))
