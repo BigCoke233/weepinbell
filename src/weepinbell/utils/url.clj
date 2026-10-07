@@ -42,13 +42,16 @@
   "Normalize URL by removing trailing slashes; removing anchor;
    replacing . and ..; ordering query params."
   [^String url]
-  (let [base   (URI. url)
+  (try 
+    (let [base   (URI. url)
         scheme (.getScheme base)
         auth   (.getAuthority base)
         path   (normlaize-path (.getPath base))
         query  (normalize-query (.getQuery base))]
-    (str scheme "://" auth path
-      (when (seq query) (str "?" query)))))
+      (str scheme "://" auth path
+        (when (seq query) (str "?" query))))
+    ;; fall back to original string if syntax is invalid
+    (catch URISyntaxException _ url)))
 
 (defn url= [& urls]
   (apply = (map normalize urls)))
