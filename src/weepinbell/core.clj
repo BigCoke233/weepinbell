@@ -1,34 +1,25 @@
 (ns weepinbell.core
   "Main component that loads resources and start other components."
-  (:require [org.httpkit.server :refer [run-server]]
-            [clojure.spec.alpha :as s]
-            [weepinbell.processor.starter :refer [start-processor]]
-            [weepinbell.handler :refer [app]]
+  (:require [clojure.spec.alpha :as s]
+            [weepinbell.storage.spec]
             [weepinbell.config :refer [load-config]]
             [weepinbell.webhook :as webhook]
             [weepinbell.storage.edn-storage :as edn]
             [clojure.core.async :refer [chan >!! <!!]]
             [taoensso.timbre :as timbre]
-            [weepinbell.storage.spec])
+            ;; two main subsystems' facades
+            [weepinbell.processor.facade :refer [start-processor]]
+            [weepinbell.webserver.facade :refer [start-webserver]])
   (:import (sun.misc Signal SignalHandler))
-  (:gen-class)) ;; Essential for "lein uberjar"
+  (:gen-class))
 
 ; Handle startup; Callable from REPL
-;; processor starter is in ns weepinbell.proceesor.starter
-;; webserver starter is defined here, temporarily
-(defn start-webserver
-  "Starts web server. Returns a function that stops the server."
-  [server-meta]
-  (let [{:keys [wmc store config]} server-meta
-        port (Integer/parseInt (or (:port config) (System/getenv "PORT") "3000"))]
-    (timbre/info "starting web server, listening on" port)
-    (run-server (app wmc store config) {:port port})))
-
 ;; start whole system
 (defn start-system
   "Start webmention processor and webserver in the background.
    Returns a function that performs a graceful shutdown."
   []
+  {:post [fn?]}
   (let [;; webmention channel 
         ;; Receiver puts webmention requests in. 
         ;; Processor takes them out.

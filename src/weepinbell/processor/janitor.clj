@@ -1,7 +1,7 @@
 (ns weepinbell.processor.janitor
   (:require [taoensso.timbre :as timbre]))
 
-(defn clean 
+(defn clean
   [data storage callbacks]
   (when (:ok? data)
     (let [{:keys [verified? new? id old-data]} data]

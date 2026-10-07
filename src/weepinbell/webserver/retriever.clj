@@ -1,4 +1,4 @@
-(ns weepinbell.retriever
+(ns weepinbell.webserver.retriever
   "Handler of routes /api/mention/:id, /api/mentions/...
   Retriever gets webmention form storage and wraps it in a response."
   (:require [weepinbell.utils.url :refer [get-domain url=]]
@@ -45,8 +45,8 @@
   (let [result {:webmention (:webmention data)}]
     (cond-> result
       (not (empty? (:microformats data)))
-      (assoc :microformats (cond-> data 
-                             true :microformats 
+      (assoc :microformats (cond-> data
+                             true :microformats
                              (not= "raw" (:microformats opts)) reduce-mf))
       (:extra data)
       (assoc :extra (:extra data)))))

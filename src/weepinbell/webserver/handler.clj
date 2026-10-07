@@ -1,4 +1,4 @@
-(ns weepinbell.handler
+(ns weepinbell.webserver.handler
   "Handler define routes and wrap responses. It pass request to other specific handlers.
   Other handlers are receiver, retriever and feed."
   (:require [compojure.core :refer [routes POST GET context]]
@@ -6,13 +6,14 @@
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
             [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.json :refer [wrap-json-response]]
-            [weepinbell.receiver :refer [receive]]
-            [weepinbell.retriever :as retriever]
-            [weepinbell.feed :as feed]))
+            [weepinbell.webserver.receiver :refer [receive]]
+            [weepinbell.webserver.retriever :as retriever]
+            [weepinbell.webserver.feed :as feed]))
 
-;; Define API routes
-
-(defn make-api [wmc storage config]
+(defn- make-api
+  "Receives webmention channel, storage vtable and config map.
+   Returns a vector of compojure route handlers. Some may be nil."
+  [wmc storage config]
   [;; receiver endpoint
    (POST (:endpoint config) [source target]
      (receive {:s source :t target} wmc config))
@@ -21,16 +22,16 @@
      ;; query webmention list
      (context "/mentions" [page microformats mftype]
        (GET "/" [url]
-         (retriever/by-url url page storage 
+         (retriever/by-url url page storage
                            {:microformats microformats
                             :type mftype}))
        (GET "/:domain" [domain]
-         (retriever/by-domain domain page storage 
+         (retriever/by-domain domain page storage
                               {:microformats microformats
                                :type mftype})))
       ;; query one specific webmention
      (context "/mention" [microformats]
-       (GET "/:id" [id] (retriever/by-id id storage 
+       (GET "/:id" [id] (retriever/by-id id storage
                                          {:microformats microformats}))
        (GET "/" [source target] (retriever/by-st-pair source target storage
                                                       {:microformats microformats}))))
@@ -45,10 +46,16 @@
     ;; 404
    (route/not-found "Not Found")])
 
-(defn- make-handler [api]
+(defn- make-handler
+  "Receive a vector of handlers. Remove nil elements.
+   Combine them in one handler using compojure routes."
+  [api]
   (->> api (remove nil?) (apply routes)))
 
-(defn app [wmc storage config]
+(defn app
+  "Receive webmention channel, storage vtable and config map. 
+   Returns an app handler."
+  [wmc storage config]
   (when (= :clojure.spec.alpha/invalid storage)
     (println "Invalid storage. Check your database configuration or submit an issue.")
     (System/exit 1))

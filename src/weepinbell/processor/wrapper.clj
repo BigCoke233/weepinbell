@@ -72,13 +72,13 @@
       (timbre/warn "webmention" id "data corrupted before writing to storage"))
     data))
 
-(defn wrap 
+(defn wrap
   [data config]
   (when (:ok? data)
     (let [{:keys [source-html wm id]} data
           {:keys [s t]} wm]
       (-> data
-          (assoc :new-data 
+          (assoc :new-data
                  (wrap-webmention id source-html s t (:base-url config)))
           (assoc :ok true)))))
 

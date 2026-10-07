@@ -10,18 +10,18 @@
             [taoensso.timbre :as timbre]))
 
 (def text-content-types #{"text/html" "text/plain"})
-(defn- match-content-type? 
+(defn- match-content-type?
   "Return true if "
   [types headers]
   (when-let [content-type (:content-type headers)]
     (-> content-type (split #";") first trim lower-case types)))
-(def text-content-types? 
+(def text-content-types?
   (partial match-content-type? text-content-types))
 
-(defn- includes-url? 
+(defn- includes-url?
   "Return true if text includes a certain URL. URLs are normalized before comparison."
   [text url]
-  (some #(url/url= % url) 
+  (some #(url/url= % url)
         (filter url/valid-http-url? (url/extract text))))
 
 (defn- verify-mention
@@ -64,7 +64,7 @@
           source-resp (client/get s {:headers {"Range" "bytes=0-1048575"}})
           target-resp (client/head t)
           verified? (verify-mention id @source-resp @target-resp s t)]
-      (-> data 
+      (-> data
           (assoc :verified? verified?)
           (assoc :source-html (:body @source-resp))
           ;; don't continue if new webmention request is not verified
