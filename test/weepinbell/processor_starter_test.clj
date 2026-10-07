@@ -1,7 +1,7 @@
 (ns weepinbell.processor-starter-test
   (:require [clojure.test :refer [deftest testing is]]
             [clojure.core.async :refer [chan put!]]
-            [weepinbell.processor.starter :refer [start-processor]]))
+            [weepinbell.processor.facade :refer [start-processor]]))
 
 (defn- test-processor [test-wmc received?]
   {:pre [(instance? clojure.lang.IPending received?)]}
