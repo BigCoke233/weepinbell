@@ -37,6 +37,26 @@
        (when-not (-> response :body parse-string empty?)
          (is (-> response :body parse-string first (get "webmention") some?)))))
 
+  (testing "/api/count/:domain route"
+     (let [response ((test-app nil {:get-by-domain (fn [_]
+                                                  [{:webmention {:source ""
+                                                                 :target ""
+                                                                 :id ""
+                                                                 :modified 0}}])}
+                            {})
+                       (mock/request :get "/api/count/www.example.com"))]
+       (is (= (:status response) 200))
+       (is (= 1 (-> response :body parse-string (get "count") Long.)))))
+
+  (testing "/api/count?url= route"
+     (let [response ((test-app nil 
+                            {:get-by-domain
+                             (fn [_] [])}
+                            {})
+                       (mock/request :get "/api/count?url=http://localhost"))]
+       (is (= (:status response) 200))
+       (is (= 0 (-> response :body parse-string (get "count") Long.)))))
+
   (testing "/api/mention/:id"
     (let [response ((test-app nil {:get (fn [_]
                                      {:webmention {:source ""

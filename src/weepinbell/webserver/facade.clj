@@ -6,7 +6,8 @@
             ;; services
             [weepinbell.webserver.receiver :as receiver]
             [weepinbell.webserver.retriever :as retriever]
-            [weepinbell.webserver.feed :as feed]))
+            [weepinbell.webserver.feed :as feed]
+            [weepinbell.webserver.counter :as counter]))
 
 (s/def ::server-meta
   (s/keys :req-un [::wmc ::store ::config]))
@@ -18,7 +19,9 @@
    :retrieve-by-domain retriever/by-domain
    :retrieve-by-url retriever/by-url
    :retrieve-by-id retriever/by-id 
-   :retrieve-by-pair retriever/by-st-pair})
+   :retrieve-by-pair retriever/by-st-pair
+   :count-by-domain counter/by-domain
+   :count-by-url counter/by-url})
 
 (defn start-webserver
   "Starts web server. Returns a function that stops the server."

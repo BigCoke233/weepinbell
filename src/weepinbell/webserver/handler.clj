@@ -8,11 +8,12 @@
             [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.json :refer [wrap-json-response]]))
 
-(s/def ::services 
+(s/def ::services
   (s/and (s/keys :req-un [::receive ::retrieve-by-url ::retrieve-by-domain
-                          ::retrieve-by-id ::retrieve-by-pair ::gen-feed])
+                          ::retrieve-by-id ::retrieve-by-pair ::gen-feed
+                          ::count-by-domain ::count-by-url])
          #(every? fn? (vals %))))
-(s/def ::api-meta 
+(s/def ::api-meta
   (s/keys :req-un [::wmc ::store ::config ::services]))
 
 (defn- make-api
@@ -23,39 +24,45 @@
    :post [sequential?]}
   (let [{:keys [wmc store config services]} api-meta
         {:keys [receive retrieve-by-url retrieve-by-domain
-                retrieve-by-id retrieve-by-pair 
-                gen-feed]} services]
+                retrieve-by-id retrieve-by-pair
+                count-by-domain count-by-url gen-feed]} services]
     [;; receiver endpoint
-   (POST (:endpoint config) [source target]
-     (receive {:s source :t target} wmc config))
+     (POST (:endpoint config) [source target]
+       (receive {:s source :t target} wmc config))
     ;; query API routes
-   (context "/api" []
+     (context "/api" []
      ;; query webmention list
-     (context "/mentions" [page microformats mftype]
-       (GET "/" [url]
-         (retrieve-by-url url page store
-                           {:microformats microformats
-                            :type mftype}))
-       (GET "/:domain" [domain]
-         (retrieve-by-domain domain page store
-                              {:microformats microformats
-                               :type mftype})))
+       (context "/mentions" [page microformats mftype]
+         (GET "/" [url]
+           (retrieve-by-url url page store
+                            {:microformats microformats
+                             :type mftype}))
+         (GET "/:domain" [domain]
+           (retrieve-by-domain domain page store
+                               {:microformats microformats
+                                :type mftype})))
+      ;; query count of webmention list 
+       (context "/count" [mftype]
+         (GET "/" [url]
+           (count-by-url url store {:type mftype}))
+         (GET "/:domain" [domain]
+           (count-by-domain domain store {:type mftype})))
       ;; query one specific webmention
-     (context "/mention" [microformats]
-       (GET "/:id" [id] (retrieve-by-id id store
-                                         {:microformats microformats}))
-       (GET "/" [source target] (retrieve-by-pair source target store
-                                                      {:microformats microformats}))))
+       (context "/mention" [microformats]
+         (GET "/:id" [id] (retrieve-by-id id store
+                                          {:microformats microformats}))
+         (GET "/" [source target] (retrieve-by-pair source target store
+                                                    {:microformats microformats}))))
     ;; RSS feed
-   (GET "/feed/:domain" [domain] (gen-feed domain store config))
+     (GET "/feed/:domain" [domain] (gen-feed domain store config))
     ;; host proxied avatars (microformats photos)
-   (route/files "/avatars/" {:root "data/avatars"})
+     (route/files "/avatars/" {:root "data/avatars"})
     ;; frontend
-   (when-let [fe (:frontend config)]
-     (when (= (:source fe) :disk)
-       (route/files "/" {:root (:dir fe)})))
+     (when-let [fe (:frontend config)]
+       (when (= (:source fe) :disk)
+         (route/files "/" {:root (:dir fe)})))
     ;; 404
-   (route/not-found "Not Found")]))
+     (route/not-found "Not Found")]))
 
 (defn- make-handler
   "Receive a vector of handlers. Remove nil elements.
