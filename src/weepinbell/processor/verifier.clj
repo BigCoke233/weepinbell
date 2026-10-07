@@ -21,8 +21,7 @@
 (defn- includes-url?
   "Return true if text includes a certain URL. URLs are normalized before comparison."
   [text url]
-  (some #(url/url= % url)
-        (filter url/valid-http-url? (url/extract text))))
+  (some #(url/url= % url) (url/extract text)))
 
 (defn- verify-mention
   "Get source and follow redirects to check if target link is present."

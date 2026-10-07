@@ -2,7 +2,7 @@
   (:require [clojure.test :refer [testing is deftest]]
             [clojure.xml :as xml]
             [clojure.java.io :as io]
-            [weepinbell.feed :as feed]
+            [weepinbell.webserver.feed :as feed]
             [weepinbell.utils.digest :refer [digest]]))
 
 (def domain "test.example.com")

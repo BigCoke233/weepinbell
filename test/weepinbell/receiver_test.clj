@@ -14,7 +14,7 @@
 (ns weepinbell.receiver-test
   (:require [clojure.test :refer [deftest testing is]]
             [clojure.core.async :refer [chan poll!]]
-            [weepinbell.receiver :refer [receive]]))
+            [weepinbell.webserver.receiver :refer [receive]]))
 
 ;; utilities
 (defn- wrap-400-msg [typ]

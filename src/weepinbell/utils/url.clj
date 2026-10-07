@@ -60,7 +60,7 @@
   "Given plain text. Returns a vector of URLs that appears in it."
   [^String text]
   {:pre [(string? text)]
-   :post [#(every? valid-http-url? %)]}
+   :post [(partial every? string?)]}
   (let [extractor (-> (LinkExtractor/builder)
                       (.linkTypes (EnumSet/of LinkType/URL))
                       .build)
