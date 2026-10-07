@@ -17,5 +17,6 @@ pom.xml.asc
 /config.edn
 /data/webmention.edn
 /data/avatars
-/bellsprout/.clj-kondo/.cache/v1
+/bellsprout/.clj-kondo
 /bellsprout/.lsp/.cache
+/bellsprout/resources/public/css/pico.purged.css

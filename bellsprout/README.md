@@ -1,40 +1,27 @@
 # bellsprout
 
-FIXME: Write a one-line description of your library/project.
+Bellsprout is a HTML + CSS + ClojureSript SPA that is meant to work with Weepinbell.
 
-## Overview
+## Features 
 
-FIXME: Write a paragraph about the library/project and highlight its goals.
+- A form that sends webmention given source and target 
+- Query webmentions and display them as cards
 
 ## Setup
 
-To get an interactive development environment run:
+You need Leiningen, Babashka and NPM to get started.
 
+To get an interactive development environment run:
 
     lein figwheel
 
-and open your browser at [localhost:3449](http://localhost:3449/).
-This will auto compile and send all changes to the browser without the
-need to reload. After the compilation process is complete, you will
-get a Browser Connected REPL. An easy way to try it is:
-
-    (js/alert "Am I connected?")
-
-and you should see an alert in the browser window.
-
-To clean all compiled files:
-
-    lein clean
-
 To create a production build run:
 
-    lein do clean, cljsbuild once min
+    bb build
 
-And open your browser in `resources/public/index.html`. You will not
-get live reloading, nor a REPL. 
+And open your browser in `resources/public/index.html`.
 
 ## License
 
-Copyright © 2014 FIXME
+Bellsprout is free software licensed under the GNU Affero General Public License.
 
-Distributed under the Eclipse Public License either version 1.0 or (at your option) any later version.
