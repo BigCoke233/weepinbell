@@ -1,12 +1,17 @@
 (ns weepinbell.handler-test
   (:require [clojure.test :refer [testing is deftest]]
             [ring.mock.request :as mock]
-            [weepinbell.handler :refer [app]]
+            [weepinbell.webserver.handler :refer [app]]
+            [weepinbell.webserver.facade :refer [make-services]]
             [cheshire.core :refer [parse-string]]))
+
+(defn test-app [wmc store config]
+  (app {:wmc wmc :store store :config config 
+        :services (make-services)}))
 
 (deftest api-routes-test
   (testing "/api/mentions/:domain route"
-     (let [response ((app nil {:get-by-domain (fn [_]
+     (let [response ((test-app nil {:get-by-domain (fn [_]
                                                   [{:webmention {:source ""
                                                                  :target ""
                                                                  :id ""
@@ -17,7 +22,7 @@
        (is (some? (:body response)))))
 
   (testing "/api/mentions?url= route"
-     (let [response ((app nil 
+     (let [response ((test-app nil 
                             {:get-by-domain
                              (fn [_]
                                 [{:webmention {:source "https://source.net"
@@ -33,7 +38,7 @@
          (is (-> response :body parse-string first (get "webmention") some?)))))
 
   (testing "/api/mention/:id"
-    (let [response ((app nil {:get (fn [_]
+    (let [response ((test-app nil {:get (fn [_]
                                      {:webmention {:source ""
                                                    :target ""
                                                    :id "xxx"
@@ -43,7 +48,7 @@
       (is (= (:status response) 200))))
 
   (testing "/api/mention/?source=&target="
-    (let [response ((app nil {:get (fn [_ _]
+    (let [response ((test-app nil {:get (fn [_ _]
                                      {:webmention {:source "1"
                                                    :target "2"
                                                    :id "xxx"
@@ -54,34 +59,34 @@
 
 (deftest feed-route-test
   (testing "RSS feed for allowed domains and has items"
-    (let [response ((app nil {:get-by-domain (fn [_] [{:webmention nil}])}
+    (let [response ((test-app nil {:get-by-domain (fn [_] [{:webmention nil}])}
                          {:allowed-target-domains "valid.com"})
                     (mock/request :get "/feed/valid.com"))]
       (is (= (:status response) 404))))
   (testing "RSS feed for allowed domains, but with no webmentions"
-    (let [response ((app nil nil {:allowed-target-domains "valid.com"})
+    (let [response ((test-app nil nil {:allowed-target-domains "valid.com"})
                     (mock/request :get "/feed/valid.com"))]
       (is (= (:status response) 404))))
   (testing "not found for disallowed domains"
-    (let [response ((app nil nil {}) (mock/request :get "/feed/invalid.com"))]
+    (let [response ((test-app nil nil {}) (mock/request :get "/feed/invalid.com"))]
       (is (= (:status response) 404)))))
 
 (deftest not-found-route-test
   (testing "not-found route"
-    (let [response ((app nil nil {}) (mock/request :get "/invalid"))]
+    (let [response ((test-app nil nil {}) (mock/request :get "/invalid"))]
       (is (= (:status response) 404))))
   (testing "root route is not found when frontend is disabled"
-    (let [response ((app nil nil {:frontend nil}) (mock/request :get "/"))]
+    (let [response ((test-app nil nil {:frontend nil}) (mock/request :get "/"))]
       (is (= (:status response) 404)))))
 
 (deftest frontend-route-test
   (testing "serve frontend resources from disk when enabled"
     (let [dir (System/getProperty "java.io.tmpdir")
-          response ((app nil nil {:frontend {:source :disk :dir dir}})
+          response ((test-app nil nil {:frontend {:source :disk :dir dir}})
                     (mock/request :get "/"))]
       (is (not= (:status response) 500))))
   (testing "serve nothing when disabled"
-    (let [response ((app nil nil {:frontend nil})
+    (let [response ((test-app nil nil {:frontend nil})
                     (mock/request :get "/"))]
       (is (= (:status response) 404)))))
 

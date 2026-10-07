@@ -1,5 +1,5 @@
 (ns weepinbell.webserver.feed
-  "Handler of route /feed/:domain. Generating RSS feed for each domain."
+  "Service generating RSS feed for each domain."
   (:require [clj-rss.core :as rss]
             [weepinbell.utils.url :refer [get-domain]]
             [weepinbell.utils.digest :refer [digest]])

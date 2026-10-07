@@ -1,6 +1,5 @@
 (ns weepinbell.webserver.receiver
-  "Handler of route /endpoint or any other route the user configured. 
-  Receiver receives Webmention request (a source and a target); verify the request; return error message if any; push Webmention into webbmention channel for processor to take."
+  "Service receiving Webmention request (a source and a target); verify the request; return error message if any; push Webmention into webbmention channel for processor to take."
   (:require [clojure.core.async :refer [put!]]
             [weepinbell.utils.url :refer [get-domain valid-http-url? normalize url=]]
             [weepinbell.utils.digest :refer [digest]]))
