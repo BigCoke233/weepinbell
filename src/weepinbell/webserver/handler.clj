@@ -31,6 +31,10 @@
        (receive {:s source :t target} wmc config))
     ;; query API routes
      (context "/api" []
+       ;; TODO /api/send is temporarily an alias of /endpoint 
+       ;; will be a full webmention sender in the future
+       (POST "/send" [source target]
+         (receive {:s source :t target} wmc config))
      ;; query webmention list
        (context "/mentions" [page microformats mftype]
          (GET "/" [url]
