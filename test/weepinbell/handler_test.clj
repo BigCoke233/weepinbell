@@ -94,19 +94,5 @@
 (deftest not-found-route-test
   (testing "not-found route"
     (let [response ((test-app nil nil {}) (mock/request :get "/invalid"))]
-      (is (= (:status response) 404))))
-  (testing "root route is not found when frontend is disabled"
-    (let [response ((test-app nil nil {:frontend nil}) (mock/request :get "/"))]
-      (is (= (:status response) 404)))))
-
-(deftest frontend-route-test
-  (testing "serve frontend resources from disk when enabled"
-    (let [dir (System/getProperty "java.io.tmpdir")
-          response ((test-app nil nil {:frontend {:source :disk :dir dir}})
-                    (mock/request :get "/"))]
-      (is (not= (:status response) 500))))
-  (testing "serve nothing when disabled"
-    (let [response ((test-app nil nil {:frontend nil})
-                    (mock/request :get "/"))]
       (is (= (:status response) 404)))))
 

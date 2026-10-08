@@ -57,10 +57,6 @@
      (GET "/feed/:domain" [domain] (gen-feed domain store config))
     ;; host proxied avatars (microformats photos)
      (route/files "/avatars/" {:root "data/avatars"})
-    ;; frontend
-     (when-let [fe (:frontend config)]
-       (when (= (:source fe) :disk)
-         (route/files "/" {:root (:dir fe)})))
     ;; 404
      (route/not-found "Not Found")]))
 

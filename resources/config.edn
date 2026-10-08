@@ -8,7 +8,4 @@
            :on-update []
            :on-delete []}
  :webhook-request-fn nil
- :feed-length 8
- ;;:frontend {:source :disk 
- ;;           :dir "bellsprout/resources/public/"}
- :frontend nil}
+ :feed-length 8}
