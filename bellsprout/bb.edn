@@ -1,11 +1,11 @@
 {:paths ["scripts"]
- :tasks {install-purgecss {:doc "Make sure purgeCSS is available"
-                           :task (shell "npm" "i" "-g" "purgecss")}
-         treeshake {:doc "Treeshake pico.min.css"
+ :tasks {treeshake {:doc "Treeshake pico.min.css"
                     :requires ([treeshake :as ts])
-                    :task (ts/treeshake-pico)
-                    :depends [install-purgecss]}
-         build {:doc "Build ClojureScript"
-                :task (shell "lein do clean, cljsbuild once min")
-                :depends [treeshake]}}}
+                    :task (ts/treeshake-pico)}
+         build {:doc "Build and bundle squint to JS"
+                :task (shell "npm run build")
+                :depends [treeshake]}
+         watch {:doc "Watch for changes and build."
+                :task (doall (pmap shell ["npm run compile:watch"
+                                          "npm run bundle:watch"]))}}}
 

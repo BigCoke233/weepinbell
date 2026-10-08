@@ -1,6 +1,6 @@
 ;; from https://clojurians-log.clojureverse.org/clojurescript/2023-12-28/1703788493.602809
 ;; by p-himik, modified by Eltrac
-(ns bellsprout.hiccup)
+(ns hiccup)
 
 (defrecord Fragment [children])
 

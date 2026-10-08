@@ -1,8 +1,7 @@
-(ns bellsprout.core
-    (:require [bellsprout.hiccup :refer [hiccup->element]]))
+(ns core
+    (:require [hiccup :refer [hiccup->element]]))
 
 ;; global constants
-(enable-console-print!)
 (def API_BASE_URL "http://localhost:3000")
 
 ;; utilities
@@ -23,9 +22,8 @@
 (def cards-area (get-el "cards"))
 
 ;; show webmentions 
-(defn- create-card [js-data]
-  (let [data (js->clj js-data)
-        wm (get data "webmention")
+(defn- create-card [data]
+  (let [wm (get data "webmention")
         source (get wm "source")
         target (get wm "target")
         mf (get data "microformats")

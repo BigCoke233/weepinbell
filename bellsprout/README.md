@@ -1,6 +1,6 @@
 # bellsprout
 
-Bellsprout is a HTML + CSS + ClojureSript SPA that is meant to work with Weepinbell.
+Bellsprout is a HTML + CSS + [Squint](https://github.com/squint-cljs/squint) SPA that is meant to work with Weepinbell. Squint compiles to vanilla JavaScript, so this is essentially a frameworkless frontend app. 
 
 ## Features 
 
@@ -9,11 +9,15 @@ Bellsprout is a HTML + CSS + ClojureSript SPA that is meant to work with Weepinb
 
 ## Setup
 
-You need Leiningen, Babashka and NPM to get started.
+You need Babashka and NPM to get started.
 
-To get an interactive development environment run:
+To install JavaScript dependencies:
 
-    lein figwheel
+    npm install
+
+To watch for file changes and rebuild automatically:
+
+    bb watch
 
 To create a production build run:
 

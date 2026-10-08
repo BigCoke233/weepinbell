@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "esbuild": "^0.28.2",
+    "purgecss": "^7.0.2",
+    "squint-cljs": "^0.14.211"
+  },
+  "scripts": {
+    "compile": "squint compile",
+    "bundle": "esbuild target/core.mjs --bundle --outfile=resources/public/js/compiled/bellsprout.js",
+    "build": "npm run compile && npm run bundle",
+    "compile:watch": "squint watch",
+    "bundle:watch": "esbuild target/core.mjs --bundle --outfile=resources/public/js/compiled/bellsprout.js --watch"
+  }
+}

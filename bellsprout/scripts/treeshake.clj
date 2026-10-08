@@ -7,7 +7,7 @@
 
 (defn treeshake [content original target]
   (let [shake (partial shell {:out :string}
-                 "purgecss" 
+                 "npx" "purgecss" 
                  "--css" original 
                  "--content")
         out (apply shake content)
