@@ -1,7 +1,7 @@
 (ns weepinbell.config
   "Config loader component that merges default config with user config.
   Default config is located at resources/config.edn"
-  (:require [clojure.edn :as edn]
+  (:require [fast-edn.core :as edn]
             [clojure.java.io :as io]))
 
 (defn load-config []
