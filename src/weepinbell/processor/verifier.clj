@@ -60,8 +60,9 @@
   (when (:ok? data)
     (let [{:keys [id wm new?]} data
           {:keys [s t]} wm
-          source-resp (client/get s {:headers {"Range" "bytes=0-1048575"}})
-          target-resp (client/head t)
+          source-resp (client/with-retry 3 5
+                        (client/get s {:headers {"Range" "bytes=0-1048575"}}))
+          target-resp (client/with-retry 3 5 (client/head t))
           verified? (verify-mention id @source-resp @target-resp s t)]
       (-> data
           (assoc :verified? verified?)
