@@ -3,7 +3,7 @@
 ## 0. Create a `.edn` file
 
 > [!note]
-> If you're not familiar with this format, see [edn](https://github.com/edn-format/edn). In short, it's Clojure's equivalent of JSON, but more extensible (for example, you can use functions as values).
+> If you're not familiar with this format, see [edn](https://github.com/edn-format/edn). In short, it's Clojure's equivalent of JSON, but more extensible.
 
 Configure weepinbell by creating `config.edn` at the app's working directory[^1].
 
@@ -71,13 +71,17 @@ The return value should be a map, which will be merged to HTTP request options. 
  :post-params {"title" "Webmention received"}}
 ```
 
-Set `:webhook-request-fn` to your generator function:
+Bascially:
 
 ```edn 
- :webhook-request-fn (fn [hook data] ...)
+(fn [hook data] 
+  {:body ...
+   :headers {}
+   ;; more 
+  })
 ```
 
-It can also be a keyword, which will use a preset generator. Currently available generator presets are `:ntfy` and `:bark`. (for push notification apps [ntfy](https://ntfy.sh/) and [Bark](https://bark.day.app/))
+For now you can only use a preset generator by setting `:webhook-request-fn` to a keyword. Currently available presets are `:ntfy` and `:bark`. (for push notification apps [ntfy](https://ntfy.sh/) and [Bark](https://bark.day.app/))
 
 ```edn 
  :webhook-request-fn :ntfy ;; or :bark
