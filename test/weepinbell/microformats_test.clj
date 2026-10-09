@@ -74,11 +74,30 @@
     (is (= (sr/use-prop :key {:properties {:key ["value"]}})
            (sr/use-prop :key {:key ["value"]})
            "value")))
-  (testing "find-type functions"
+  (testing "find-type should find items with a specific type given a collection of items"
     (is (= ["h-entry"]
            (->> testdata first :in sr/use-items sr/find-h-entry :type)))
     (is (= ["h-card"]
            (->> testdata second :in sr/use-items sr/find-h-card :type))))
+  (testing "find-type should recursively find qualified items inside items' children"
+    (let [testdata-a {:items [{:type ["h-feed"]
+                               :children [{:type ["h-entry"]
+                                           :properties {:content [{:html "<div>test</div>"
+                                                                   :text "test"}]
+                                                        :published [52341243232]}}]}]}]
+      (is (= ["h-entry"]
+             (->> testdata-a sr/use-items sr/find-h-entry :type))))
+  (testing "find-type should find all matched items on different layers"
+    (let [testdata-a {:items [{:type ["h-feed"]
+                               :children [{:type ["h-entry"]
+                                           :children [{:type ["h-card"]}]}
+                                          {:type ["h-card"]}]}
+                              {:type ["h-card"]}]}]
+      (is (= 3 (->> testdata-a sr/use-items sr/find-h-cards count)))))
+  (testing "find-type should not return empty seq if nothing's matched"
+    (let [testdata-a {:items [{:type ["h-feed"]
+                               :children []}]}]
+      (is (->> testdata-a sr/use-items sr/find-h-entry empty?)))))
   (testing "search photos in h-card"
     (let [photo-url "https://test.com/photo.png"
           testdata-a {:type ["h-card"]

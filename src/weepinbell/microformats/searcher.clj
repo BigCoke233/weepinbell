@@ -58,7 +58,8 @@
     :else                        nil))
 
 (defn find-type [mftype items]
-  (filter #(some #{mftype} (type-vector %)) items))
+  (concat (filter #(some #{mftype} (type-vector %)) items)
+          (mapcat #(find-type mftype (:children %)) items)))
 (def find-h-entries (partial find-type "h-entry"))
 (def find-h-cards (partial find-type "h-card"))
 
