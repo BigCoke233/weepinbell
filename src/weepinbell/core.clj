@@ -1,7 +1,6 @@
 (ns weepinbell.core
   "Main component that loads resources and start other components."
-  (:require [clojure.spec.alpha :as s]
-            [weepinbell.storage.spec]
+  (:require [weepinbell.storage.spec]
             [weepinbell.config :refer [load-config]]
             [weepinbell.webhook :as webhook]
             [weepinbell.storage.edn-storage :as edn]
@@ -26,7 +25,7 @@
         wmc (chan)
         ;; Weepinbell configuration, 
         ;; loaded from config.edn and merged with defaults.
-        config (load-config)
+        config (load-config (or (System/getenv "WEEPINBELL_CONFIG") "config.edn"))
         ;; Storage middle layer, a map of data-manipulating functions.
         ;; Supports various storage as long as the map conforms storage.spec.
         store (edn/use-store (:data-path config))
