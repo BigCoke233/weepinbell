@@ -7,6 +7,7 @@
   (testing "Config file merged with default config"
     (let [external-config {:port 4000}
           config-file "tmp/config.tmp.edn"]
+      (io/make-parents config-file)
       (spit config-file external-config)
       (let [config (load-config config-file)]
         (is (= (:port config) (:port external-config)))
