@@ -11,13 +11,13 @@
   (let [pages (partition-all size data)
         length (count pages)
         page (cond (keyword? page) page
+                   (number? page) page
                    (= page "")     0
                    (string? page)  (Integer/parseInt page)
                    :else           false)]
     (cond (= page :last) (last pages)
-          (int? page)    (if (>= page length) false
+          (number? page) (if (>= page length) '()
                              (nth pages page))
-          (not page)     false
           :else          false)))
 
 (defn- respond-webmention-json [data]
@@ -34,11 +34,14 @@
   (let [base-resp {:status 200
                    :headers {"Content-Type" "application/json; charset=utf-8"}
                    :body nil}]
-    (if data
-      (assoc base-resp :body data)
-      (-> base-resp
-          (assoc :status 404)
-          (assoc :body {:message "The requested webmention list does not exist."})))))
+    (cond
+      (false? data) (-> base-resp
+                        (assoc :status 400)
+                        (assoc :body "Page number is invalid. Either too large or not a number."))
+      (empty? data) (-> base-resp
+                        (assoc :status 404)
+                        (assoc :body {:message "The requested webmention list does not exist."}))
+      :else (assoc base-resp :body data))))
 
 (defn- wrap-response-object [data opts]
   (let [result {:webmention (:webmention data)}]
