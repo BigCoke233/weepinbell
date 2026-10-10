@@ -44,7 +44,9 @@
                   ["https://alice.blog/article/abc#anchor" "https://alice.blog/article/abc" (wrap-400-msg :identical)]
                   ["https://alice.blog/article/abc?a=1&b=2" "https://alice.blog/article/abc?b=2&a=1" (wrap-400-msg :identical)]
                   ;; domain not allowed 
-                  ["https://bob.blog/post/123" "https://chris.blog/archive/xxx" (wrap-400-msg :domain-not-allowed)]])
+                  ["https://bob.blog/post/123" "https://chris.blog/archive/xxx" (wrap-400-msg :domain-not-allowed)]
+                  ;; nil input 
+                  [nil nil (wrap-400-msg :invalid-url)]])
 ;; end define test cases
 
 ;; webmention queue for testing

@@ -42,7 +42,7 @@
                         {:wmc wmc
                          :store store
                          :config config})]
-    (fn [] (stop-processor) (stop-webserver))))
+    (fn [] (stop-processor) (stop-webserver) true)))
 
 ; Entry point; Terminal user interface
 ;; start up system and wait for signals to perform graceful shutdown

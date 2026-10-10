@@ -3,6 +3,7 @@
             [ring.mock.request :as mock]
             [weepinbell.webserver.handler :refer [app]]
             [weepinbell.webserver.facade :refer [make-services]]
+            [clojure.core.async :refer [chan poll!]]
             [cheshire.core :refer [parse-string]]))
 
 (defn test-app [wmc store config]
@@ -95,4 +96,17 @@
   (testing "not-found route"
     (let [response ((test-app nil nil {}) (mock/request :get "/invalid"))]
       (is (= (:status response) 404)))))
+
+(deftest receiver-endpoint-test 
+  (testing "/endpoint and /api/send should receive valid webmention and return 201"
+    (let [test-chan (chan)
+          app (test-app test-chan nil {:endpoint "/endpoint"
+                                       :allowed-target-domains ["www.target.net"]})
+          payload {:source "https://a.validsource.com"
+                   :target "https://www.target.net"}
+          resp-a (app (mock/request :post "/endpoint" payload))
+          resp-b (app (mock/request :post "/api/send" payload))]
+      (is (= 201 (:status resp-a)))
+      (is (= 201 (:status resp-b)))
+      (is (every? some? (repeatedly 2 #(poll! test-chan)))))))
 
