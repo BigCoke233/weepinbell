@@ -2,7 +2,7 @@ when:
   - event: [push, manual]
     branch: master
     path:
-      include: ['.woodpecker/run-test.yaml', 'src/**', 'test/**', 'resources/**']
+      include: ['.woodpecker/run-test.yaml', 'src/**', 'resources/**']
       exclude: ['*.md', 'docs/**']
   - event: [pull_request]
 
