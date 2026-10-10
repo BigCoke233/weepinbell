@@ -4,6 +4,8 @@
   (:require [fast-edn.core :as edn]
             [clojure.java.io :as io]
             [weepinbell.utils.url :refer [get-domain get-target get-path url=]]
+            [clojure.spec.alpha :as s]
+            [weepinbell.storage.spec]
             [clojure.string :refer [join]]))
 
 (defn unload-data
@@ -88,6 +90,7 @@
 ;; make storage vtable
 (def file-exists? #(.exists (io/file %)))
 (defn use-store [datasource]
+  {:post [#(s/valid? :weepinbell.storage.spec/vtable %)]}
   (when (not (file-exists? datasource))
     (io/make-parents datasource)
     (spit datasource ""))

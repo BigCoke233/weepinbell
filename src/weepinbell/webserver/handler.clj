@@ -74,9 +74,6 @@
   "Receive webmention channel, storage vtable and config map. 
    Returns an app handler."
   [api-meta]
-  (when (= :clojure.spec.alpha/invalid (:store api-meta))
-    (println "Invalid storage. Check your database configuration or submit an issue.")
-    (System/exit 1))
   (-> (make-api api-meta)
       make-handler
       (wrap-resource "static")

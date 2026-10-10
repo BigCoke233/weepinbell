@@ -29,8 +29,7 @@
         config (load-config)
         ;; Storage middle layer, a map of data-manipulating functions.
         ;; Supports various storage as long as the map conforms storage.spec.
-        store (s/conform :weepinbell.storage.spec/vtable
-                         (edn/use-store (:data-path config)))
+        store (edn/use-store (:data-path config))
         ;; Hooks, a map of callback functions that processor calls 
         ;; on certain events. Can be used for webhooks and more.
         hooks (webhook/make-hooks config)
