@@ -36,8 +36,10 @@
   Return JSON response of pending notification, rejection or error."
   [wm wmc config]
   (let [{:keys [s t]} wm
-        source (normalize s)
-        target (normalize t)
+        ;; if params are nil, use empty string 
+        ;; empty strings will fail check-request
+        source (if s (normalize s) "")
+        target (if t (normalize t) "")
         new-wm {:s source :t target}
         allowlist (:allowed-target-domains config)]
      ;; Request verification
