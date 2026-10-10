@@ -52,11 +52,12 @@
   (testing "/api/count?url= route"
      (let [response ((test-app nil 
                             {:get-by-domain
-                             (fn [_] [])}
+                             (fn [_] [{:webmention {:source "1"
+                                                    :target "http://localhost"}}])}
                             {})
                        (mock/request :get "/api/count?url=http://localhost"))]
        (is (= (:status response) 200))
-       (is (= 0 (-> response :body parse-string (get "count") Long.)))))
+       (is (= 1 (-> response :body parse-string (get "count") Long.)))))
 
   (testing "/api/mention/:id"
     (let [response ((test-app nil {:get (fn [_]
