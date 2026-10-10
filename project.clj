@@ -21,7 +21,7 @@
                  [org.nibor.autolink/autolink "0.12.0"]
                  [io.github.tonsky/fast-edn "1.2.0"]]
   :managed-dependencies [[org.clojure/tools.reader "1.6.0"]
-                         [org.ow2.asm/asm "9.8"]] 
+                         [org.ow2.asm/asm "9.11"]] 
   :profiles {:uberjar {:aot :all}
              :test {:dependencies [[ring/ring-mock "0.6.2"]]}
              :dev {:source-paths ["dev"]

@@ -2,7 +2,7 @@
   "dependencies": {
     "esbuild": "^0.28.2",
     "purgecss": "^7.0.2",
-    "squint-cljs": "^0.14.211"
+    "squint-cljs": "^0.15.212"
   },
   "scripts": {
     "compile": "squint compile",
