@@ -16,8 +16,12 @@
 
 ;; predicates used for filtering webmention
 (defn- st-pair-equal-pred [source target wm]
-  (and (url= source (get-in wm [:webmention :source]))
-       (url= target (get-in wm [:webmention :target]))))
+  (let [wm-source (get-in wm [:webmention :source])
+        wm-target (get-in wm [:webmention :target])]
+    (and (some? source) (some? target)
+         (some? wm-source) (some? wm-target)
+         (url= source wm-source)
+         (url= target wm-target))))
 (defn- id-equal-pred [id wm]
   (= id (get-in wm [:webmention :id])))
 (defn- get-predicate [source target]

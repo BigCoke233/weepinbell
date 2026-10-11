@@ -50,7 +50,9 @@
         query  (normalize-query (.getQuery base))]
       (str scheme "://" auth path
         (when (seq query) (str "?" query))))
-    ;; fall back to original string if syntax is invalid
+    ;; fallback to empty string is url is nil
+    (catch NullPointerException _ "")
+    ;; fallback to original string if syntax is invalid
     (catch URISyntaxException _ url)))
 
 (defn url= [& urls]

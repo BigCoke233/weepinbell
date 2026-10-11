@@ -35,14 +35,18 @@
           (do
             (timbre/info "webmention found in queue, processing.")
             ((:on-receive callbacks) {:webmention {:id id :source s :target t}})
-            (-> {:id id
-                 :wm wm
-                 :ok? true}
-                (check-storage storage)
-                verify
-                (clean storage callbacks)
-                (wrap config)
-                (write storage callbacks))
+            (try
+              (-> {:id id
+                   :wm wm
+                   :ok? true}
+                  (check-storage storage)
+                  verify
+                  (clean storage callbacks)
+                  (wrap config)
+                  (write storage callbacks))
+              (catch Exception e
+                (timbre/error "unexpceted exception in pipeline: " (.getMessage e))
+                (timbre/debug e)))
             (recur (<! wmc))))))
     ;; return a function that stops the loop 
     (fn [] (put! wmc {:stop? true}))))
