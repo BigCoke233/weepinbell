@@ -57,7 +57,8 @@
   (map #(wrap-response-object % opts) data))
 
 (defn- filter-response-by-mftype [typ data]
-  (filter #(= typ (get-in % [:microformats :type])) data))
+  (filter #(= (keyword typ) 
+              (get-in % [:microformats :type])) data))
 ;; end utilities
 
 (defn by-domain
