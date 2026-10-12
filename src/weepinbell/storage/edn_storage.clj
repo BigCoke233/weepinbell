@@ -94,7 +94,6 @@
 ;; make storage vtable
 (def file-exists? #(.exists (io/file %)))
 (defn use-store [datasource]
-  {:post [#(s/valid? :weepinbell.storage.spec/vtable %)]}
   (when (not (file-exists? datasource))
     (io/make-parents datasource)
     (spit datasource ""))

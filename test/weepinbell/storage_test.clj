@@ -1,6 +1,7 @@
 (ns weepinbell.storage-test
   (:require [clojure.test :refer [testing is deftest]]
             [weepinbell.storage.edn-storage :as edns]
+            [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
             [weepinbell.storage.spec]))
 
@@ -10,10 +11,87 @@
     (with-redefs [weepinbell.storage.edn-storage/file-exists? (fn [_] true)]
       (is (spec-check (edns/use-store "source.edn")))))
   (testing "spec-check invalid storage vtables"
-    (is (not (spec-check {:get-by-domain (fn [_])})))
-    (is (not (spec-check {:append (fn [_]) :get (fn [_])})))
-    (is (not (spec-check nil)))
-    (is (not (spec-check 1)))
-    (is (not (spec-check "I am storage. Trust me.")))
-    (is (not (spec-check [])))
-    (is (not (spec-check {})))))
+    (doseq [check [{:get-by-domain (fn [_])}
+                     {:append (fn [_]) :get (fn [_])}
+                     "I am storage. Trust me"
+                     nil 1 [] {}]]
+      (is (not (spec-check check))))))
+
+(def test-edn-file "tmp/testfile")
+(when (.exists (io/file test-edn-file))
+  (io/delete-file test-edn-file))
+(def storages [(edns/use-store test-edn-file)])
+
+(defn- wm= [& wms]
+  (->> (map :webmention wms)
+       (map #(select-keys % [:target :source :modified]))
+       (apply =)))
+
+(defn- test-append-and-get [storage]
+  (let [id "123456789"
+        source "https://source.net"
+        target "https://target.net"
+        data {:webmention {:source source
+                           :target target
+                           :id id
+                           :modified (System/currentTimeMillis)}}]
+    ((:append storage) data)
+    (is (wm= data ((:get storage) id)))
+    (is (wm= data ((:get storage) source target)))
+    ((:delete storage) id)
+    (is (nil? ((:get storage) id)))))
+
+(defn- test-append-and-get-list [storage]
+  (let [domain "target.com"
+        data [{:webmention {:source "source"
+                            :target (str "https://" domain "/a")
+                            :id "1"
+                            :modified (System/currentTimeMillis)}}
+              {:webmention {:source "source"
+                            :target (str "https://" domain "/b")
+                            :id "2"
+                            :modified (System/currentTimeMillis)}}]
+        ids (map #(:id (:webmention %)) data)]
+    (doseq [item data]
+      ((:append storage) item))
+    (is (= (count data) (count ((:get-by-domain storage) domain))))
+    (is (= 1 (count ((:get-by-domain storage) domain "/b"))))
+    (doseq [id ids]
+      ((:delete storage) id))
+    (is (= 0 (count ((:get-by-domain storage) domain))))))
+
+(defn- test-update [storage]
+  (let [id "987654321"
+        source "https://source.com"
+        target "https://target.com"
+        data {:webmention {:id id 
+                           :source source
+                           :target target
+                           :modified (System/currentTimeMillis)}}
+        data-wm (:webmention data)
+        data-new (assoc data :webmention 
+                        (assoc data-wm :modified 
+                               (+ (System/currentTimeMillis) 1)))
+        data-neo (assoc data-new :webmention 
+                        (assoc data-wm :modified 
+                               (+ (System/currentTimeMillis) 1)))]
+    ((:append storage) data)
+    ((:update storage) id data-new)
+    (is (wm= data-new ((:get storage) id)))
+    ((:update storage) source target data-neo)
+    (is (wm= data-neo ((:get storage) source target)))
+    ((:delete storage) id)))
+
+(defn- test-get-empty [storage]
+  (is (nil? ((:get storage) nil "target")))
+  (is (nil? ((:get storage) "source" nil)))
+  (is (nil? ((:get storage) nil nil))))
+
+(deftest general-storage-test 
+  (doseq [storage storages]
+    (doseq [testcase [[test-append-and-get "appending webmention"]
+                      [test-append-and-get-list "appending and getting by domain"]
+                      [test-update "updating webmentions"]
+                      [test-get-empty "making sure getting empty won't throw"]]]
+      (testing (last testcase)
+        ((first testcase) storage)))))
