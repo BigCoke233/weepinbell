@@ -23,9 +23,9 @@
 
 ;; query list of webmentions
 
-(defn mftype= [& types]
+(defn- mftype= [& types]
   (apply = (map keyword types)))
-(defn filter-by-mftype
+(defn- filter-by-mftype
   [mftype data]
   (if (nil? mftype) data
       (->> data
@@ -33,7 +33,7 @@
                   [(get-in item [:webmention :target])
                    item]))
            (filter (fn [[target item]]
-                     (->> item  
+                     (->> item
                           :microformats
                           mfsr/use-items
                           mfsr/find-h-entry
@@ -41,25 +41,37 @@
                           (mftype= mftype))))
            (map last))))
 
+(defn- paging [page page-size data]
+  (if (nil? page) data
+      (let [pages (vec (partition-all
+                        (or page-size default-page-size)
+                        data))
+            page-number (if (number? page) page
+                            (- (count pages) 1))]
+        (get pages page-number))))
+
+(defn- reduce-helper [wm]
+   (if-let [mf (:microformats wm)]
+     (if (empty? mf) 
+       (dissoc wm :microformats)
+       (let [target (get-in wm [:webmention :target])
+             reduced (reduce-mf target mf)]
+         (assoc wm :microformats reduced)))
+     wm))
+(defn- reduce-microformats [mf-opt data]
+  (if (= mf-opt "raw") data
+    (map reduce-helper data)))
+
 (defn query-list
   "Get a list of webmentions by certain filters."
   {:pre [(s/keys :req-un [::domain ::path ::page ::page-size ::storage ::mftype])]}
   [opts]
   (let [{:keys [domain path page page-size storage mftype]} opts
-        reduce-mf? (not= (:microformats opts) "raw")
-        page-size (or page-size default-page-size)
         data ((:get-by-domain storage path) domain)
         data (filter-by-mftype mftype data)
-        pages (vec (partition-all page-size data))
-        page-number (if (number? page) page
-                        (- (count pages) 1))
-        page-selected (get pages page-number)
-        result (if reduce-mf? (map #(assoc % :microformats
-                                           (reduce-mf (get-in % [:webmention :target])
-                                                      (:microformats %)))
-                                   page-selected)
-                   page-selected)]
-    (respond-webmention-list-json result)))
+        data (paging page page-size data)
+        data (reduce-microformats (:microformats opts) data)]
+    (respond-webmention-list-json data)))
 
 (defn by-domain
   "Get webmentions sent to a particular domain."
