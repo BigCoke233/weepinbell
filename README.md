@@ -1,7 +1,7 @@
 > [!warning]
 > This Project is still under active development. API may change. There may be fatal bugs.
 
-<img src="resources/static/weepinbell.avif" align="right" width="300px" />
+<img src="doc/images/weepinbell.avif" align="right" width="300px" />
 
 # weepinbell
 

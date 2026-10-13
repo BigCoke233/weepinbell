@@ -5,7 +5,6 @@
             [compojure.core :refer [routes POST GET context]]
             [compojure.route :as route]
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
-            [ring.middleware.resource :refer [wrap-resource]]
             [ring.middleware.json :refer [wrap-json-response]]))
 
 (s/def ::services
@@ -76,7 +75,6 @@
   [api-meta]
   (-> (make-api api-meta)
       make-handler
-      (wrap-resource "static")
-      (wrap-defaults api-defaults)
-      (wrap-json-response)))
+      (wrap-json-response)
+      (wrap-defaults api-defaults)))
 
