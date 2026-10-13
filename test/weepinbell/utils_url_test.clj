@@ -53,4 +53,16 @@
           ["http://www.example.com/index.php?page=123#anchor"]
           (url/extract "complicated one (http://www.example.com/index.php?page=123#anchor)")))))
 
+(deftest relative-predicate-test
+  (testing "Check if a URL is relative"
+    (is (url/relative? "./asset/photo.png"))
+    (is (url/relative? "../photo.png"))
+    (is (url/relative? "/photo.png"))))
+
+(deftest get-base-test
+  (testing "Check if get-base works"
+    (is (= "https://source.net"
+           (url/get-base "https://source.net/page/index.php?param=value#test")))
+    (is (not= "https://source.net/"
+              (url/get-base "https://source.net/page/index.php?param=value#test")))))
 

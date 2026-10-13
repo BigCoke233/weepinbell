@@ -3,7 +3,7 @@
   It adds microformats and extra data and return complete webmention map ready for storage."
   (:require [clojure.java.io :as io]
             [weepinbell.http.downloader :refer [download-file]]
-            [weepinbell.utils.url :refer [valid-http-url?]]
+            [weepinbell.utils.url :refer [valid-http-url? get-base relative? normalize]]
             [weepinbell.microformats.searcher :refer [use-items search-photo find-h-entry find-h-card]]
             [mf2clj.core :as mf-parser]
             [taoensso.timbre :as timbre]
@@ -38,7 +38,7 @@
   (or (->> mf use-items find-h-entry search-photo)
       (->> mf use-items find-h-card search-photo)))
 
-(defn- proxy-mf-photo [raw-photo base-url]
+(defn- proxy-mf-photo [photo-base raw-photo]
   (if raw-photo
     (let [photo-url (str raw-photo)
           file-ext (or (re-find #"\.(?:jpg|jpeg|png|gif|webp)" photo-url) ".jpg")
@@ -49,22 +49,28 @@
       (when-not (.exists (io/file local-path))
         (timbre/info "Downloading microformats photo to proxy external image.")
         (download-file photo-url local-path))
-      (str base-url public-path))
+      (str photo-base public-path))
     nil))
+
+(defn complete-url [source-base url]
+  (if (relative? url)
+    (normalize (str source-base url))
+    url))
 
 (defn- wrap-webmention
   "Parse microformats and collect essential info. 
   Wrap source, target and collected data into a map and return it."
-  [id source-html source target base-url]
+  [id source-html source target photo-base]
   (timbre/info "parsing microformats and wrapping up webmention" id)
   (let [mf (-> source-html mf-parser/parse :items)
         wm {:source source
             :target target
             :id (digest (str source target))
             :modified (System/currentTimeMillis)}
-        proxied-photo (-> mf
-                          find-mf-photo
-                          (proxy-mf-photo base-url))
+        proxied-photo (->> mf
+                           find-mf-photo
+                           (complete-url (get-base source))
+                           (proxy-mf-photo photo-base))
         data {:webmention wm
               :microformats mf
               :extra {:proxied-photo proxied-photo}}]

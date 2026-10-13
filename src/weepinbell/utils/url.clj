@@ -16,6 +16,10 @@
     (catch MalformedURLException _ false)
     (catch URISyntaxException _ false)))
 
+(defn relative? [url]
+  (or (string/starts-with? url "/")
+      (string/starts-with? url ".")))
+
 (defn get-domain [url]
   (when (some? url)
     (-> url URI/create .getHost)))
@@ -23,6 +27,10 @@
 (defn get-path [url]
   (when (some? url)
     (-> url URI/create .getPath)))
+
+(defn get-base [url]
+  (let [uri (URI. url)]
+    (str (.getScheme uri) "://" (.getAuthority uri))))
 
 (defn get-target [wm]
   (get-in wm [:webmention :target]))
