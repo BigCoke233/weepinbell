@@ -12,6 +12,7 @@
                  [compojure "1.7.2"]
                  [ring/ring-core "1.15.5"]
                  [ring/ring-defaults "0.7.1"]
+                 [metosin/ring-http-response "0.9.5"]
                  [http-kit "2.9.0-beta4"]
                  [ring/ring-json "0.5.1"]
                  [cheshire "6.2.0"]

@@ -5,7 +5,8 @@
             [clojure.test :refer [deftest testing is]]))
 
 (def testdata
-  [{:in {:items [{:type ["h-entry"]
+  [{:target "https://test.com/"
+    :in {:items [{:type ["h-entry"]
                   :properties {:content [{:html "<div>test</div>"
                                           :text "test"}]
                                :in-reply-to ["https://test.com"]
@@ -23,7 +24,8 @@
           :type :in-reply-to,
           :published 52341243232,
           :content {:html "<div>test</div>", :text "test"}}}
-   {:in {:items [{:type ["h-entry"]
+   {:target ""
+    :in {:items [{:type ["h-entry"]
                   :properties {:content [{:html "<div>test</div>"
                                           :text "test"}]
                                :published [52341243232]}}
@@ -45,7 +47,7 @@
 (deftest reducer-test
   (testing "Normal microformats reduction"
     (->> testdata
-         (map #(let [reduced (reduce-mf (:in %))]
+         (map #(let [reduced (reduce-mf (:target %) (:in %))]
                  (is (= reduced (:out %)))
                  (is (spec-check reduced))))
          doall))

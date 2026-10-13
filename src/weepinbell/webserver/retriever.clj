@@ -1,103 +1,113 @@
 (ns weepinbell.webserver.retriever
   "Service getting webmention form storage and wrapping it in a response."
-  (:require [weepinbell.utils.url :refer [get-domain url=]]
-            [weepinbell.microformats.reducer :refer [reduce-mf]]))
+  (:require [weepinbell.utils.url :refer [get-domain get-path]]
+            [weepinbell.microformats.reducer :refer [reduce-mf]]
+            [weepinbell.microformats.searcher :as mfsr]
+            [ring.util.http-response :refer [bad-request not-found ok]]
+            [clojure.spec.alpha :as s]))
 
 (def default-page-size 12)
 
-;; utilities
-(defn- partition-pages
-  [page size data]
-  (let [pages (partition-all size data)
-        length (count pages)
-        page (cond (keyword? page) page
-                   (number? page) page
-                   (= page "")     0
-                   (string? page)  (Integer/parseInt page)
-                   :else           false)]
-    (cond (= page :last) (last pages)
-          (number? page) (if (>= page length) '()
-                             (nth pages page))
-          :else          false)))
+;; response utilities 
 
 (defn- respond-webmention-json [data]
-  (let [base-resp {:status 200
-                   :headers {"Content-Type" "application/json; charset=utf-8"}
-                   :body nil}]
-    (if (and data (some? (:webmention data)))
-      (assoc base-resp :body data)
-      (-> base-resp
-          (assoc :status 404)
-          (assoc :body {:message "The requested webmention does not exist."})))))
+  (if (and data (some? (:webmention data)))
+    (ok data)
+    (not-found {:message "The requested webmention does not exist."})))
 
 (defn- respond-webmention-list-json [data]
-  (let [base-resp {:status 200
-                   :headers {"Content-Type" "application/json; charset=utf-8"}
-                   :body nil}]
-    (cond
-      (false? data) (-> base-resp
-                        (assoc :status 400)
-                        (assoc :body "Page number is invalid. Either too large or not a number."))
-      (empty? data) (-> base-resp
-                        (assoc :status 404)
-                        (assoc :body {:message "The requested webmention list does not exist."}))
-      :else (assoc base-resp :body data))))
+  (cond
+    (false? data) (bad-request {:message "Page number is invalid. Either too large or not a number."})
+    (empty? data) (not-found {:message "The requested webmention list does not exist."})
+    :else         (ok data)))
 
-(defn- wrap-response-object [data opts]
-  (let [result {:webmention (:webmention data)}]
-    (cond-> result
-      (not (empty? (:microformats data)))
-      (assoc :microformats (cond-> data
-                             true :microformats
-                             (not= "raw" (:microformats opts)) reduce-mf))
-      (:extra data)
-      (assoc :extra (:extra data)))))
+;; query list of webmentions
 
-(defn- wrap-response-list [opts data]
-  (map #(wrap-response-object % opts) data))
+(defn filter-by-mftype 
+  [mftype data]
+  (if (nil? mftype) data 
+    (->> data
+         (map (fn [item]
+                [(get-in item [:webmention :target])
+                 (get item :microformats)]))
+         (filter (fn [[target mf]]
+                   (->> mf mfsr/use-items 
+                     mfsr/find-h-entry 
+                     (mfsr/search-mftype target)
+                     (= mftype)))))))
 
-(defn- filter-response-by-mftype [typ data]
-  (filter #(= (keyword typ) 
-              (get-in % [:microformats :type])) data))
-;; end utilities
+(defn query-list 
+  "Get a list of webmentions by certain filters."
+  {:pre [(s/keys :req-un [::domain ::path ::page ::page-size ::storage ::mftype])]}
+  [opts]
+  (let [{:keys [domain path page page-size storage mftype]} opts
+        reduce-mf? (not= (:microformats opts) "raw")
+        page-size (or page-size default-page-size)
+        data ((:get-by-domain storage path) domain)
+        data (filter-by-mftype mftype data)
+        pages (vec (partition-all page-size data))
+        page-number (if (number? page) page 
+                      (- (count pages) 1))
+        page-selected (get pages page-number)
+        result (if reduce-mf? (map #(assoc % :microformats 
+                            (reduce-mf (get-in % [:webmention :target])
+                                       (:microformats %))) 
+                    page-selected)
+                 page-selected)]
+    (respond-webmention-list-json result)))
 
 (defn by-domain
   "Get webmentions sent to a particular domain."
   [domain page storage opts]
-  (cond->> ((:get-by-domain storage) domain)
-    true (wrap-response-list opts)
-    (:type opts) (filter-response-by-mftype (:type opts))
-    page (partition-pages page default-page-size)
-    true respond-webmention-list-json))
+  (query-list {:domain domain
+               :path nil
+               :page page 
+               :page-size default-page-size
+               :storage storage 
+               :mftype (:type opts)
+               :microformats (:microformats opts)}))
 
 (defn by-url
   "Get webmention sent to a particular URL."
   [url page storage opts]
   (if url
-    (cond->> (get-domain url)
-      true ((:get-by-domain storage))
-      true (filter #(url= url (get-in % [:webmention :target])))
-      true (wrap-response-list opts)
-      (:type opts) (filter-response-by-mftype (:type opts))
-      page (partition-pages page default-page-size)
-      true respond-webmention-list-json)
-    ;; if no url query is passed
-    {:status 400
-     :headers {"Content-Type" "application/json; charset=utf-8"}
-     :body {:status 400
-            :message "Missing URL. Specify target URL whose webmentions you are querying."}}))
+    (query-list {:domain (get-domain url)
+                 :path (get-path url)
+                 :page page 
+                 :page-size default-page-size
+                 :storage storage 
+                 :mftype (:type opts)
+                 :microformats (:microformats opts)})
+    {:status 400 
+     :body {:message "Missing URL. Specify target URL whose webmentions you are querying."}}))
+
+;; query one webmention
+
+(defn query-one 
+  "Get one specific webmention by id or by its source and target."
+  [opts]
+  {:post [(s/keys :req-un [::identifiers ::storage ::microformats])]}
+  (let [{:keys [identifiers storage microformats]} opts
+        reduce-mf? (not= "raw" microformats)
+        data (apply (:get storage) identifiers)
+        result (if (and (:microformats data) reduce-mf?)
+               (assoc data :microformats 
+                      (reduce-mf (get-in (:microformats data) [:webmention :target])
+                                 (:microformats data)))
+               data)]
+    (respond-webmention-json result)))
 
 (defn by-id
   "Get one specific webmention by ID."
   [id storage opts]
-  (-> ((:get storage) id)
-      (wrap-response-object opts)
-      respond-webmention-json))
+  (query-one {:identifiers [id]
+              :storage storage 
+              :microformats (:microformats opts)}))
 
 (defn by-st-pair
   "Get one specific webmention by source and target."
   [source target storage opts]
-  (-> ((:get storage) source target)
-      (wrap-response-object opts)
-      respond-webmention-json))
+  (query-one {:identifiers [source target]
+              :storage storage 
+              :microformats (:microformats opts)}))
 

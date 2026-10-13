@@ -13,13 +13,15 @@
             resp1 (ret/by-domain "" 1 mock-store {})]
         (is (= page-size (count (:body resp0))))
         (is (= page-size (count (:body resp1)))))))
-  (testing "by-domain handle invalid page number"
+  (testing "by-domain: if page is not number, return the last page frame"
     (with-redefs [weepinbell.webserver.retriever/default-page-size page-size]
       (let [mock-data [{:webmention {:source "1" :target "1"}}
                        {:webmention {:source "2" :target "2"}}]
             mock-store {:get-by-domain (fn [& _] mock-data)}
             resp (ret/by-domain "" true mock-store {})]
-        (is (= 400 (:status resp))))))
+        (is (= 200 (:status resp)))
+        (is (= (-> mock-data last :webmention)
+               (-> resp :body last :webmention))))))
   (testing "by-domain return 404 when list is empty"
     (let [mock-store {:get-by-domain (fn [& _] [])}
           resp (ret/by-domain "" nil mock-store {})]

@@ -1,7 +1,8 @@
 (ns weepinbell.microformats.searcher
   "This namespace contains functions used for searching in a microformats JSON.
   Microformats are indeterministic and dynamic. A specific properties could be 
-  in different places and many forms, thus will require extra effort finding it.")
+  in different places and many forms, thus will require extra effort finding it."
+  (:require [weepinbell.utils.url :refer [url=]]))
 
 ;; glossary
 ;;
@@ -76,3 +77,11 @@
       (if author-photo author-photo
           (when-let [card (use-prop :org node)]
             (search-photo card))))))
+
+(defn search-mftype [target h-entry]
+  (or
+   (->> [:like-of :repost-of :in-reply-to]
+        (filter #(url= (use-prop % h-entry) target))
+        first)
+   :mention))
+
