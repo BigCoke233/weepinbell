@@ -29,7 +29,7 @@
 
 (defn- normlaize-path [^String path*]
   (let [path (or path* "")
-        deslashed (if (and (> (count path) 1) (.endsWith path "/"))
+        deslashed (if (and (pos? (count path)) (.endsWith path "/"))
                     (subs path 0 (dec (count path))) 
                     path)]
    (str (.normalize (URI. deslashed)))))
