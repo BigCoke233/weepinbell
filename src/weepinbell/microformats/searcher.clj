@@ -51,12 +51,15 @@
     (has-key? data :type)   [data]
     :else                   nil))
 
-(defn use-prop [property data]
+(defn use-prop-all [property data]
   (cond
     (not (map? data))            nil
-    (has-key? data :properties)  (first-value (get-key (get-key data :properties) property))
-    (has-key? data property)     (first-value (get-key data property))
+    (has-key? data :properties)  (get-key (get-key data :properties) property)
+    (has-key? data property)     (get-key data property)
     :else                        nil))
+
+(defn use-prop [property data]
+  (first-value (use-prop-all property data)))
 
 (defn find-type [mftype items]
   (concat (filter #(some #{mftype} (type-vector %)) items)
@@ -80,8 +83,9 @@
 
 (defn search-mftype [target h-entry]
   (or
-   (->> [:like-of :repost-of :in-reply-to]
-        (filter #(url= (use-prop % h-entry) target))
+   (->> [:like-of :repost-of :in-reply-to :rsvp]
+        (filter #(some (fn [x] (url= x target)) 
+                       (use-prop-all % h-entry)))
         first)
    :mention))
 

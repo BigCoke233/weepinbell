@@ -23,18 +23,23 @@
 
 ;; query list of webmentions
 
+(defn mftype= [& types]
+  (apply = (map keyword types)))
 (defn filter-by-mftype
   [mftype data]
   (if (nil? mftype) data
       (->> data
            (map (fn [item]
                   [(get-in item [:webmention :target])
-                   (get item :microformats)]))
-           (filter (fn [[target mf]]
-                     (->> mf mfsr/use-items
+                   item]))
+           (filter (fn [[target item]]
+                     (->> item  
+                          :microformats
+                          mfsr/use-items
                           mfsr/find-h-entry
                           (mfsr/search-mftype target)
-                          (= mftype)))))))
+                          (mftype= mftype))))
+           (map last))))
 
 (defn query-list
   "Get a list of webmentions by certain filters."
