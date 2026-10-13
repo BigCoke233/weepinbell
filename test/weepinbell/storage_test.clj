@@ -12,9 +12,9 @@
       (is (spec-check (edns/use-store "source.edn")))))
   (testing "spec-check invalid storage vtables"
     (doseq [check [{:get-by-domain (fn [_])}
-                     {:append (fn [_]) :get (fn [_])}
-                     "I am storage. Trust me"
-                     nil 1 [] {}]]
+                   {:append (fn [_]) :get (fn [_])}
+                   "I am storage. Trust me"
+                   nil 1 [] {}]]
       (is (not (spec-check check))))))
 
 (def test-edn-file "tmp/testfile")
@@ -64,16 +64,16 @@
   (let [id "987654321"
         source "https://source.com"
         target "https://target.com"
-        data {:webmention {:id id 
+        data {:webmention {:id id
                            :source source
                            :target target
                            :modified (System/currentTimeMillis)}}
         data-wm (:webmention data)
-        data-new (assoc data :webmention 
-                        (assoc data-wm :modified 
+        data-new (assoc data :webmention
+                        (assoc data-wm :modified
                                (+ (System/currentTimeMillis) 1)))
-        data-neo (assoc data-new :webmention 
-                        (assoc data-wm :modified 
+        data-neo (assoc data-new :webmention
+                        (assoc data-wm :modified
                                (+ (System/currentTimeMillis) 1)))]
     ((:append storage) data)
     ((:update storage) id data-new)
@@ -87,7 +87,7 @@
   (is (nil? ((:get storage) "source" nil)))
   (is (nil? ((:get storage) nil nil))))
 
-(deftest general-storage-test 
+(deftest general-storage-test
   (doseq [storage storages]
     (doseq [testcase [[test-append-and-get "appending webmention"]
                       [test-append-and-get-list "appending and getting by domain"]

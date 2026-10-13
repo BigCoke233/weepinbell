@@ -89,17 +89,17 @@
                                                         :published [52341243232]}}]}]}]
       (is (= ["h-entry"]
              (->> testdata-a sr/use-items sr/find-h-entry :type))))
-  (testing "find-type should find all matched items on different layers"
-    (let [testdata-a {:items [{:type ["h-feed"]
-                               :children [{:type ["h-entry"]
-                                           :children [{:type ["h-card"]}]}
-                                          {:type ["h-card"]}]}
-                              {:type ["h-card"]}]}]
-      (is (= 3 (->> testdata-a sr/use-items sr/find-h-cards count)))))
-  (testing "find-type should not return empty seq if nothing's matched"
-    (let [testdata-a {:items [{:type ["h-feed"]
-                               :children []}]}]
-      (is (->> testdata-a sr/use-items sr/find-h-entry empty?)))))
+    (testing "find-type should find all matched items on different layers"
+      (let [testdata-a {:items [{:type ["h-feed"]
+                                 :children [{:type ["h-entry"]
+                                             :children [{:type ["h-card"]}]}
+                                            {:type ["h-card"]}]}
+                                {:type ["h-card"]}]}]
+        (is (= 3 (->> testdata-a sr/use-items sr/find-h-cards count)))))
+    (testing "find-type should not return empty seq if nothing's matched"
+      (let [testdata-a {:items [{:type ["h-feed"]
+                                 :children []}]}]
+        (is (->> testdata-a sr/use-items sr/find-h-entry empty?)))))
   (testing "search photos in h-card"
     (let [photo-url "https://test.com/photo.png"
           testdata-a {:type ["h-card"]

@@ -7,12 +7,12 @@
 
 (defn treeshake [content original target]
   (let [shake (partial shell {:out :string}
-                 "npx" "purgecss" 
-                 "--css" original 
-                 "--content")
+                       "npx" "purgecss"
+                       "--css" original
+                       "--content")
         out (apply shake content)
-      css (-> out :out json/parse-string first (get "css"))]
-  (spit target css)))
+        css (-> out :out json/parse-string first (get "css"))]
+    (spit target css)))
 
 (def original-css "resources/public/css/pico.min.css")
 (def target-css "resources/public/css/pico.purged.css")
@@ -25,8 +25,8 @@
     (let [size #(.length (java.io.File. %))
           old-size (size original-css)
           new-size (size target-css)]
-      (println "Tree shaken. Purged CSS file size:" new-size "Bytes" 
-               (str "(" (- new-size old-size ) " Bytes)")))
+      (println "Tree shaken. Purged CSS file size:" new-size "Bytes"
+               (str "(" (- new-size old-size) " Bytes)")))
     (println "Something went wrong.")))
 
 (defn -main []

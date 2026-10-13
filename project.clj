@@ -22,7 +22,7 @@
                  [org.nibor.autolink/autolink "0.12.0"]
                  [io.github.tonsky/fast-edn "1.2.0"]]
   :managed-dependencies [[org.clojure/tools.reader "1.6.0"]
-                         [org.ow2.asm/asm "9.11"]] 
+                         [org.ow2.asm/asm "9.11"]]
   :profiles {:uberjar {:aot :all}
              :test {:dependencies [[ring/ring-mock "0.6.2"]]}
              :dev {:source-paths ["dev"]
@@ -36,6 +36,6 @@
   :plugins [[lein-ancient "0.6.15"]
             ;; latest commits of cloverage were "co-authored" by Claude
             ;; we'll keep it on this version for now
-            [lein-cloverage "1.2.2"] 
+            [lein-cloverage "1.2.2"]
             [dev.weavejester/lein-cljfmt "0.16.5"]])
 

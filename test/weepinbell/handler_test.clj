@@ -7,82 +7,82 @@
             [cheshire.core :refer [parse-string]]))
 
 (defn test-app [wmc store config]
-  (app {:wmc wmc :store store :config config 
+  (app {:wmc wmc :store store :config config
         :services (make-services)}))
 
 (deftest api-routes-test
   (testing "/api/mentions/:domain route"
-     (let [response ((test-app nil {:get-by-domain (fn [_]
-                                                  [{:webmention {:source ""
-                                                                 :target ""
-                                                                 :id ""
-                                                                 :modified 0}}])}
-                            {})
-                       (mock/request :get "/api/mentions/www.example"))]
-       (is (= (:status response) 200))
-       (is (some? (:body response)))))
+    (let [response ((test-app nil {:get-by-domain (fn [_]
+                                                    [{:webmention {:source ""
+                                                                   :target ""
+                                                                   :id ""
+                                                                   :modified 0}}])}
+                              {})
+                    (mock/request :get "/api/mentions/www.example"))]
+      (is (= (:status response) 200))
+      (is (some? (:body response)))))
 
   (testing "/api/mentions?url= route"
-     (let [response ((test-app nil 
-                            {:get-by-domain
-                             (fn [_]
-                                [{:webmention {:source "https://source.net"
-                                               :target "http://localhost"
-                                               :id "123456789123456789"
-                                               :modified 0}
-                                  :microformats {:type :like-of}}])}
-                            {})
-                       (mock/request :get "/api/mentions?url=http://localhost"))]
-       (is (= (:status response) 200))
-       (is (some? (:body response)))
-       (when-not (-> response :body parse-string empty?)
-         (is (-> response :body parse-string first (get "webmention") some?)))))
+    (let [response ((test-app nil
+                              {:get-by-domain
+                               (fn [_]
+                                 [{:webmention {:source "https://source.net"
+                                                :target "http://localhost"
+                                                :id "123456789123456789"
+                                                :modified 0}
+                                   :microformats {:type :like-of}}])}
+                              {})
+                    (mock/request :get "/api/mentions?url=http://localhost"))]
+      (is (= (:status response) 200))
+      (is (some? (:body response)))
+      (when-not (-> response :body parse-string empty?)
+        (is (-> response :body parse-string first (get "webmention") some?)))))
 
   (testing "/api/count/:domain route"
-     (let [response ((test-app nil {:get-by-domain (fn [_]
-                                                  [{:webmention {:source ""
-                                                                 :target ""
-                                                                 :id ""
-                                                                 :modified 0}}])}
-                            {})
-                       (mock/request :get "/api/count/www.example.com"))]
-       (is (= (:status response) 200))
-       (is (= 1 (-> response :body parse-string (get "count") Long.)))))
+    (let [response ((test-app nil {:get-by-domain (fn [_]
+                                                    [{:webmention {:source ""
+                                                                   :target ""
+                                                                   :id ""
+                                                                   :modified 0}}])}
+                              {})
+                    (mock/request :get "/api/count/www.example.com"))]
+      (is (= (:status response) 200))
+      (is (= 1 (-> response :body parse-string (get "count") Long.)))))
 
   (testing "/api/count?url= route"
-     (let [response ((test-app nil 
-                            {:get-by-domain
-                             (fn [_] [{:webmention {:source "1"
-                                                    :target "http://localhost"}}])}
-                            {})
-                       (mock/request :get "/api/count?url=http://localhost"))]
-       (is (= (:status response) 200))
-       (is (= 1 (-> response :body parse-string (get "count") Long.)))))
+    (let [response ((test-app nil
+                              {:get-by-domain
+                               (fn [_] [{:webmention {:source "1"
+                                                      :target "http://localhost"}}])}
+                              {})
+                    (mock/request :get "/api/count?url=http://localhost"))]
+      (is (= (:status response) 200))
+      (is (= 1 (-> response :body parse-string (get "count") Long.)))))
 
   (testing "/api/mention/:id"
     (let [response ((test-app nil {:get (fn [_]
-                                     {:webmention {:source ""
-                                                   :target ""
-                                                   :id "xxx"
-                                                   :modified 0}})}
-                         {})
+                                          {:webmention {:source ""
+                                                        :target ""
+                                                        :id "xxx"
+                                                        :modified 0}})}
+                              {})
                     (mock/request :get "/api/mention/xxx"))]
       (is (= (:status response) 200))))
 
   (testing "/api/mention/?source=&target="
     (let [response ((test-app nil {:get (fn [_ _]
-                                     {:webmention {:source "1"
-                                                   :target "2"
-                                                   :id "xxx"
-                                                   :modified 0}})}
-                         {})
+                                          {:webmention {:source "1"
+                                                        :target "2"
+                                                        :id "xxx"
+                                                        :modified 0}})}
+                              {})
                     (mock/request :get "/api/mention/?source=1&?target=2"))]
       (is (= (:status response) 200)))))
 
 (deftest feed-route-test
   (testing "RSS feed for allowed domains and has items"
     (let [response ((test-app nil {:get-by-domain (fn [_] [{:webmention nil}])}
-                         {:allowed-target-domains "valid.com"})
+                              {:allowed-target-domains "valid.com"})
                     (mock/request :get "/feed/valid.com"))]
       (is (= (:status response) 404))))
   (testing "RSS feed for allowed domains, but with no webmentions"
@@ -98,7 +98,7 @@
     (let [response ((test-app nil nil {}) (mock/request :get "/invalid"))]
       (is (= (:status response) 404)))))
 
-(deftest receiver-endpoint-test 
+(deftest receiver-endpoint-test
   (testing "/endpoint and /api/send should receive valid webmention and return 201"
     (let [test-chan (chan)
           app (test-app test-chan nil {:endpoint "/endpoint"

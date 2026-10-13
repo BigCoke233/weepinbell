@@ -52,13 +52,13 @@
         stop-system (start-system)]
     ;; Register signal handlers for SIGINT and SIGTERM
     (doseq [signal ["INT" "TERM"]]
-      (Signal/handle (Signal. signal) 
-        (reify SignalHandler
-          (handle [_ sig] 
-            (stop-system)
-            (timbre/info "signal" (.getName sig) "received." 
-                         "gracefully shut down weepinbell.")
-            (>!! done-chan true)))))
+      (Signal/handle (Signal. signal)
+                     (reify SignalHandler
+                       (handle [_ sig]
+                         (stop-system)
+                         (timbre/info "signal" (.getName sig) "received."
+                                      "gracefully shut down weepinbell.")
+                         (>!! done-chan true)))))
     ;; block til signal received
     (<!! done-chan)))
 

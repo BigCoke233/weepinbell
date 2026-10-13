@@ -74,20 +74,20 @@
   (let [retryables #{TimeoutException}]
     (some #(instance? % error) retryables)))
 
-(defmacro with-retry 
+(defmacro with-retry
   "Retry request after failure with backoff, asynchronously."
   [times backoff & body]
   `(future (loop [~'current-try 0
-          ~'backoff ~backoff]
-     (let [~'result (try 
-       (deref ~@body) 
-       (catch Throwable ~'e {:error ~'e}))]
-       (if (and (:error ~'result)
-                (retryable? (:error ~'result))
-                (< ~'current-try ~times))
-         (do
-           (timbre/warn "request failed. retry after" ~'backoff "seconds")
-           (Thread/sleep (* ~'backoff 1000)) 
-           (recur (inc ~'current-try) (* 2 ~'backoff)))
-         ~'result)))))
+                  ~'backoff ~backoff]
+             (let [~'result (try
+                              (deref ~@body)
+                              (catch Throwable ~'e {:error ~'e}))]
+               (if (and (:error ~'result)
+                        (retryable? (:error ~'result))
+                        (< ~'current-try ~times))
+                 (do
+                   (timbre/warn "request failed. retry after" ~'backoff "seconds")
+                   (Thread/sleep (* ~'backoff 1000))
+                   (recur (inc ~'current-try) (* 2 ~'backoff)))
+                 ~'result)))))
 

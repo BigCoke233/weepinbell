@@ -4,7 +4,7 @@
             [weepinbell.core]))
 
 (reload/init
-  {:dirs ["src" "dev" "test"]})
+ {:dirs ["src" "dev" "test"]})
 
 (defonce stop-fn (atom nil))
 

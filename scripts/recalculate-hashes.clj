@@ -24,11 +24,11 @@
     (->> (line-seq r)
          (map edn/read-string)
          f)))
-(defn- java-digest [^String s algo] 
-  (let [algorithm (MessageDigest/getInstance algo) 
-        raw-bytes (.digest algorithm (.getBytes s "UTF-8"))] 
+(defn- java-digest [^String s algo]
+  (let [algorithm (MessageDigest/getInstance algo)
+        raw-bytes (.digest algorithm (.getBytes s "UTF-8"))]
     (apply str (map #(format "%02x" %) raw-bytes))))
-(defn digest 
+(defn digest
   ([s]
    (digest s :sha-256 32))
   ([s algo]
@@ -45,16 +45,16 @@
 ;; end 
 
 (let [[datafile] *command-line-args*]
-  (with-webmentions datafile 
+  (with-webmentions datafile
     (fn [wms]
       (println "starting reading, total count:" (count wms))
       (->> wms
            (map (fn [wm]
-             (let [webmention (:webmention wm)
-                   source (:source webmention)
-                   target (:target webmention)
-                   new-id (digest (str source target))]
-               (println new-id)
-               (assoc wm :webmention (assoc webmention :id new-id)))))
+                  (let [webmention (:webmention wm)
+                        source (:source webmention)
+                        target (:target webmention)
+                        new-id (digest (str source target))]
+                    (println new-id)
+                    (assoc wm :webmention (assoc webmention :id new-id)))))
            (unload-data datafile))
       (println "complete!"))))

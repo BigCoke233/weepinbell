@@ -15,10 +15,10 @@
 (defn make-services []
   {:post [#(s/valid? :weepinbell.webserver.handler/services %)]}
   {:gen-feed feed/rss
-   :receive receiver/receive 
+   :receive receiver/receive
    :retrieve-by-domain retriever/by-domain
    :retrieve-by-url retriever/by-url
-   :retrieve-by-id retriever/by-id 
+   :retrieve-by-id retriever/by-id
    :retrieve-by-pair retriever/by-st-pair
    :count-by-domain counter/by-domain
    :count-by-url counter/by-url})

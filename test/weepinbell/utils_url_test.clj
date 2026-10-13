@@ -31,9 +31,9 @@
     (is (= "/index.php" (url/get-path "https://www.example.com/index.php?page=abc")))
     (is (= "/page/abc" (url/get-path "https://example.com/page/abc#anchor"))))
   (testing "getting target"
-    (is (= "https://www.example.com" (url/get-target {:webmention {:target "https://www.example.com"}}))))) 
+    (is (= "https://www.example.com" (url/get-target {:webmention {:target "https://www.example.com"}})))))
 
-(deftest url-equal-test 
+(deftest url-equal-test
   (testing "URL equality"
     (is (url/url= "https://example.com/./abc" "https://example.com/abc"))
     (is (url/url= "https://example.com/page/../abc" "https://example.com/abc"))
@@ -44,14 +44,14 @@
 
 (defn- has-same-elements? [& colls]
   (apply = (map set colls)))
-(deftest url-extract-test 
+(deftest url-extract-test
   (testing "Extracting URLs from string"
-    (is (has-same-elements? 
-          ["https://test.com" "https://example.com"]
-          (url/extract "two links: https://test.com and https://example.com")))
-    (is (has-same-elements? 
-          ["http://www.example.com/index.php?page=123#anchor"]
-          (url/extract "complicated one (http://www.example.com/index.php?page=123#anchor)")))))
+    (is (has-same-elements?
+         ["https://test.com" "https://example.com"]
+         (url/extract "two links: https://test.com and https://example.com")))
+    (is (has-same-elements?
+         ["http://www.example.com/index.php?page=123#anchor"]
+         (url/extract "complicated one (http://www.example.com/index.php?page=123#anchor)")))))
 
 (deftest relative-predicate-test
   (testing "Check if a URL is relative"

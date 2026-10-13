@@ -8,7 +8,7 @@
             [weepinbell.http.client :as client]
             [weepinbell.webhook-presets :refer [request-presets]]))
 
-(s/def ::hooks-map 
+(s/def ::hooks-map
   (s/keys :req-un [::on-create ::on-update ::on-delete ::on-receive]))
 
 ;; utilities
@@ -73,7 +73,7 @@
                            (make-request event-key data (:request-fn %))))
        doall))
 
-(def empty-hooks 
+(def empty-hooks
   (zipmap [:on-receive :on-create :on-delete :on-update]
           (repeat 4 (fn [& _]))))
 (defn make-hooks

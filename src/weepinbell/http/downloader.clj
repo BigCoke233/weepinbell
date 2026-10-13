@@ -1,4 +1,4 @@
-(ns weepinbell.http.downloader 
+(ns weepinbell.http.downloader
   (:require [taoensso.timbre :as timbre]
             [clojure.java.io :as io]
             [weepinbell.http.client :as client]))
@@ -14,7 +14,7 @@
       (let [response (client/get! url {:as :stream})
             status (:status response)]
         (if (and status (> status 199) (< status 300))
-          (do 
+          (do
             (timbre/info "Downloading [" url "] -> [" dest-path "]")
             ;; write to output stream
             (with-open [in (:body response)
@@ -22,7 +22,7 @@
               (io/copy in out))
             (timbre/info "Download success. File size:" (.length file) "bytes")
             true)
-          (do 
+          (do
             (timbre/warn "Download fail. Status: " status)
             (when-let [error (:error response)]
               (timbre/error error))))))

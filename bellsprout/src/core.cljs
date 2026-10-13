@@ -1,5 +1,5 @@
 (ns core
-    (:require [hiccup :refer [hiccup->element]]))
+  (:require [hiccup :refer [hiccup->element]]))
 
 ;; global constants
 (def API_BASE_URL "http://localhost:3000")
@@ -30,28 +30,28 @@
         photo (or (get-in data ["extra" "proxied-photo"])
                   (get-in mf ["author" "photo"]))]
     (hiccup->element
-      [:div {:class "card" :style "font-family: monospace;"}
-        [:p "From: " [:a {:href source :target "_blank"} source]]
-        [:p "To: " [:a {:href target :target "_blank"} target]]
-        (when mf
-          [:footer {:class "card-footer"}
-            [:img {:src photo :class "card-photo"}]
-            [:small [:a {:href (or (get-in mf ["author" "url"]) "#")
-                         :target "_blank"} 
-                     (get-in mf ["author" "name"])]]
-            (when-let [datetime (get wm "modified")]
-              (when-not (= "null" datetime)
-                [:small [:time {:datetime (date->iso datetime)}
-                         (date->local datetime)]]))])])))
+     [:div {:class "card" :style "font-family: monospace;"}
+      [:p "From: " [:a {:href source :target "_blank"} source]]
+      [:p "To: " [:a {:href target :target "_blank"} target]]
+      (when mf
+        [:footer {:class "card-footer"}
+         [:img {:src photo :class "card-photo"}]
+         [:small [:a {:href (or (get-in mf ["author" "url"]) "#")
+                      :target "_blank"}
+                  (get-in mf ["author" "name"])]]
+         (when-let [datetime (get wm "modified")]
+           (when-not (= "null" datetime)
+             [:small [:time {:datetime (date->iso datetime)}
+                      (date->local datetime)]]))])])))
 
 (defn show-cards [data]
   (set! (. cards-area -innerHTML) "")
   (doseq [card-data data]
-    (.appendChild cards-area 
-      (create-card card-data))))
+    (.appendChild cards-area
+                  (create-card card-data))))
 
 (defn get-webmention-list [by term]
-  (-> (case by 
+  (-> (case by
         :domain (js/fetch (str API_BASE_URL "/api/mentions/" term))
         :url    (js/fetch (str API_BASE_URL "/api/mentions?url=" term)))
       (.then (fn [resp] (.json resp)))))
@@ -70,12 +70,12 @@
 (defn- nil-or-empty? [value]
   (or (nil? value) (= "" value) (empty? value)))
 (defn find-webmention [source target]
-  (cond 
+  (cond
     (nil-or-empty? target) (js/alert "Cannot find webmention with no target URL")
     (nil-or-empty? source) (show-webmention-list :url target)
     :else (show-webmention source target)))
 
-(set! (. button-find -onclick) 
+(set! (. button-find -onclick)
       (fn [] (find-webmention (. input-wm-source -value)
                               (. input-wm-target -value))))
 
