@@ -1,9 +1,22 @@
 (ns weepinbell.storage-test
   (:require [clojure.test :refer [testing is deftest]]
             [weepinbell.storage.edn-storage :as edns]
+            [weepinbell.storage.worker :as worker]
             [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
             [weepinbell.storage.spec]))
+
+;; preparing storages to test
+
+(def test-edn-file "tmp/testfile")
+(when (.exists (io/file test-edn-file))
+  (io/delete-file test-edn-file))
+
+(def edn-storage (edns/use-store test-edn-file))
+(def storages [edn-storage
+               (last (worker/start edn-storage))])
+
+;; check if storages conform spec
 
 (def spec-check (partial s/valid? :weepinbell.storage.spec/vtable))
 (deftest storage-conformity-test
@@ -17,10 +30,16 @@
                    nil 1 [] {}]]
       (is (not (spec-check check))))))
 
-(def test-edn-file "tmp/testfile")
-(when (.exists (io/file test-edn-file))
-  (io/delete-file test-edn-file))
-(def storages [(edns/use-store test-edn-file)])
+;; basic general test suite
+
+(defmacro wait-til! [condition-expr & body]
+  `(let [~'start (System/currentTimeMillis)]
+     (loop []
+       (if (try ~condition-expr (catch Throwable ~'_ false))
+         (do ~@body)
+         (when (< (- (System/currentTimeMillis) ~'start) 10000)
+           (Thread/sleep 10)
+           (recur))))))
 
 (defn- wm= [& wms]
   (->> (map :webmention wms)
@@ -36,9 +55,11 @@
                            :id id
                            :modified (System/currentTimeMillis)}}]
     ((:append storage) data)
+    (wait-til! ((:get storage) id))
     (is (wm= data ((:get storage) id)))
     (is (wm= data ((:get storage) source target)))
     ((:delete storage) id)
+    (wait-til! (nil? ((:get storage) id)))
     (is (nil? ((:get storage) id)))))
 
 (defn- test-append-and-get-list [storage]
@@ -54,10 +75,14 @@
         ids (map #(:id (:webmention %)) data)]
     (doseq [item data]
       ((:append storage) item))
+    (wait-til! (->> data
+                    (map (fn [item] (get-in item [:webmention :id])))
+                    (every? #((:get storage) %))))
     (is (= (count data) (count ((:get-by-domain storage) domain))))
     (is (= 1 (count ((:get-by-domain storage) domain "/b"))))
     (doseq [id ids]
       ((:delete storage) id))
+    (wait-til! (= 0 (count ((:get-by-domain storage) domain))))
     (is (= 0 (count ((:get-by-domain storage) domain))))))
 
 (defn- test-update [storage]
@@ -74,11 +99,14 @@
                                (+ (System/currentTimeMillis) 1)))
         data-neo (assoc data-new :webmention
                         (assoc data-wm :modified
-                               (+ (System/currentTimeMillis) 1)))]
+                               (+ (System/currentTimeMillis) 2)))]
     ((:append storage) data)
+    (wait-til! ((:get storage) id))
     ((:update storage) id data-new)
+    (wait-til! (wm= data-new ((:get storage) id)))
     (is (wm= data-new ((:get storage) id)))
     ((:update storage) source target data-neo)
+    (wait-til! (wm= data-neo ((:get storage) source target)))
     (is (wm= data-neo ((:get storage) source target)))
     ((:delete storage) id)))
 

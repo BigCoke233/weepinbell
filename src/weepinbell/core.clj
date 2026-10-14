@@ -4,6 +4,7 @@
             [weepinbell.config :refer [load-config]]
             [weepinbell.webhook :as webhook]
             [weepinbell.storage.edn-storage :as edn]
+            [weepinbell.storage.worker :as worker]
             [clojure.core.async :refer [chan >!! <!!]]
             [taoensso.timbre :as timbre]
             ;; two main subsystems' facades
@@ -28,7 +29,8 @@
         config (load-config (or (System/getenv "WEEPINBELL_CONFIG") "config.edn"))
         ;; Storage middle layer, a map of data-manipulating functions.
         ;; Supports various storage as long as the map conforms storage.spec.
-        store (edn/use-store (:data-path config))
+        bare-store (edn/use-store (:data-path config))
+        [stop-worker async-store] (worker/start bare-store)
         ;; Hooks, a map of callback functions that processor calls 
         ;; on certain events. Can be used for webhooks and more.
         hooks (webhook/make-hooks config)
@@ -36,13 +38,17 @@
         stop-processor (start-processor
                         {:wmc wmc
                          :callbacks hooks
-                         :storage store
+                         :storage async-store
                          :config config})
         stop-webserver (start-webserver
                         {:wmc wmc
-                         :store store
+                         :store async-store
                          :config config})]
-    (fn [] (stop-processor) (stop-webserver) true)))
+    (fn [] 
+      (stop-processor) 
+      (stop-worker)
+      (stop-webserver) 
+      true)))
 
 ; Entry point; Terminal user interface
 ;; start up system and wait for signals to perform graceful shutdown
