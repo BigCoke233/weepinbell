@@ -7,7 +7,7 @@
 
 <p>
 <img src="https://img.shields.io/badge/clojure-1.12.6-brightgreen?logo=clojure" alt="clojure version">
-<!--COVERAGE_BADGE:START--><img src="https://img.shields.io/badge/coverage-81.04%25-green" alt="test coverage 81.04%"><!--COVERAGE_BADGE:END-->
+<!--COVERAGE_BADGE:START--><img src="https://img.shields.io/badge/coverage-79.51%25-green" alt="test coverage 79.51%"><!--COVERAGE_BADGE:END-->
 <a href="https://ci.codeberg.org/repos/16777" target="_blank">
   <img src="https://ci.codeberg.org/api/badges/16777/status.svg?workflow=test" alt="status-badge" />
 </a>
