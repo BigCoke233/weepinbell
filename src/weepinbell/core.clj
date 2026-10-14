@@ -44,10 +44,10 @@
                         {:wmc wmc
                          :store async-store
                          :config config})]
-    (fn [] 
-      (stop-processor) 
-      (stop-worker)
-      (stop-webserver) 
+    (fn []
+      (stop-webserver) ;; stop receiving webmentions
+      (stop-processor) ;; stop processing webmentions
+      (stop-worker)    ;; stop writing to storage
       true)))
 
 ; Entry point; Terminal user interface
