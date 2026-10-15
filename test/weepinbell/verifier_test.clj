@@ -35,7 +35,8 @@
                                "http://localhost:38888/target"))))))
 
 (deftest verification-exceptional-cases-test
-  (with-redefs [weepinbell.http.client/default-options {:timeout 100}]
+  (with-redefs [weepinbell.http.client/default-options {:timeout 100}
+                weepinbell.processor.verifier/retry-times 0]
     (testing "source is not found"
       (with-webmention :new ["/source" {:status 404
                                         :headers {"Content-Type" "text/plain"}
