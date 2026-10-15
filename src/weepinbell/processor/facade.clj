@@ -1,6 +1,6 @@
 (ns weepinbell.processor.facade
   (:require [clojure.spec.alpha :as s]
-            [clojure.core.async :refer [go-loop <! put! close! chan <!!]]
+            [clojure.core.async :refer [go-loop <! put! chan <!!]]
             [taoensso.timbre :as timbre]
             [weepinbell.utils.digest :refer [digest]]
             [weepinbell.storage.spec]
@@ -15,6 +15,9 @@
 (s/def ::callbacks
   (s/keys :req-un [::on-receive ::on-create ::on-delete ::on-update]))
 (s/def ::storage (partial s/valid? :weepinbell.storage.spec/vtable))
+(s/def ::base-url string?)
+(s/def ::allowed-target-domains sequential?)
+(s/def ::pipeline-concurrency int?)
 (s/def ::config
   (s/keys :req-un [::base-url ::allowed-target-domains ::pipeline-concurrency]))
 (s/def ::processor-meta
