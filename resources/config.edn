@@ -8,4 +8,5 @@
            :on-update []
            :on-delete []}
  :webhook-request-fn nil
- :feed-length 8}
+ :feed-length 8
+ :pipeline-concurrency 5}

@@ -16,7 +16,8 @@
                          :update (fn [& _])
                          :get-by-domain (fn [& _])}
                :config {:base-url "https://test.com"
-                        :allowed-target-domains ["test.com"]}}]
+                        :allowed-target-domains ["test.com"]
+                        :pipeline-concurrency 1}}]
     (start-processor pmeta)))
 
 (deftest start-processor-test
