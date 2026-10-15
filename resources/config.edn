@@ -9,4 +9,5 @@
            :on-delete []}
  :webhook-request-fn nil
  :feed-length 8
- :pipeline-concurrency 5}
+ :pipeline-concurrency 5
+ :log-level :info}

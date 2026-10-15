@@ -18,15 +18,12 @@
 (defn start-system
   "Start webmention processor and webserver in the background.
    Returns a function that performs a graceful shutdown."
-  []
+  [config]
   {:post [fn?]}
   (let [;; webmention channel 
         ;; Receiver puts webmention requests in. 
         ;; Processor takes them out.
         wmc (chan)
-        ;; Weepinbell configuration, 
-        ;; loaded from config.edn and merged with defaults.
-        config (load-config (or (System/getenv "WEEPINBELL_CONFIG") "config.edn"))
         ;; Storage middle layer, a map of data-manipulating functions.
         ;; Supports various storage as long as the map conforms storage.spec.
         bare-store (edn/use-store (:data-path config))
@@ -53,18 +50,23 @@
 ; Entry point; Terminal user interface
 ;; start up system and wait for signals to perform graceful shutdown
 (defn -main [& _]
-  (timbre/info "starting weepinbell...")
-  (let [done-chan (chan 1)
-        stop-system (start-system)]
+  (let [config-file (or (System/getenv "WEEPINBELL_CONFIG") "config.edn")
+        config (load-config config-file)
+        log-level (or (System/getenv "WEEPINBELL_LOGLEVEL") 
+                      (:log-level config) :info)]
+    (timbre/merge-config! {:min-level log-level})
+    (timbre/info "starting weepinbell...")
+    (let [done-chan (chan 1)
+          stop-system (start-system config)]
     ;; Register signal handlers for SIGINT and SIGTERM
-    (doseq [signal ["INT" "TERM"]]
-      (Signal/handle (Signal. signal)
-                     (reify SignalHandler
-                       (handle [_ sig]
-                         (stop-system)
-                         (timbre/info "signal" (.getName sig) "received."
-                                      "gracefully shut down weepinbell.")
-                         (>!! done-chan true)))))
+      (doseq [signal ["INT" "TERM"]]
+        (Signal/handle (Signal. signal)
+                       (reify SignalHandler
+                         (handle [_ sig]
+                           (stop-system)
+                           (timbre/info "signal" (.getName sig) "received."
+                                        "gracefully shut down weepinbell.")
+                           (>!! done-chan true)))))
     ;; block til signal received
-    (<!! done-chan)))
+      (<!! done-chan))))
 
