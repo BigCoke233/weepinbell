@@ -112,6 +112,7 @@
      (update-related! ds (:id wm) new))))
 
 (defn make-db [db-file]
+  (io/make-parents db-file)
   {:dbtype "sqlite" :dbname db-file})
 (defn make-ds [db]
   (jdbc/get-datasource db))
