@@ -34,7 +34,33 @@ lein uberjar
 
 And grab `target/weepinbell-v0.x.x-standalone.jar`.
 
-## 2. Run the app
+## 2. Configure the app
+
+Create a file named `config.edn` at the current working directory[^1], or set environment variable `WEEPINBELL_CONFIG` to a custom file pathname. Either way, it should be written in EDN format.
+
+> [!note]
+> If you're not familiar with this format, see [edn](https://github.com/edn-format/edn). In short, it's Clojure's equivalent of JSON, but more extensible.
+
+Use [resources/config.edn](../../resources/config.edn) as a template.
+
+Refer to comments in the template config file or a feature's documentation for details. But first, you should change at least the following two options in your config file.
+
+For weepinbell to receive webmentions for your site, add your site's domain to `:allowed-target-domains`.
+
+```edn 
+ :allowed-target-domains ["your.site.domain" "can-have.more-than.one"]
+```
+
+For weepinbell to return the right URLs to webmentions and proxied photos, set `:base-url` to where you're hosting weepinbell, **without trailing slash**.
+
+```edn 
+ :base-url "https://example.com"
+``` 
+
+> [!warning]
+> You have to **restart** weepinbell for configuration to take effects.
+
+## 3. Run the app
 
 ### The command 
 
@@ -63,7 +89,7 @@ docker compose up -d
 
 Podman should work as well, but it's not tested.
 
-## 3. Set up web server
+## 4. Set up web server
 
 It's recommended to put weepinbell behind a reverse proxy, using something like [nginx](https://nginx.org/) and [caddy](https://caddyserver.com/). Here's an example `Caddyfile`:
 
@@ -73,9 +99,9 @@ example.com
 reverse_proxy :3000
 ```
 
-Weepinbell listens port `:3000` by default. See [configuration](./configuration.md) on how to change it.
+Weepinbell listens port `:3000` by default. Edit configuration `:port` if you want something else.
 
-## 4. Point your site to weepinbell 
+## 5. Point your site to weepinbell 
 
 Add this to your `<head>`:
 
@@ -85,7 +111,4 @@ Add this to your `<head>`:
 
 Senders will look for this `<link>` tag and know where to send webmentions to.
 
----
-
-Now weepinbell is installed on your site. Before it can actually receive webmentions for you, you need to [configure it](./configuration.md).
-
+[^1]: Working directory is where the starting command is run. For example, if you `cd` into `/home/yourname/weepinbell` and run `java -jar weepinbell-xxx.jar`, then your configuration file should be `/home/yourname/weepinbell/config.edn`. If you're using Docker or systemd, you can configure working directory in `docker-compose.yaml` and `.service` files.

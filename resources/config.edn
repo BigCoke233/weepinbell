@@ -1,14 +1,32 @@
-{:port "3000"
+{;; :port is a string representing port number weepinbell listens to
+ ;; configurable by environmental variable PORT, which is overridden by config
+ :port "3000"
+ ;; :base-url is used to form permalinks to a resource (a webmention, proxied photos...)
  :base-url "http://localhost:3000"
+ ;; :endpoint is where webmention requests are sent to
  :endpoint "/endpoint"
+ ;; :allowed-target-domains is a vector representing an allow list
+ ;; weepinbell only receive webmentions whose target is from one of the domain below
  :allowed-target-domains ["example.com"]
+ ;; available storage types: 
+ ;; - :edn (:data-path should point to an edn text file)
+ ;; - :sqlite (:data-path should point to a SQLite db file)
+ ;; :data-path can be non-existent. weepinbell will create them.
  :storage-type :edn
  :data-path "data/webmention.edn"
+ ;; :webhook is a map of events to URLs. weepinbell sends POST request to these URLs
+ ;; when certain event occurs.
+ ;; :webhook-request-fn is the payload generator for those requests. If nil, webhook
+ ;; will carry no data and sends a plain POST request.
  :webhook {:on-receive []
            :on-create []
            :on-update []
            :on-delete []}
- :webhook-request-fn nil
+ :webhook-request-fn nil ;; supported values: `:ntfy` or `:bark`
+ ;; :feed-length is how many latest items an RSS feed should contain.
  :feed-length 8
+ ;; :pipeline-concurrency is how many processing pipelines should be started.
+ ;; For personal use, 1 would be enough. For large traffic, adjust accordingly
  :pipeline-concurrency 5
+ ;; Minimal log level. Set to `:debug` when debugging or submitting a bug.
  :log-level :info}

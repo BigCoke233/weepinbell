@@ -3,9 +3,12 @@
 ## Index 
 
 1. [Installation](./installation.md)
-2. [Configuration](./configuration.md)
-3. [API Referrence](./API.md)
-4. [Migration](./migration.md)
+2. [API Referrence](./API.md)
+3. [Webhook](./webhook.md)
+4. [RSS](./rss.md)
+5. [Migration](./migration.md)
+
+---
 
 ## Ask a question 
 
@@ -27,5 +30,5 @@ I don't care for issue templates. When [submitting a new issue](https://codeberg
 
 ## Suggest a Feature
 
-
+Read about our [philosophy](../PHILOSOPHY.md) first and then open an issue.
 
