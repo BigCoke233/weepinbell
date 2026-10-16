@@ -9,7 +9,7 @@ steps:
   - name: run cloverage
     image: clojure:latest
     commands:
-      - lein cloverage
+      - lein cloverage --ns-exclude-regex user
   - name: extract coverage and update README
     image: babashka/babashka:latest
     commands:
