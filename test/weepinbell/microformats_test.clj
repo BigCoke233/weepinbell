@@ -70,6 +70,7 @@
   (testing "use-props get properties of a microformats item"
     (->> testdata
          (map #(is (= (->> % sr/use-items sr/find-h-entry (sr/use-prop :content))
+                      (->> % sr/use-items sr/find-h-entry (sr/use-prop "content"))
                       (get-in % [:items first :properties :content first]))))
          doall))
   (testing "use-props works with out :properties key as well"

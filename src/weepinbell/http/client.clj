@@ -12,19 +12,15 @@
   {:user-agent "WebmentionBot"
    :timeout (* 20 1000)})
 
-(defn- wrap-response [response]
-  (assoc response :content-length (or (get-in response [:headers "Content-Length"])
-                                      (get-in response [:headers "content-length"]))))
-
 (defn- wrap-promise [promised-response]
-  (future (wrap-response @promised-response)))
+  (future @promised-response))
 
 (defn post
   "Sends POST request asynchronously. Returns a promise/future."
-  ([url]
-   (post url nil))
-  ([url options]
-   (post url options nil))
+  ;;([url]
+  ;; (post url nil))
+  ;;([url options]
+  ;; (post url options nil))
   ([url options callbacks]
    (-> url
        (hk/post (merge default-options options) callbacks)
@@ -32,8 +28,8 @@
 
 (defn get
   "Sends GET request asynchronously. Returns a promise/future."
-  ([url]
-   (get url nil))
+  ;;([url]
+  ;; (get url nil))
   ([url options]
    (get url options nil))
   ([url options callbacks]
@@ -47,7 +43,7 @@
    @(get url nil))
   ([url options]
    @(get url options nil))
-  ([url options callbacks]
+  #_([url options callbacks]
    @(get url options callbacks)))
 
 (defn head
@@ -61,14 +57,15 @@
        (hk/head (merge default-options options) callbacks)
        wrap-promise)))
 
-(defn head!
-  "Sends HEAD request synchronously. Returns a response."
-  ([url]
-   @(head url nil))
-  ([url options]
-   @(head url options nil))
-  ([url options callbacks]
-   @(head url options callbacks)))
+;; Nothing referrences this function, commented for now
+;;(defn head!
+;;  "Sends HEAD request synchronously. Returns a response."
+;;  ([url]
+;;   @(head url nil))
+;;  ([url options]
+;;   @(head url options nil))
+;;  ([url options callbacks]
+;;   @(head url options callbacks)))
 
 (defn retryable? [error]
   (let [retryables #{TimeoutException}]

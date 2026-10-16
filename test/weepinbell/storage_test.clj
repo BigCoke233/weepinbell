@@ -115,11 +115,45 @@
   (is (nil? ((:get storage) "source" nil)))
   (is (nil? ((:get storage) nil nil))))
 
+(defn- test-friends [storage]
+  (let [id "123456789", mf {}
+        photo "https://source.net/photo.png"
+        data {:webmention {:id id
+                           :source "https://source.net"
+                           :target "https://target.net"
+                           :modified (System/currentTimeMillis)}
+              :microformats mf
+              :extra {:proxied-photo photo}}]
+    ((:append storage) data)
+    (wait-til! ((:get storage) id))
+    (let [retrieved ((:get storage) id)]
+      (is (= photo (get-in retrieved [:extra :proxied-photo])))
+      (is (= mf (:microformats retrieved))))
+    ((:delete storage) id)
+    (wait-til! (not ((:get storage) id)))))
+
 (deftest general-storage-test
   (doseq [storage storages]
     (doseq [testcase [[test-append-and-get "appending webmention"]
                       [test-append-and-get-list "appending and getting by domain"]
                       [test-update "updating webmentions"]
-                      [test-get-empty "making sure getting empty won't throw"]]]
+                      [test-get-empty "making sure getting empty won't throw"]
+                      [test-friends "friends of webmention (microformats, proxied-photo) can be stored correctly"]]]
       (testing (last testcase)
         ((first testcase) storage)))))
+
+;; storage worker specifics
+
+(deftest storage-worker-test
+  (testing "Storage worker should keep working if some Exceptions occur"
+    (let [signal (promise)
+          [stop store] (-> edn-storage
+                           (assoc :append (fn [_] (throw (Exception.))))
+                           (assoc :delete (fn [& _] (deliver signal true)))
+                           worker/start)]
+      ((:append store) {}) ;; this throws Exception inside worker
+      (Thread/sleep 50)
+      ((:delete store) {}) ;; if Exception was caught, this should gets done
+      (Thread/sleep 50)
+      (is signal)
+      (stop))))
