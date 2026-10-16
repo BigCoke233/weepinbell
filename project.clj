@@ -20,10 +20,15 @@
                  [com.taoensso/timbre "6.8.0"]
                  [clj-rss "0.4.0"]
                  [org.nibor.autolink/autolink "0.12.0"]
-                 [io.github.tonsky/fast-edn "1.2.0"]]
+                 [io.github.tonsky/fast-edn "1.2.0"]
+                 [com.github.seancorfield/next.jdbc "1.3.828"]
+                 [org.xerial/sqlite-jdbc "3.53.4.0"]]
   :managed-dependencies [[org.clojure/tools.reader "1.6.0"]
                          [org.ow2.asm/asm "9.11"]]
-  :profiles {:uberjar {:aot :all}
+  :profiles {:uberjar {:aot :all
+                       :uberjar-exclusions [#"^org/sqlite/native/Mac/"
+                                            #"^org/sqlite/native/Windows/"
+                                            #"^org/sqlite/native/Linux-Android/"]}
              :test {:dependencies [[ring/ring-mock "0.6.2"]]}
              :dev {:source-paths ["dev"]
                    :repl-options {:init-ns user

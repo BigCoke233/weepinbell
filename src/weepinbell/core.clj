@@ -4,6 +4,7 @@
             [weepinbell.config :refer [load-config]]
             [weepinbell.webhook :as webhook]
             [weepinbell.storage.edn-storage :as edn]
+            [weepinbell.storage.sqlite :as sqlite]
             [weepinbell.storage.worker :as worker]
             [clojure.core.async :refer [chan >!! <!!]]
             [taoensso.timbre :as timbre]
@@ -26,7 +27,10 @@
         wmc (chan)
         ;; Storage middle layer, a map of data-manipulating functions.
         ;; Supports various storage as long as the map conforms storage.spec.
-        bare-store (edn/use-store (:data-path config))
+        data-path (:data-path config)
+        bare-store (case (:storage-type config)
+                     :edn (edn/use-store data-path)
+                     :sqlite (sqlite/use-store data-path))
         [stop-worker async-store] (worker/start bare-store)
         ;; Hooks, a map of callback functions that processor calls 
         ;; on certain events. Can be used for webhooks and more.

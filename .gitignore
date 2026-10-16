@@ -21,3 +21,4 @@ pom.xml.asc
 /bellsprout/.lsp/.cache
 /bellsprout/resources/public/css/pico.purged.css
 /bellsprout/node_modules
+*.db

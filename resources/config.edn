@@ -2,6 +2,7 @@
  :base-url "http://localhost:3000"
  :endpoint "/endpoint"
  :allowed-target-domains ["example.com"]
+ :storage-type :edn
  :data-path "data/webmention.edn"
  :webhook {:on-receive []
            :on-create []

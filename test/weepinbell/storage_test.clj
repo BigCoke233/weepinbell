@@ -1,6 +1,7 @@
 (ns weepinbell.storage-test
   (:require [clojure.test :refer [testing is deftest]]
             [weepinbell.storage.edn-storage :as edns]
+            [weepinbell.storage.sqlite :as sqlite]
             [weepinbell.storage.worker :as worker]
             [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
@@ -11,9 +12,15 @@
 (def test-edn-file "tmp/testfile")
 (when (.exists (io/file test-edn-file))
   (io/delete-file test-edn-file))
+(def test-sqlite-db "tmp/testsqlite.db")
+(when (.exists (io/file test-sqlite-db))
+  (io/delete-file test-sqlite-db))
 
 (def edn-storage (edns/use-store test-edn-file))
+(def sqlite-storage (sqlite/use-store test-sqlite-db))
 (def storages [edn-storage
+               sqlite-storage
+               (last (worker/start sqlite-storage))
                (last (worker/start edn-storage))])
 
 ;; check if storages conform spec
@@ -22,7 +29,8 @@
 (deftest storage-conformity-test
   (testing "edn-storage should conform storage spec."
     (with-redefs [weepinbell.storage.edn-storage/file-exists? (fn [_] true)]
-      (is (spec-check (edns/use-store "source.edn")))))
+      (doseq [storage storages]
+        (is (spec-check storage)))))
   (testing "spec-check invalid storage vtables"
     (doseq [check [{:get-by-domain (fn [_])}
                    {:append (fn [_]) :get (fn [_])}
@@ -64,11 +72,11 @@
 
 (defn- test-append-and-get-list [storage]
   (let [domain "target.com"
-        data [{:webmention {:source "source"
+        data [{:webmention {:source "https://source.net"
                             :target (str "https://" domain "/a")
                             :id "1"
                             :modified (System/currentTimeMillis)}}
-              {:webmention {:source "source"
+              {:webmention {:source "https://source.net"
                             :target (str "https://" domain "/b")
                             :id "2"
                             :modified (System/currentTimeMillis)}}]
