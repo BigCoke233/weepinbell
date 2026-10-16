@@ -66,6 +66,7 @@ The message themselves should be informative enough.
 | Query Params    | Description                                                                                                                                          | Default |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
 | `microformats`* | Only takes value `"raw"`. By default, microformats are reduced to deterministic structure. If `"raw"`, return original unmodified microformats data. | None    |
+
 An example response: 
 
 ```json 
@@ -103,22 +104,41 @@ An example response:
 | `GET`  | `/api/mentions/{domain}`      | Webmentions sent to a specific domain. |
 | `GET`  | `/api/mentions/?url={target}` | Webmentions sent to a specific URL.    |
 
+| Query Params    | Description                                                                                                                                                      | Default |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `microformats`* | Only takes value `"raw"`. By default, microformats are reduced to deterministic structure. If `"raw"`, return original unmodified microformats data.             | None    |
+| `page`*         | Page number starting from `0`. **If no page number, weepinbell returns a full list.** If not a number (e.g. `last`, a string), weepinbell returns the last page. | None    |
+| `mftype`*       | Filters webmentions by their microformats type. Available types are `like-of`, `repost-of`, `in-reply-to` and `rsvp`. If no mftype, no filter is applied.        | None    |
+
 The responses are almost the same as `/api/mention/{id}` except that there are multiple webmention items wrapped inside a JSON array.
 
----
+### Couting a list of webmentions
 
-## Deprecated API 
+| Method | Path                       | Description                                     |
+| ------ | -------------------------- | ----------------------------------------------- |
+| `GET`  | `/api/count/{domain}`      | Count of webmentions sent to a specific domain. |
+| `GET`  | `/api/count/?url={target}` | Count of webmentions sent to a specific URL.    |
 
-### Microformats-Type-Aware routes 
+An example response:
 
-Will be replaced with a query parameter of `/api/mentions/`. See [#46](https://codeberg.org/eltrac/weepinbell/issues/46).
+```json
+{
+    "count": "<integer>"
+}
+```
 
-| Method | Path                          | Description                            |
-| ------ | ----------------------------- | -------------------------------------- |
-| `GET`  | `/api/likes/{domain}`      | Webmentions sent to a specific domain, which contains microformats property `like-of`. |
-| `GET`  | `/api/likes/?url={target}` | Webmentions sent to a specific URL, which contains microformats property `like-of`.    |
-| `GET`  | `/api/reposts/{domain}`      | Webmentions sent to a specific domain, which contains microformats property `repost-of`. |
-| `GET`  | `/api/reposts/?url={target}` | Webmentions sent to a specific URL, which contains microformats property `repost-of`.    |
-| `GET`  | `/api/replies/{domain}`      | Webmentions sent to a specific domain., which contains microformats property `in-reply-to` |
-| `GET`  | `/api/replies/?url={target}` | Webmentions sent to a specific URL, which contains microformats property `in-reply-to`.    |
+### Sending webmentions
+
+| Method | Path                       | Description                                     |
+| ------ | -------------------------- | ----------------------------------------------- |
+| `POST`  | `/api/send/`      | Count of webmentions sent to a specific domain. |
+
+| Post Params | Description                                                                                                                                               | Default |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `source`    | Where webmention is coming from. The page that mentioned `target`.                                                                                        | None    |
+| `target`    | Where webmention is sent to. The page that was mentioned by `source`. Target's domain should be in the allow list of receiver. (see [configuration](./configuration.md)) | None    |
+
+Currently implemented as an alias of `/endpoint`.
+
+Will support sending webmentions to other servers in the future. See issue [#24](https://codeberg.org/eltrac/weepinbell/issues/24).
 
