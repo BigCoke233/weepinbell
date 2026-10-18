@@ -22,7 +22,7 @@
                   :identical "Source and target are identical."
                   :domain-not-allowed "Domain of target is not allowed. This receiver does not receive webmention on its behalf."})]
     {:status 400
-     :headers {"Content-Type" "application/json; charset=utf-8"}
+     :headers {}
      :body {:status 400
             :message msg}}))
 ;; end utilities

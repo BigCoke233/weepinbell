@@ -1,6 +1,7 @@
 (ns weepinbell.webserver.receiver
   "Service receiving Webmention request (a source and a target); verify the request; return error message if any; push Webmention into webbmention channel for processor to take."
   (:require [clojure.core.async :refer [put!]]
+            [ring.util.http-response :refer [bad-request created]]
             [weepinbell.utils.url :refer [get-domain valid-http-url? normalize url=]]
             [weepinbell.utils.digest :refer [digest]]))
 
@@ -45,10 +46,8 @@
      ;; Request verification
     (if-let [error-msg (check-request source target allowlist)]
        ;; respond if request verification failed
-      {:status 400
-       :headers {"Content-Type" "application/json; charset=utf-8"}
-       :body {:status 400
-              :message error-msg}}
+      (bad-request {:status 400
+                    :message error-msg})
        ;; proceed if request is ok
       (do
          ;; The receiver SHOULD check that target is a valid
@@ -66,9 +65,5 @@
               response {:status 201
                         :message "Webmention is accepted and pending for verification."
                         :url wm-url}]
-          {:status 201
-           :headers {"Location" wm-url
-                     "Content-Type" "application/json; charset=utf-8"}
-           :body response})))))
-
+          (created wm-url response))))))
 
