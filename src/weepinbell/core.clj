@@ -8,6 +8,7 @@
             [weepinbell.storage.worker :as worker]
             [clojure.core.async :refer [chan >!! <!!]]
             [taoensso.timbre :as timbre]
+            [weepinbell.migration :as m]
             ;; two main subsystems' facades
             [weepinbell.processor.facade :refer [start-processor]]
             [weepinbell.webserver.facade :refer [start-webserver]])
@@ -53,7 +54,7 @@
 
 ; Entry point; Terminal user interface
 ;; start up system and wait for signals to perform graceful shutdown
-(defn -main [& _]
+(defn start-engine []
   (let [config-file (or (System/getenv "WEEPINBELL_CONFIG") "config.edn")
         config (load-config config-file)
         log-level (or (System/getenv "WEEPINBELL_LOGLEVEL") 
@@ -73,4 +74,9 @@
                            (>!! done-chan true)))))
     ;; block til signal received
       (<!! done-chan))))
+
+(defn -main [& args]
+  (case (first args)
+    "migrate-db" (apply m/edn->sqlite (rest args))
+    (start-engine)))
 
