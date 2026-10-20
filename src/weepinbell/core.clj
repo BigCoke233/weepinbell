@@ -8,6 +8,7 @@
             [weepinbell.storage.worker :as worker]
             [clojure.core.async :refer [chan >!! <!!]]
             [taoensso.timbre :as timbre]
+            [nrepl.server :as nrepl]
             [weepinbell.migration :as m]
             ;; two main subsystems' facades
             [weepinbell.processor.facade :refer [start-processor]]
@@ -58,21 +59,28 @@
   (let [config-file (or (System/getenv "WEEPINBELL_CONFIG") "config.edn")
         config (load-config config-file)
         log-level (or (System/getenv "WEEPINBELL_LOGLEVEL") 
-                      (:log-level config) :info)]
+                      (:log-level config) :info)
+        nrepl-port (:nrepl-port config)]
     (timbre/merge-config! {:min-level log-level})
-    (timbre/info "starting weepinbell...")
+    
     (let [done-chan (chan 1)
-          stop-system (start-system config)]
-    ;; Register signal handlers for SIGINT and SIGTERM
+          stop-system (do (timbre/info "starting weepinbell...")
+                          (start-system config))
+          nrepl-server (when nrepl-port
+                         (timbre/info "starting nREPL server on port" nrepl-port)
+                         (nrepl/start-server :port nrepl-port))]
+      ;; Register signal handlers for SIGINT and SIGTERM
       (doseq [signal ["INT" "TERM"]]
         (Signal/handle (Signal. signal)
                        (reify SignalHandler
                          (handle [_ sig]
                            (stop-system)
+                           (when nrepl-server
+                             (nrepl/stop-server nrepl-server))
                            (timbre/info "signal" (.getName sig) "received."
                                         "gracefully shut down weepinbell.")
                            (>!! done-chan true)))))
-    ;; block til signal received
+      ;; block til signal received
       (<!! done-chan))))
 
 (defn -main [& args]

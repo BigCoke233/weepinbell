@@ -29,4 +29,10 @@
  ;; For personal use, 1 would be enough. For large traffic, adjust accordingly
  :pipeline-concurrency 5
  ;; Minimal log level. Set to `:debug` when debugging or submitting a bug.
- :log-level :info}
+ :log-level :info
+ ;; :nrepl-port is port number of the embedded nREPL server
+ ;; use nil to turn off nREPL feature; use an integer to enable nREPL
+ ;; e.g. `:nrepl-prot 7888` means an nREPL client can connect to weepinbell's
+ ;;      nREPL server and evaluate Clojure code on the fly.
+ ;; WARNING: never expose nREPL server to the public network!
+ :nrepl-port nil}
