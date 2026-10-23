@@ -4,7 +4,7 @@
             [weepinbell.config :refer [load-config]]
             [weepinbell.webhook :as webhook]
             [weepinbell.storage.edn-storage :as edn]
-            [weepinbell.storage.sqlite :as sqlite]
+            [weepinbell.storage.h2 :as h2]
             [weepinbell.storage.worker :as worker]
             [clojure.core.async :refer [chan >!! <!!]]
             [taoensso.timbre :as timbre]
@@ -32,7 +32,7 @@
         data-path (:data-path config)
         bare-store (case (:storage-type config)
                      :edn (edn/use-store data-path)
-                     :sqlite (sqlite/use-store data-path))
+                     :h2 (h2/use-store data-path))
         [stop-worker async-store] (worker/start bare-store)
         ;; Hooks, a map of callback functions that processor calls 
         ;; on certain events. Can be used for webhooks and more.
@@ -85,6 +85,6 @@
 
 (defn -main [& args]
   (case (first args)
-    "migrate-db" (apply m/edn->sqlite (rest args))
+    "migrate-db" (apply m/edn->h2 (rest args))
     (start-engine)))
 

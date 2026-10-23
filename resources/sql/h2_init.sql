@@ -1,5 +1,5 @@
 create table if not exists webmention (
-  id integer primary key autoincrement,
+  id integer auto_increment primary key,
   hash text not null unique,
   wm_source text not null,
   wm_target text not null,
@@ -7,11 +7,11 @@ create table if not exists webmention (
   wm_target_domain text not null,
   wm_source_path text not null,
   wm_target_path text not null,
-  lastmod integer not null
+  lastmod bigint not null
 );
 
 create table if not exists microformats (
-  id integer primary key autoincrement,
+  id integer auto_increment primary key,
   wm_id integer not null,
   mf_type text not null,
   mf_data text not null, /* schema on read, store EDN string here */
@@ -22,7 +22,7 @@ create table if not exists microformats (
 );
 
 create table if not exists proxied_photo (
-  id integer primary key autoincrement,
+  id integer auto_increment primary key,
   wm_id integer not null,
   url text not null,
 

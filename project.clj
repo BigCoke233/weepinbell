@@ -22,7 +22,7 @@
                  [org.nibor.autolink/autolink "0.12.0"]
                  [io.github.tonsky/fast-edn "1.2.0"]
                  [com.github.seancorfield/next.jdbc "1.3.828"]
-                 [org.xerial/sqlite-jdbc "3.53.4.0"]
+                 [com.h2database/h2 "2.3.232"]
                  [nrepl "1.8.0"]]
   :managed-dependencies [[org.clojure/tools.reader "1.6.0"]
                          [org.ow2.asm/asm "9.11.1"]]

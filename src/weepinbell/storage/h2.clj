@@ -1,4 +1,4 @@
-(ns weepinbell.storage.sqlite
+(ns weepinbell.storage.h2
   (:require [clojure.string :refer [blank? split]]
             [next.jdbc :as jdbc]
             [next.jdbc.result-set :refer [as-unqualified-lower-maps]]
@@ -55,7 +55,7 @@
   (let [mf (:microformats data)
         photo (get-in data [:extra :proxied-photo])
         wm_result (sql/insert! ds :webmention (wm->schema data))
-        wm_id (get wm_result (keyword "last_insert_rowid()"))]
+        wm_id (:id wm_result)]
     (when mf
       (sql/insert! ds :microformats (mf->schema wm_id data)))
     (when photo
@@ -113,14 +113,14 @@
 
 (defn make-db [db-file]
   (io/make-parents db-file)
-  {:dbtype "sqlite" :dbname db-file})
+  {:dbtype "h2" :dbname db-file})
 (defn make-ds [db]
   (jdbc/get-datasource db))
 (defn make-datasource [db-file]
   (jdbc/with-options (make-ds (make-db db-file))
                      {:builder-fn as-unqualified-lower-maps}))
 
-(def init-sql-script (io/resource "sql/sqlite_init.sql"))
+(def init-sql-script (io/resource "sql/h2_init.sql"))
 (defn create-tables [ds]
   (doseq [:let [statements (-> init-sql-script slurp (split #";"))]
           statement (remove blank? statements)]
