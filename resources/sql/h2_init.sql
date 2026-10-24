@@ -31,10 +31,10 @@ create table if not exists proxied_photo (
     on delete cascade
 );
 
-create index idx_webmention_hash on webmention (hash);
+create index if not exists idx_webmention_hash on webmention (hash);
 
-create index idx_webmention_pair on webmention (wm_source, wm_target);
+create index if not exists idx_webmention_pair on webmention (wm_source, wm_target);
 
-create index idx_webmention_domain on webmention (wm_target_domain);
+create index if not exists idx_webmention_domain on webmention (wm_target_domain);
 
-create index idx_webmention_uri on webmention (wm_target_domain, wm_target_path);
+create index if not exists idx_webmention_uri on webmention (wm_target_domain, wm_target_path);

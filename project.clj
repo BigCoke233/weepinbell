@@ -1,4 +1,4 @@
-(defproject weepinbell "v1.0.0-818b2d0"
+(defproject weepinbell "v1.0.0-fcfdb21"
   :description "A Webmention receiver written in Clojure."
   :url "https://codeberg.org/eltrac/weepinbell"
   :license {:name "GNU Affero General Public License"
