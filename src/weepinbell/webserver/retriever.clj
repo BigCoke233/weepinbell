@@ -41,7 +41,7 @@
                           (mftype= mftype))))
            (map last))))
 
-(defn- paging [page page-size data]
+(defn- paging [^Long page ^Long page-size data]
   (if (nil? page) data
       (let [pages (vec (partition-all
                         (or page-size default-page-size)
@@ -67,6 +67,9 @@
   {:pre [(s/keys :req-un [::domain ::path ::page ::page-size ::storage ::mftype])]}
   [opts]
   (let [{:keys [domain path page page-size storage mftype]} opts
+        ;; parse to number if possible, use original if not
+        page (try (Long/parseLong page) (catch Exception _ page))
+        ;; data trasformations
         data ((:get-by-domain storage path) domain)
         data (filter-by-mftype mftype data)
         data (paging page page-size data)

@@ -13,6 +13,14 @@
             resp1 (ret/by-domain "" 1 mock-store {})]
         (is (= page-size (count (:body resp0))))
         (is (= page-size (count (:body resp1)))))))
+  (testing "by-domain: if page is a string that can be parsed to number, it should work"
+    (with-redefs [weepinbell.webserver.retriever/default-page-size page-size]
+      (let [mock-data [{:webmention {:source "1" :target "1"}}
+                       {:webmention {:source "2" :target "2"}}]
+            mock-store {:get-by-domain (fn [& _] mock-data)}
+            resp0 (ret/by-domain "" "0" mock-store {})
+            resp1 (ret/by-domain "" 0 mock-store {})]
+        (is (= resp0 resp1)))))
   (testing "by-domain: if page is not number, return the last page frame"
     (with-redefs [weepinbell.webserver.retriever/default-page-size page-size]
       (let [mock-data [{:webmention {:source "1" :target "1"}}
