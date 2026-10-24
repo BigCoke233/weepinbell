@@ -13,24 +13,24 @@
 (when (.exists (io/file test-edn-file))
   (io/delete-file test-edn-file))
 (def test-h2-db "tmp/testh2")
-(when (.exists (io/file test-h2-db))
-  (io/delete-file test-h2-db))
+(when (.exists (io/file (str test-h2-db ".mv.db")))
+  (io/delete-file (str test-h2-db ".mv.db")))
 
 (def edn-storage (edns/use-store test-edn-file))
 (def h2-storage (h2/use-store test-h2-db))
-(def storages [edn-storage
-               h2-storage
-               (last (worker/start edn-storage))
-               (last (worker/start h2-storage))])
+(def storages [["bare-edn" edn-storage]
+               ["bare-h2" h2-storage]
+               ["worker-edn" (last (worker/start edn-storage))]
+               ["worker-h2" (last (worker/start h2-storage))]])
 
 ;; check if storages conform spec
 
 (def spec-check (partial s/valid? :weepinbell.storage.spec/vtable))
 (deftest storage-conformity-test
-  (testing "edn-storage should conform storage spec."
+  (testing "storage should conform storage spec."
     (with-redefs [weepinbell.storage.edn-storage/file-exists? (fn [_] true)]
       (doseq [storage storages]
-        (is (spec-check storage)))))
+        (is (spec-check (last storage))))))
   (testing "spec-check invalid storage vtables"
     (doseq [check [{:get-by-domain (fn [_])}
                    {:append (fn [_]) :get (fn [_])}
@@ -74,11 +74,11 @@
   (let [domain "target.com"
         data [{:webmention {:source "https://source.net"
                             :target (str "https://" domain "/a")
-                            :id "1"
+                            :id "35231"
                             :modified (System/currentTimeMillis)}}
               {:webmention {:source "https://source.net"
                             :target (str "https://" domain "/b")
-                            :id "2"
+                            :id "232425"
                             :modified (System/currentTimeMillis)}}]
         ids (map #(:id (:webmention %)) data)]
     (doseq [item data]
@@ -140,15 +140,44 @@
     ((:delete storage) id)
     (wait-til! (not ((:get storage) id)))))
 
+(defn- test-result-order [storage]
+  (let [domain "target.com"
+        data [{:webmention {:source "https://source.net"
+                            :target (str "https://" domain "/a")
+                            :id "135234"
+                            :modified (System/currentTimeMillis)}}
+              {:webmention {:source "https://source.net"
+                            :target (str "https://" domain "/b")
+                            :id "24645"
+                            :modified (+ (System/currentTimeMillis) 1)}}
+              {:webmention {:source "https://source.net"
+                            :target (str "https://" domain "/b")
+                            :id "334324"
+                            :modified (+ (System/currentTimeMillis) 2)}}
+              {:webmention {:source "https://source.net"
+                            :target (str "https://" domain "/b")
+                            :id "45343"
+                            :modified (+ (System/currentTimeMillis) 3)}}]
+        ids (map #(:id (:webmention %)) data)]
+    (doseq [item (shuffle data)]
+      ((:append storage) item))
+    (wait-til! (every? #((:get storage) (:id (:webmention %))) data))
+    (let [result ((:get-by-domain storage) domain)]
+      (is (= (mapv #(get-in % [:webmention :id]) result)
+             (mapv #(get-in % [:webmention :id]) data))))
+    (doseq [id ids] ((:delete storage) id))
+    (wait-til! (every? #(not ((:get storage) (:id (:webmention %)))) data))))
+
 (deftest general-storage-test
   (doseq [storage storages]
     (doseq [testcase [[test-append-and-get "appending webmention"]
                       [test-append-and-get-list "appending and getting by domain"]
                       [test-update "updating webmentions"]
                       [test-get-empty "making sure getting empty won't throw"]
-                      [test-friends "friends of webmention (microformats, proxied-photo) can be stored correctly"]]]
-      (testing (last testcase)
-        ((first testcase) storage)))))
+                      [test-friends "friends of webmention (microformats, proxied-photo) can be stored correctly"]
+                      [test-result-order "result should be in chronological order"]]]
+      (testing (str (first storage) ": " (last testcase))
+        ((first testcase) (last storage))))))
 
 ;; storage worker specifics
 

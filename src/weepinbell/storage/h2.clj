@@ -69,11 +69,15 @@
   (sql/delete! ds :webmention {:hash hashcode}))
 
 (defn get-webmention-by-hash [ds hashcode]
-  (first (sql/find-by-keys ds :webmention {:hash hashcode})))
+  (first (sql/find-by-keys ds :webmention 
+                           {:hash hashcode}
+                           {:order-by [:lastmod :id]})))
 
 (defn get-webmention-by-pair [ds source target]
-  (first (sql/find-by-keys ds :webmention {:wm_source source
-                                           :wm_target target})))
+  (first (sql/find-by-keys ds :webmention 
+                           {:wm_source source
+                            :wm_target target}
+                           {:order-by [:lastmod :id]})))
 (defn get-webmention
   ([ds hashcode]
    (some->> (get-webmention-by-hash ds hashcode)
@@ -88,7 +92,8 @@
   ([ds domain path]
    (let [keys (cond-> {:wm_target_domain domain}
                 (some? path) (assoc :wm_target_path path))]
-     (->> (sql/find-by-keys ds :webmention keys)
+     (->> (sql/find-by-keys ds :webmention keys
+                            {:order-by [:lastmod :id]})
           (map (partial row->wrapped ds))))))
 
 (defn- update-related! [ds wm_id data]

@@ -4,7 +4,6 @@
   (:require [fast-edn.core :as edn]
             [clojure.java.io :as io]
             [weepinbell.utils.url :refer [get-domain get-target get-path url=]]
-            [clojure.spec.alpha :as s]
             [weepinbell.storage.spec]
             [clojure.string :refer [join]]))
 
@@ -68,6 +67,7 @@
      #(cond->> %
         true         (filter (partial domain-equal domain))
         (some? path) (filter (partial path-equal path))
+        true         (sort-by (fn [x] (:modified (:webmention x))))
         true         vec))))
 
 (defn first-line-empty? [path]
