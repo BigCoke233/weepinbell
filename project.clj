@@ -1,4 +1,4 @@
-(defproject weepinbell "v1.0.0-4ab2ebf"
+(defproject weepinbell "v1.0.0-818b2d0"
   :description "A Webmention receiver written in Clojure."
   :url "https://codeberg.org/eltrac/weepinbell"
   :license {:name "GNU Affero General Public License"
@@ -26,10 +26,7 @@
                  [nrepl "1.8.0"]]
   :managed-dependencies [[org.clojure/tools.reader "1.6.0"]
                          [org.ow2.asm/asm "9.11.1"]]
-  :profiles {:uberjar {:aot :all
-                       :uberjar-exclusions [#"^org/sqlite/native/Mac/"
-                                            #"^org/sqlite/native/Windows/"
-                                            #"^org/sqlite/native/Linux-Android/"]}
+  :profiles {:uberjar {:aot :all}
              :test {:dependencies [[ring/ring-mock "0.6.2"]]}
              :dev {:source-paths ["dev"]
                    :repl-options {:init-ns user
