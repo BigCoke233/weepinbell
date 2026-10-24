@@ -10,7 +10,7 @@
  :allowed-target-domains ["example.com"]
  ;; available storage types: 
  ;; - :edn (:data-path should point to an edn text file)
- ;; - :sqlite (:data-path should point to a SQLite db file)
+ ;; - :h2 (:data-path should point to a H2 db, WITHOUT extension like ".db")
  ;; :data-path can be non-existent. weepinbell will create them.
  :storage-type :edn
  :data-path "data/webmention.edn"

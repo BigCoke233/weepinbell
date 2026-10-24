@@ -11,10 +11,11 @@
 ;; data trasnformation utilities
 
 (defn schema->map
-  [{:keys [wm_source wm_target hash lastmod]} mf-row photo-row]
+  [{:keys [wm_source wm_target hash lastmod 
+           mf_data photo_url]}]
   (let [parse #(if (string? %) (edn/read-string %) %)
-        mf (parse (:mf_data mf-row))
-        photo (:url photo-row)]
+        mf (parse mf_data)
+        photo photo_url]
     (cond-> {:webmention {:source wm_source
                           :target wm_target
                           :id hash
@@ -42,59 +43,68 @@
      ;; conver EDN to raw string
      :mf_data (pr-str mf)}))
 
-(defn- row->wrapped [ds wm-row]
-  (when wm-row
-    (let [wm_id (:id wm-row)]
-      (schema->map wm-row 
-                   (first (sql/find-by-keys ds :microformats {:wm_id wm_id})) 
-                   (first (sql/find-by-keys ds :proxied_photo {:wm_id wm_id}))))))
-
 ;; sql
 
 (defn insert-webmention [ds data]
-  (let [mf (:microformats data)
-        photo (get-in data [:extra :proxied-photo])
-        wm_result (sql/insert! ds :webmention (wm->schema data))
-        wm_id (:id wm_result)]
-    (when mf
-      (sql/insert! ds :microformats (mf->schema wm_id data)))
-    (when photo
-      (sql/insert! ds :proxied_photo
-                   {:wm_id wm_id
-                    :url photo}))))
+  (jdbc/with-transaction [tx ds]
+    (let [tx (jdbc/with-options tx {:builder-fn as-unqualified-lower-maps})
+          mf (:microformats data)
+          photo (get-in data [:extra :proxied-photo])
+          wm_result (sql/insert! tx :webmention (wm->schema data))
+          wm_id (:id wm_result)]
+      (when mf
+        (sql/insert! tx :microformats (mf->schema wm_id data)))
+      (when photo
+        (sql/insert! tx :proxied_photo
+                     {:wm_id wm_id
+                      :url photo})))))
 
 (defn delete-webmention [ds hashcode]
   ;; microformats and photo will be deleted by
   ;; cascade rule by SQL, no need to handle it
   (sql/delete! ds :webmention {:hash hashcode}))
 
+(def base-sql "SELECT w.*, m.mf_data, m.mf_type, p.url AS photo_url
+               FROM webmention w               
+               LEFT JOIN microformats m 
+               ON w.id = m.wm_id
+               LEFT JOIN proxied_photo p
+               ON w.id = p.wm_id")
+
 (defn get-webmention-by-hash [ds hashcode]
-  (first (sql/find-by-keys ds :webmention 
-                           {:hash hashcode}
-                           {:order-by [:lastmod :id]})))
+  (first (jdbc/execute! ds [(str base-sql "
+                  WHERE hash = ?") hashcode])))
 
 (defn get-webmention-by-pair [ds source target]
-  (first (sql/find-by-keys ds :webmention 
-                           {:wm_source source
-                            :wm_target target}
-                           {:order-by [:lastmod :id]})))
+  (first (jdbc/execute! ds [(str base-sql "
+                  WHERE wm_source = ?
+                  AND wm_target = ?
+                  ORDER BY w.lastmod, w.id")
+                  source target])))
+
 (defn get-webmention
   ([ds hashcode]
    (some->> (get-webmention-by-hash ds hashcode)
-            (row->wrapped ds)))
+            schema->map))
   ([ds source target]
    (some->> (get-webmention-by-pair ds source target)
-            (row->wrapped ds))))
+            schema->map)))
 
 (defn get-webmentions-by-domain
   ([ds domain]
    (get-webmentions-by-domain ds domain nil))
   ([ds domain path]
-   (let [keys (cond-> {:wm_target_domain domain}
-                (some? path) (assoc :wm_target_path path))]
-     (->> (sql/find-by-keys ds :webmention keys
-                            {:order-by [:lastmod :id]})
-          (map (partial row->wrapped ds))))))
+   (let [r (if (some? path)
+             (jdbc/execute! ds [(str base-sql "
+                  WHERE wm_target_domain = ?
+                  AND wm_target_path = ?
+                  ORDER BY w.lastmod, w.id") 
+                  domain path])
+             (jdbc/execute! ds [(str base-sql "
+                  WHERE wm_target_domain = ?
+                  ORDER BY w.lastmod, w.id") 
+                  domain]))]
+     (map schema->map r))))
 
 (defn- update-related! [ds wm_id data]
   (let [mf (:microformats data)
@@ -108,13 +118,17 @@
 
 (defn update-webmention
   ([ds hashcode new]
-   (when-let [wm (get-webmention-by-hash ds hashcode)]
-     (sql/update! ds :webmention (wm->schema new) {:id (:id wm)})
-     (update-related! ds (:id wm) new)))
+   (jdbc/with-transaction [tx ds]
+     (let [tx (jdbc/with-options tx {:builder-fn as-unqualified-lower-maps})]
+       (when-let [wm (get-webmention-by-hash tx hashcode)]
+         (sql/update! tx :webmention (wm->schema new) {:id (:id wm)})
+         (update-related! tx (:id wm) new)))))
   ([ds source target new]
-   (when-let [wm (get-webmention-by-pair ds source target)]
-     (sql/update! ds :webmention (wm->schema new) {:id (:id wm)})
-     (update-related! ds (:id wm) new))))
+   (jdbc/with-transaction [tx ds]
+     (let [tx (jdbc/with-options tx {:builder-fn as-unqualified-lower-maps})]
+       (when-let [wm (get-webmention-by-pair tx source target)]
+         (sql/update! tx :webmention (wm->schema new) {:id (:id wm)})
+         (update-related! tx (:id wm) new))))))
 
 (defn make-db [db-file]
   (io/make-parents db-file)
