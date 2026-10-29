@@ -60,6 +60,8 @@ For weepinbell to return the right URLs to webmentions and proxied photos, set `
 > [!warning]
 > You have to **restart** weepinbell for configuration to take effects.
 
+You may want to know how and where your webmentions are stored by default and how to change it, see [storage](./storage.md).
+
 ## 3. Run the app
 
 ### The command 
@@ -73,6 +75,17 @@ When you see this line of log, you're good to go:
 ``` 
 2026-09-28T08:20:45.680Z MACHINE INFO [weepinbell.core:43] - weepinbell started, listening on 3000
 ```
+
+> [!warning]
+> If you're just trying weepinbell, running it with a command is fine. It's recommended to use a service manager or a container. See below.
+
+### `systemd` (Linux)
+
+TODO
+
+### `rc` (OpenBSD)
+
+TODO
 
 ### Docker
 

@@ -16,12 +16,12 @@ Receiver endpoint is where people send their webmentions to. It's a route that a
 
 | Method | Path                                                  |
 | ------ | ----------------------------------------------------- |
-| `POST` | `/endpoint` (Configurable, see [configuration](./configuration.md)) |
+| `POST` | `/endpoint` (can be configured using option `:endpoint`, see `config.edn`) |
 
 | Post Params | Description                                                                                                                                               | Default |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
 | `source`    | Where webmention is coming from. The page that mentioned `target`.                                                                                        | None    |
-| `target`    | Where webmention is sent to. The page that was mentioned by `source`. Target's domain should be in the allow list of receiver. (see [configuration](./configuration.md)) | None    |
+| `target`    | Where webmention is sent to. The page that was mentioned by `source`. Target's domain should be in the allow list of receiver. (allow list is `:allowed-target-domains` in `config.edn`) | None    |
 
 The endpoint responds with status code `201` and a `Location` header pointing to the webmention. It'll take some time for weepinbell to verify, process and store webmention. Senders should check the `Location` URL a few minutes after.
 
@@ -63,10 +63,6 @@ The message themselves should be informative enough.
 | `GET`  | `/api/mention/{id}`                              |
 | `GET`  | `/api/mention/?source={source}&target={target}` |
 
-| Query Params    | Description                                                                                                                                          | Default |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `microformats`* | Only takes value `"raw"`. By default, microformats are reduced to deterministic structure. If `"raw"`, return original unmodified microformats data. | None    |
-
 An example response: 
 
 ```json 
@@ -77,18 +73,28 @@ An example response:
     "id": "<32_digit_SHA_256_hash>",
     "modified": <timestamp_of_last_modified>
   },
-  "microformats": {
+  "jf2": {
+    "type": "entry", // it's always "entry"
+    "name": "Title of this entry",
+    "url": "URL to this entry",
     "author": {
-      "name": "<author_name>",
-      "url": "<author_url>",
-      "photo": "<author_photo>"
+        "type": "card", // it's always "card"
+        "name": "Name of author",
+        "url": "URL to this author",
+        "photo": "Photo URL" // optional
     },
-    "type": "<mention | in-reply-to | like-of | repost-of>",
-    "published": "<date>",
+    "published": "Date string of published date",
     "content": {
-        "html": "<html>",
-        "text": "<text>"
-    }
+        "html": "<p>content of this entry</p>",
+        "text": "content of this entry"
+    },
+    "summary": "Summary or description of this entry", // optional
+    "wm-property": "mention", // or "like-of", "repost-of", "in-reply-to", "rsvp"
+    // below are fields that only exists when the coresponding "wm-property" is present
+    "like-of": "URL that this webmention represents a like of",
+    "repost-of": "URL that this webmention represents a repost of",
+    "in-reply-to": "URL that this webmention replies to",
+    "rsvp": "URL to the event that this webmention represents an RSVP for"
   },
   "extra": {
     "proxied-photo": "<config:base_url>/avatars/<photo_path>"
@@ -106,11 +112,10 @@ An example response:
 
 | Query Params    | Description                                                                                                                                                      | Default |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `microformats`* | Only takes value `"raw"`. By default, microformats are reduced to deterministic structure. If `"raw"`, return original unmodified microformats data.             | None    |
 | `page`*         | Page number starting from `0`. **If no page number, weepinbell returns a full list.** If not a number (e.g. `last`, a string), weepinbell returns the last page. | None    |
-| `mftype`*       | Filters webmentions by their microformats type. Available types are `like-of`, `repost-of`, `in-reply-to` and `rsvp`. If no mftype, no filter is applied.        | None    |
+| `jf2type`*       | Filters webmentions by their JF2 type (.i.e the `wm-property`). Available types are `like-of`, `repost-of`, `in-reply-to` and `rsvp`. If absent, no filter is applied.        | None    |
 
-The responses are almost the same as `/api/mention/{id}` except that there are multiple webmention items wrapped inside a JSON array.
+The responses are mostly the same as `/api/mention/{id}` except that there are multiple webmention items wrapped inside a JSON array.
 
 ### Couting a list of webmentions
 

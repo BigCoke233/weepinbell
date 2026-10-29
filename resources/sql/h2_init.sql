@@ -10,11 +10,11 @@ create table if not exists webmention (
   lastmod bigint not null
 );
 
-create table if not exists microformats (
+create table if not exists jf2 (
   id integer auto_increment primary key,
   wm_id integer not null,
-  mf_type text not null,
-  mf_data text not null, /* schema on read, store EDN string here */
+  jf2_type text not null,
+  jf2_data text not null, /* schema on read, store EDN string here */
 
   FOREIGN KEY (wm_id)
     references webmention(id)

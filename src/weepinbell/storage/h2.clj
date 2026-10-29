@@ -5,22 +5,21 @@
             [next.jdbc.sql :as sql]
             [clojure.java.io :as io]
             [fast-edn.core :as edn]
-            [weepinbell.utils.url :refer [get-domain get-path]]
-            [weepinbell.microformats.searcher :refer [use-items find-h-entry search-mftype]]))
+            [weepinbell.utils.url :refer [get-domain get-path]]))
 
 ;; data trasnformation utilities
 
 (defn schema->map
   [{:keys [wm_source wm_target hash lastmod 
-           mf_data photo_url]}]
+           jf2_data photo_url]}]
   (let [parse #(if (string? %) (edn/read-string %) %)
-        mf (parse mf_data)
+        jf2 (parse jf2_data)
         photo photo_url]
     (cond-> {:webmention {:source wm_source
                           :target wm_target
                           :id hash
                           :modified lastmod}}
-      (some? mf)    (assoc :microformats mf)
+      (some? jf2)   (assoc :jf2 jf2)
       (some? photo) (assoc :extra {:proxied-photo photo}))))
 
 (defn wm->schema [data]
@@ -35,39 +34,39 @@
      :wm_target_path (get-path target)
      :lastmod (or modified (System/currentTimeMillis))}))
 
-(defn mf->schema [wm_id data]
-  (let [mf (:microformats data)
-        target (get-in data [:webmention :target])]
+(defn jf2->schema [wm_id data]
+  (let [jf2 (:jf2 data)
+        get-name #(if % (name %) "mention")]
     {:wm_id wm_id
-     :mf_type (->> mf use-items find-h-entry (search-mftype target) name)
+     :jf2_type (->> jf2 :wm-property get-name)
      ;; conver EDN to raw string
-     :mf_data (pr-str mf)}))
+     :jf2_data (pr-str jf2)}))
 
 ;; sql
 
 (defn insert-webmention [ds data]
   (jdbc/with-transaction [tx ds]
     (let [tx (jdbc/with-options tx {:builder-fn as-unqualified-lower-maps})
-          mf (:microformats data)
+          jf2 (:jf2 data)
           photo (get-in data [:extra :proxied-photo])
           wm_result (sql/insert! tx :webmention (wm->schema data))
           wm_id (:id wm_result)]
-      (when mf
-        (sql/insert! tx :microformats (mf->schema wm_id data)))
+      (when jf2
+        (sql/insert! tx :jf2 (jf2->schema wm_id data)))
       (when photo
         (sql/insert! tx :proxied_photo
                      {:wm_id wm_id
                       :url photo})))))
 
 (defn delete-webmention [ds hashcode]
-  ;; microformats and photo will be deleted by
+  ;; jf2 data and photo will be deleted by
   ;; cascade rule by SQL, no need to handle it
   (sql/delete! ds :webmention {:hash hashcode}))
 
-(def base-sql "SELECT w.*, m.mf_data, m.mf_type, p.url AS photo_url
+(def base-sql "SELECT w.*, j.jf2_data, j.jf2_type, p.url AS photo_url
                FROM webmention w               
-               LEFT JOIN microformats m 
-               ON w.id = m.wm_id
+               LEFT JOIN jf2 j 
+               ON w.id = j.wm_id
                LEFT JOIN proxied_photo p
                ON w.id = p.wm_id")
 
@@ -107,11 +106,11 @@
      (map schema->map r))))
 
 (defn- update-related! [ds wm_id data]
-  (let [mf (:microformats data)
+  (let [jf2 (:jf2 data)
         photo (get-in data [:extra :proxied-photo])]
-    (sql/delete! ds :microformats {:wm_id wm_id})
-    (when mf
-      (sql/insert! ds :microformats (mf->schema wm_id data)))
+    (sql/delete! ds :jf2 {:wm_id wm_id})
+    (when jf2
+      (sql/insert! ds jf2 (jf2->schema wm_id data)))
     (sql/delete! ds :proxied_photo {:wm_id wm_id})
     (when photo
       (sql/insert! ds :proxied_photo {:wm_id wm_id :url photo}))))

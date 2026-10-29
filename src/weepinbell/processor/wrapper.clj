@@ -1,90 +1,74 @@
 (ns weepinbell.processor.wrapper
-  "Wrapper component wraps a qualified webmention while processing, used by processor.
-  It adds microformats and extra data and return complete webmention map ready for storage."
+  "Wrapper component wraps a qualified webmention while processing, part of the pipeline.
+   It adds metadata and extra, and return complete webmention map ready for storage."
   (:require [clojure.java.io :as io]
             [weepinbell.http.downloader :refer [download-file]]
-            [weepinbell.utils.url :refer [valid-http-url? get-base relative? normalize]]
-            [weepinbell.microformats.searcher :refer [use-items search-photo find-h-entry find-h-card]]
-            [mf2clj.core :as mf-parser]
+            [weepinbell.utils.url :refer [get-base relative? normalize]]
+            [weepinbell.metadata.jf2 :as jf2]
+            [weepinbell.metadata.jf2-spec]
             [taoensso.timbre :as timbre]
             [weepinbell.utils.digest :refer [digest]]
-            [clojure.spec.alpha :as s]))
+            [clojure.string :refer [split]]))
 
-;;;; spec definitions
-(s/def ::source valid-http-url?)
-(s/def ::target valid-http-url?)
-(s/def ::id (s/and string?
-                   #(let [len (count %)]
-                      (or (= len 32)
-                          (= len 8)))))
-(s/def ::modified int?)
-(s/def ::webmention
-  (s/keys :req-un [::source ::target ::id ::modified]))
-
-;; NOTE current microformats parser is unstable
-;; will have to postpone microformats spec definition
-(s/def ::microformats map?)
-
-(s/def ::proxied-photo valid-http-url?)
-(s/def ::extra
-  (s/keys :opt-un [::proxied-photo]))
-
-(s/def ::webmention-wrapped
-  (s/keys :req-un [::webmention]
-          :opt-un [::microformats ::extra]))
-
-;;;; utilities
-(defn- find-mf-photo [mf]
-  (or (->> mf use-items find-h-entry search-photo)
-      (->> mf use-items find-h-card search-photo)))
-
-(defn- proxy-mf-photo [photo-base raw-photo]
-  (if raw-photo
-    (let [photo-url (str raw-photo)
-          file-ext (or (re-find #"\.(?:jpg|jpeg|png|gif|webp)" photo-url) ".jpg")
-          filename  (str (digest photo-url) file-ext)
-          local-path (str "data/avatars/" filename)
-          public-path (str "/avatars/" filename)]
+(defn- proxy-photo
+  "Download a photo to /data/avatars to serve from our server."
+  [photo-base raw-photo]
+  (let [photo-url (str raw-photo)
+          ;; TODO might need to use MIME-type to get ext
+        file-ext (str "." (last (split photo-url #"\.")))
+        filename  (str (digest photo-url) file-ext)
+        local-path (str "data/avatars/" filename)
+        public-path (str "/avatars/" filename)]
                  ;; download photo if not exists
-      (when-not (.exists (io/file local-path))
-        (timbre/info "Downloading microformats photo to proxy external image.")
-        (download-file photo-url local-path))
-      (str photo-base public-path))
-    nil))
+    (when-not (.exists (io/file local-path))
+      (timbre/info "Downloading author photo to serve locally")
+      (download-file photo-url local-path))
+    (str photo-base public-path)))
 
-(defn complete-url [source-base url]
+(defn- complete-url
+  "Prepend base URL if a URL is relative."
+  [source-base url]
   (if (relative? url)
     (normalize (str source-base url))
     url))
 
-(defn- wrap-webmention
-  "Parse microformats and collect essential info. 
-  Wrap source, target and collected data into a map and return it."
-  [id source-html source target photo-base]
-  (timbre/info "parsing microformats and wrapping up webmention" id)
-  (let [mf (-> source-html mf-parser/parse :items)
-        wm {:source source
-            :target target
-            :id (digest (str source target))
-            :modified (System/currentTimeMillis)}
-        proxied-photo (->> mf
-                           find-mf-photo
-                           (complete-url (get-base source))
-                           (proxy-mf-photo photo-base))
-        data {:webmention wm
-              :microformats mf
-              :extra {:proxied-photo proxied-photo}}]
-    (when-not (s/valid? ::webmention-wrapped data)
-      (timbre/warn "webmention" id "data corrupted before writing to storage"))
-    data))
+;; wrappers
+(defn- wrap-webmention-basics
+  "Wrap basic webmention data, :source :target :id and :modified.
+   Will use current system time in milliseconds for :modified."
+  [{:keys [s t]} id]
+  {:webmention {:source s, :target t,
+                :id (or id (digest (str s t))),
+                :modified (System/currentTimeMillis)}})
+
+(defn- wrap-jf2
+  "Parses JF2 from source html, and associate :jf2 key to it."
+  [data source-html]
+  (assoc data :jf2 (-> source-html jf2/parse)))
+
+(defn- wrap-extra
+  "Wrap extra data, i.e. proxied photo."
+  [data photo-base]
+  (let [{:keys [webmention jf2]} data]
+    (if-let [photo (get-in jf2 [:author :photo])]
+      (assoc data :extra
+             {:proxied-photo
+              (->> photo
+                   (complete-url (get-base (:source webmention)))
+                   (proxy-photo photo-base))})
+      data)))
 
 (defn wrap
+  "Part of the processor pipeline. Takes :source-html from last
+   handler of the pipeline, parses data from it, wraps data
+   to :new-data in the data map, and proceed with ok signal."
   [data config]
   (when (:ok? data)
     (let [{:keys [source-html wm id]} data
-          {:keys [s t]} wm]
+          new-data (-> wm (wrap-webmention-basics id)
+                       (wrap-jf2 source-html)
+                       (wrap-extra (:base-url config)))]
       (-> data
-          (assoc :new-data
-                 (wrap-webmention id source-html s t (:base-url config)))
-          (assoc :ok true)))))
+          (assoc :new-data new-data)
+          (assoc :ok? true)))))
 

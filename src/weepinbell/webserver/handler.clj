@@ -35,30 +35,26 @@
        (POST "/send" [source target]
          (receive {:s source :t target} wmc config))
      ;; query webmention list
-       (context "/mentions" [page microformats mftype]
+       (context "/mentions" [page jf2type]
          (GET "/" [url]
            (retrieve-by-url url page store
-                            {:microformats microformats
-                             :type mftype}))
+                            {:type jf2type}))
          (GET "/:domain" [domain]
            (retrieve-by-domain domain page store
-                               {:microformats microformats
-                                :type mftype})))
+                               {:type jf2type})))
       ;; query count of webmention list 
-       (context "/count" [mftype]
+       (context "/count" [jf2type]
          (GET "/" [url]
-           (count-by-url url store {:type mftype}))
+           (count-by-url url store {:type jf2type}))
          (GET "/:domain" [domain]
-           (count-by-domain domain store {:type mftype})))
+           (count-by-domain domain store {:type jf2type})))
       ;; query one specific webmention
-       (context "/mention" [microformats]
-         (GET "/:id" [id] (retrieve-by-id id store
-                                          {:microformats microformats}))
-         (GET "/" [source target] (retrieve-by-pair source target store
-                                                    {:microformats microformats}))))
+       (context "/mention" []
+         (GET "/:id" [id] (retrieve-by-id id store))
+         (GET "/" [source target] (retrieve-by-pair source target store))))
     ;; RSS feed
      (GET "/feed/:domain" [domain] (gen-feed domain store config))
-    ;; host proxied avatars (microformats photos)
+    ;; host proxied avatars (jf2 photos)
      (route/files "/avatars/" {:root "data/avatars"})
     ;; 404
      (route/not-found "Not Found")]))

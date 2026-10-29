@@ -1,5 +1,7 @@
 (ns weepinbell.processor.writer
-  (:require [taoensso.timbre :as timbre]))
+  (:require [taoensso.timbre :as timbre]
+            [weepinbell.storage.spec]
+            [clojure.spec.alpha :as s]))
 
 (defn write
   [data storage callbacks]
@@ -14,4 +16,6 @@
           (timbre/info "webmention" id "exists, updating...")
           ((:update storage) id new-data)
           ((:on-update callbacks) new-data)))
+      (when (not (s/valid? :weepinbell.storage.spec/webmention-wrapped new-data))
+        (timbre/warn "webmention" id "data does not match spec before writing to storage"))
       (-> data (assoc :ok? true)))))

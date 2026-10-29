@@ -58,8 +58,8 @@
           query  (normalize-query (.getQuery base))]
       (str scheme "://" auth path
            (when (seq query) (str "?" query))))
-    ;; fallback to empty string is url is nil
-    (catch NullPointerException _ "")
+    ;; return nil is url is nil
+    (catch NullPointerException _ nil)
     ;; fallback to original string if syntax is invalid
     (catch URISyntaxException _ url)))
 

@@ -23,11 +23,13 @@
                  [io.github.tonsky/fast-edn "1.2.0"]
                  [com.github.seancorfield/next.jdbc "1.3.828"]
                  [com.h2database/h2 "2.3.232"]
-                 [nrepl "1.8.0"]]
+                 [nrepl "1.8.0"]
+                 [org.clj-commons/hickory "0.7.7"]]
   :managed-dependencies [[org.clojure/tools.reader "1.6.0"]
                          [org.ow2.asm/asm "9.11.1"]]
   :profiles {:uberjar {:aot :all}
-             :test {:dependencies [[ring/ring-mock "0.6.2"]]}
+             :test {:dependencies [[ring/ring-mock "0.6.2"]]
+                    :resource-paths ["test/resources"]}
              :dev {:source-paths ["dev"]
                    :repl-options {:init-ns user
                                   :init (do (start) (watch))}

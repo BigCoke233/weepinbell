@@ -86,5 +86,6 @@
 (defn -main [& args]
   (case (first args)
     "migrate-db" (apply m/edn->h2 (rest args))
+    "edn-jf2ify" (apply m/edn-jf2ify (rest args))
     (start-engine)))
 

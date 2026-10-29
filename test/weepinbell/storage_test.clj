@@ -130,13 +130,13 @@
                            :source "https://source.net"
                            :target "https://target.net"
                            :modified (System/currentTimeMillis)}
-              :microformats mf
+              :jf2 mf
               :extra {:proxied-photo photo}}]
     ((:append storage) data)
     (wait-til! ((:get storage) id))
     (let [retrieved ((:get storage) id)]
       (is (= photo (get-in retrieved [:extra :proxied-photo])))
-      (is (= mf (:microformats retrieved))))
+      (is (= mf (:jf2 retrieved))))
     ((:delete storage) id)
     (wait-til! (not ((:get storage) id)))))
 
