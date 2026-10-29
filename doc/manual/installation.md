@@ -79,13 +79,104 @@ When you see this line of log, you're good to go:
 > [!warning]
 > If you're just trying weepinbell, running it with a command is fine. It's recommended to use a service manager or a container. See below.
 
-### `systemd` (Linux)
-
-TODO
-
 ### `rc` (OpenBSD)
 
-TODO
+If you're running weepinbell on OpenBSD, it's recommended to use `rc` (stands for "Run Commands").
+
+If you haven't already, install Java:
+
+```sh
+doas pkg_add jdk-25
+```
+
+Create a user named `_weepinbell`.
+
+```sh
+doas useradd _weepinbell
+```
+
+At `/home/_weepinbell`, place the `.jar` and create a shell script named `run.sh`:
+
+```sh
+#!/bin/ksh
+exec /usr/local/jdk-25/bin/java -jar /home/_weepinbell/weepinbell-v1.x.x-standalone.jar >> /var/log/weepinbell.log 2>&1
+```
+
+Then, create `/etc/rc.d/weepinbell`:
+
+```sh
+#!/bin/ksh
+daemon="/home/_weepinbell/run.sh"
+daemon_user="_weepinbell"
+
+pexp=".*weepinbell.*"
+
+. /etc/rc.d/rc.subr
+
+rc_bg=YES
+
+rc_cmd $1
+```
+
+Enable and run:
+
+```sh
+doas rcctl enable weepinbell
+doas rcctl start weepinbell
+```
+
+To stop weepinbell:
+
+```sh
+doas rcctl stop weepinbell
+```
+
+### `systemd` (Linux)
+
+If you haven't already, install Java with your package manager.
+
+Then, create a user named `weepinbell`:
+
+```sh
+sudo useradd weepinbell
+```
+
+Place the `.jar` at `/home/weepinbell/`.
+
+Create `/etc/systemd/system/weepinbell.service`:
+
+```systemd
+[Unit]
+Description=Weepinbell
+After=network.target
+
+[Service]
+Type=simple
+User=weepinbell
+Group=weepinbell
+Environment="PORT=3000"
+WorkingDirectory=/home/eltrac/weepinbell
+ExecStart=/usr/bin/java -jar /home/eltrac/weepinbell/weepinbell-v1.x.x-standalone.jar
+SuccessExitStatus=143
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Reload daemon, enable service and run:
+
+```sh
+sudo systemctl daemon-reload
+sudo systemctl enable weepinbell
+sudo systemctl start weepinbell
+```
+
+To stop weepinbell:
+
+```sh
+sudo systemctl stop weepinbell
+```
 
 ### Docker
 
