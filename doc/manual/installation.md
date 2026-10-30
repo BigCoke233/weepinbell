@@ -180,15 +180,56 @@ sudo systemctl stop weepinbell
 
 ### Docker
 
-> [!warning]
-> The `Dockerfile` is not actively tested.
+Example `Dockerfile`:
 
-[Dockerfile](Dockerfile) and [docker-compose.yml](docker-compose.yml) are included in the repository.
+```Dockerfile
+FROM clojure:lein-alpine AS builder
+
+WORKDIR /app
+COPY project.clj /app/
+RUN lein deps
+
+COPY . /app
+RUN lein uberjar && \
+    cp target/default+uberjar/*-standalone.jar ./app.jar || \
+    cp target/*-standalone.jar ./app.jar
+
+FROM eclipse-temurin:21-jre-alpine
+
+WORKDIR /app
+COPY --from=builder /app/app.jar ./weepinbell.jar
+
+EXPOSE 3000
+CMD ["java", "-jar", "weepinbell.jar"]
+```
+
+Example `docker-compose.yml`:
+
+```yaml
+services:
+  weepinbell:
+    build: .
+    container_name: weepinbell
+    ports:
+      - "5432:3000"
+    volumes:
+      - ./config.edn:/app/config.edn:ro
+      - ./data:/app/data
+    environment:
+      - PORT=3000
+    restart: always
+```
+
+Start using `docker compose`:
 
 ```shell
-git clone https://codeberg.org/eltrac/weepinbell
-cd weepinbell
 docker compose up -d
+```
+
+To stop weepinbell:
+
+```shell
+docker compose down
 ```
 
 Podman should work as well, but it's not tested.
