@@ -42,11 +42,16 @@
                 (println (.getMessage e))))))))
     (println "Done")))
 
+(defn- file? [file]
+  (or (string? file) 
+      (instance? java.io.File file)
+      (instance? java.net.URL file)))
+
 (defn edn-jf2ify
   "Given an EDN file with deprecated microformats data, converts
    microformats to jf2 and generate a new file in new format."
   [old-edn new-edn]
-  {:pre [(string? old-edn) (string? new-edn)]}
+  {:pre [(file? old-edn) (file? new-edn)]}
   (io/make-parents new-edn)
   (.createNewFile (io/file new-edn))
   (with-open [rdr (io/reader old-edn)]
