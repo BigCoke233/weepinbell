@@ -1,4 +1,0 @@
-[tools]
-java = "latest"
-leiningen = "2.12"
-clojure = "1.12.6"
