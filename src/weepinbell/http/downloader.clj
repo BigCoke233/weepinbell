@@ -7,10 +7,8 @@
   "Download file to destination. Return true if success, false if failed."
   [url dest-path]
   (try
-    (let [file (io/file dest-path)
-          parent-dir (.getParentFile file)]
-      (when (and parent-dir (not (.exists parent-dir)))
-        (.mkdirs parent-dir))
+    (let [file (io/file dest-path)]
+      (io/make-parents file)
       (let [response (client/get! url {:as :stream})
             status (:status response)]
         (if (and status (> status 199) (< status 300))
@@ -25,11 +23,13 @@
           (do
             (timbre/warn "Download fail. Status: " status)
             (when-let [error (:error response)]
-              (timbre/error error))))))
+              (timbre/error error))
+            false))))
     ;; when download failed
-    (catch Exception e
+    (catch Throwable e
       (timbre/error "Download error:" (.getMessage e))
       (timbre/debug e)
-      (io/delete-file (io/file dest-path))
+      (when (.exists (io/file dest-path))
+        (io/delete-file (io/file dest-path)))
       false)))
 
