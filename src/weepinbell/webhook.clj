@@ -13,15 +13,14 @@
 
 ;; utilities
 (defn- send-webhook [url opts]
-  (if (valid-http-url? url)
-    (client/post url opts
-                 (fn async-callback [{:keys [status _ _ error]}]
-                   (cond
-                     error (timbre/error "error ocurred sending webhook to" url ":" error)
-                     (>= status 500) (timbre/error "something's wrong with webhook server of" url)
-                     (>= status 400) (timbre/error "webhook url is invalid:" url)
-                     :else (timbre/info "request sent to" url))))
-    (timbre/warn "webhook url not valid, skipped" url)))
+  {:pre [(valid-http-url? url) (map? opts)]}
+  (client/post url opts
+               (fn async-callback [{:keys [status _ _ error]}]
+                 (cond
+                   error (timbre/error "error ocurred sending webhook to" url ":" error)
+                   (>= status 500) (timbre/error "something's wrong with webhook server of" url)
+                   (>= status 400) (timbre/error "webhook url is invalid:" url)
+                   :else (timbre/info "request sent to" url)))))
 
 (defn make-request [event-key data request-fn]
   (cond
@@ -41,7 +40,7 @@
         source (:source webmention)
         target (:target webmention)]
     (-> url
-        (string/replace "{event}" (or (name event-key) ""))
+        (string/replace "{event}" (name event-key))
         (string/replace "{target}" (or target ""))
         (string/replace "{source}" (or source ""))
         (string/replace "{target-encoded}" (if target (url-encode target) ""))

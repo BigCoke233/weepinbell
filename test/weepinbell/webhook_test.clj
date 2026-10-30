@@ -89,7 +89,9 @@
   (testing "Webhook constructing request options with custom functions"
     (let [custom-map {:body "customized!"}]
       (is (= (webhook/make-request :on-receive test-wm-data (fn [& _] custom-map))
-             custom-map)))))
+             custom-map))))
+  (testing "Unknown request-fn type"
+    (is (nil? (webhook/make-request :on-delete test-wm-data "I am a function")))))
 
 (deftest make-actions-test
   (testing "Constructing action map"
