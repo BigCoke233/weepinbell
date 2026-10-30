@@ -34,11 +34,15 @@
   (testing "Exception/Error thrown while downloading"
     (with-redefs [weepinbell.http.client/get!
                   (fn [& _] (throw (.Error "Test error")))]
-      (is (false? (download-file "" "")))))
+      (let [dest "tmp/error-thrown-while-downloading"]
+        (io/make-parents dest)
+        (spit "tmp/test" dest)
+        (is (false? (download-file "" "tmp/test"))))))
   (testing "Deletes possibly corrupted file when failure is caught"
     (with-redefs [weepinbell.http.client/get!
                   (fn [& _] (throw (.Error "Test error")))]
       (let [dest "dest"]
+        (io/make-parents dest)
         (spit dest "CORRUPTED")
         (is (false? (download-file "" dest)))
         (is (not (.exists (io/file dest))))))))
