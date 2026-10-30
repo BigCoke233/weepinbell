@@ -4,7 +4,9 @@
 
 (s/def ::type string?)
 
-(s/def ::name string?)
+(s/def ::name
+  (s/or :missing-name nil?
+        :has-name string?))
 
 (s/def ::url
   (s/or :has-value valid-http-url?
@@ -20,7 +22,8 @@
           :opt-un [::photo]))
 
 (s/def ::content
-  (s/or :content-map (s/keys :req-un [::html ::text])
+  (s/or :content-map (s/keys :req-un [::text]
+                             :opt-un [::html])
         :string string?))
 
 (s/def ::wm-property
@@ -31,12 +34,17 @@
   (s/or :has-summary string?
         :no-summary nil?))
 
-(s/def ::like-of valid-http-url?)
-(s/def ::in-reply-to valid-http-url?)
-(s/def ::repost-of valid-http-url?)
-(s/def ::rsvp valid-http-url?)
+(s/def ::like-of 
+  (s/and sequential? #(every? valid-http-url? %)))
+(s/def ::in-reply-to 
+  (s/and sequential? #(every? valid-http-url? %)))
+(s/def ::repost-of 
+  (s/and sequential? #(every? valid-http-url? %)))
+(s/def ::rsvp 
+  (s/or :single-answer string?
+        :multi-answer #(every? string? %)))
 
 (s/def ::jf2
-  (s/keys :req-un [::type ::name ::url ::author ::published ::content ::wm-property]
-          :opt-un [::summary ::like-of ::in-reply-to ::repost-of ::rsvp]))
+  (s/keys :req-un [::type ::name ::url ::author ::published ::wm-property]
+          :opt-un [::content ::summary ::like-of ::in-reply-to ::repost-of ::rsvp]))
 
