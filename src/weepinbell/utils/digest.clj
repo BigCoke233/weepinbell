@@ -10,13 +10,7 @@
 (defn digest
   ([s]
    (digest s :sha-256 32))
-  ([s algo]
-   (digest s algo 32))
   ([s algo length]
    (->> (java-digest s (upper-case (name algo)))
         (take length)
         (apply str))))
-
-(defn digest-short [s]
-  (digest s :sha-256 8))
-
