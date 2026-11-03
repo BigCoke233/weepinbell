@@ -6,6 +6,7 @@
             [weepinbell.storage.edn-storage :as edns]
             [weepinbell.storage.spec]
             [weepinbell.metadata.microformats :refer [parse-microformats]]
+            [weepinbell.utils.url :refer [normalize]]
             [weepinbell.utils.digest :refer [digest]]
             [clojure.java.io :as io]
             [fast-edn.core :as edn]))
@@ -19,14 +20,19 @@
       (assoc :jf2 (parse-microformats (:microformats wm)))
       (dissoc :microformats)))
 
-(defn rehash
+(defn re-normalize
   "Given a Webmention object, recalculate its hash and return a new map."
   [wm]
   {:pre [(map? wm) (contains? wm :webmention)]}
-  (assoc wm :webmention
-         (assoc (:webmention wm) :id
-                (digest (str (get-in wm [:webmention :source])
-                             (get-in wm [:webmention :target]))))))
+  (let [{:keys [source target]} (:webmention wm)
+        normal-source (normalize source)
+        normal-target (normalize target)
+        newhash (digest (str normal-source normal-target))]
+    (assoc wm :webmention
+           (-> (:webmention wm)
+               (assoc :source normal-source)
+               (assoc :target normal-target)
+               (assoc :id newhash)))))
 
 (defn edn->h2
   "Given an EDN file and a SQLite DB path, migrate data from that
@@ -42,12 +48,12 @@
       (fn [wms]
         (doseq [wm wms]
           (let [id (get-in wm [:webmention :id])]
-            (println "Appending webmention" id "to database")
             (try
               (let [wm (if (contains? wm :microformats)
                          (mf->jf2 wm) wm)
-                    wm (rehash wm)]
-                (h2/insert-webmention ds wm))
+                    wm (re-normalize wm)]
+                (h2/insert-webmention ds wm)
+                (println id "->" (get-in wm [:webmention :id])))
               (catch Exception e
                 (println "Something unexpected happened.")
                 (println (.getMessage e))))))))
