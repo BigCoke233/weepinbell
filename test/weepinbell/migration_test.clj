@@ -3,14 +3,16 @@
             [weepinbell.metadata.jf2-spec]
             [fast-edn.core :as edn]
             [weepinbell.storage.h2 :as h2]
+            [weepinbell.utils.digest :refer [digest]]
             [next.jdbc :as jdbc]
+            [next.jdbc.sql :as sql]
             [clojure.spec.alpha :as s]
             [clojure.test :refer [deftest testing is]]
             [clojure.java.io :as io]))
 
 (def test-source-edn (io/resource "webmention-test.edn"))
 
-(def webmention-test-edn 
+(def webmention-test-edn
   (with-open [rdr (io/reader test-source-edn)]
     (->> rdr line-seq (map edn/read-string) doall)))
 
@@ -22,36 +24,42 @@
           converted (m/mf->jf2 data)]
       (is (contains? converted :jf2))
       (is (not (contains? converted :microformats)))
-      (is (s/valid? :weepinbell.metadata.jf2-spec/jf2 
+      (is (s/valid? :weepinbell.metadata.jf2-spec/jf2
                     (:jf2 converted))))))
 
 (deftest test-migration-from-edn-to-h2
-  (testing "Migrating EDN file storage to H2 database storage"
+  (testing "Migrating EDN file storage to H2 database storage:"
     (let [target-h2 "tmp/webmention-test-h2"]
-      ;; assert migration succeed with no error
-      (is (nil? (try
-        (m/edn->h2 test-source-edn target-h2)
-        (catch Throwable _ :fail))))
-      ;; assert data count 
-      (let [ds (h2/make-datasource target-h2)
-            result (jdbc/execute! ds ["SELECT count(*) FROM webmention"])
-            len (get (first result) (keyword "count(*)"))]
-        (is (= len (count webmention-test-edn))))
+      (testing "no error or exception should be thrown"
+        (is (nil? (try
+                    (m/edn->h2 test-source-edn target-h2)
+                    (catch Throwable _ :fail)))))
+      (testing "there should be no data loss"
+        (let [ds (h2/make-datasource target-h2)
+              result (jdbc/execute! ds ["SELECT count(*) FROM webmention"])
+              len (get (first result) (keyword "count(*)"))]
+          (is (= len (count webmention-test-edn)))))
+      (testing "should recalculate hash/id of webmentions"
+        (let [ds (h2/make-datasource target-h2)
+              result (jdbc/execute! ds ["SELECT hash, wm_source, wm_target FROM webmention"])
+              match? (fn [{:keys [hash wm_source wm_target]}]
+                       (= hash (digest (str wm_source wm_target))))]
+          (is (every? match? result))))
       (io/delete-file (str target-h2 ".mv.db"))))
   (testing "Exceptions thrown during migration does not abort program"
-    (with-redefs [weepinbell.storage.h2/insert-webmention 
+    (with-redefs [weepinbell.storage.h2/insert-webmention
                   (fn [& _] (throw (Exception. "Test exception")))]
       (let [target-h2 "tmp/webmention-test-exception-h2"]
         (is (nil? (try
                     (m/edn->h2 test-source-edn target-h2)
                     (catch Exception _ :fail)))))))
   (testing "Errors thrown during migration should fail migration"
-    (with-redefs [weepinbell.storage.h2/insert-webmention 
+    (with-redefs [weepinbell.storage.h2/insert-webmention
                   (fn [& _] (throw (Error. "Test error")))]
       (let [target-h2 "tmp/webmention-test-exception-h2"]
         (is (= :fail (try
-                    (m/edn->h2 test-source-edn target-h2)
-                    (catch Error _ :fail))))))))
+                       (m/edn->h2 test-source-edn target-h2)
+                       (catch Error _ :fail))))))))
 
 (deftest test-edn-jf2ify
   (testing "Convert webmenion-test.edn to webmention-test-jf2.edn with jf2 markup"
