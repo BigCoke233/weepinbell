@@ -13,6 +13,9 @@
 <a href="https://ci.codeberg.org/repos/16777" target="_blank">
   <img src="https://ci.codeberg.org/api/badges/16777/status.svg?workflow=test" alt="status-badge" />
 </a>
+<a href="https://codeberg.org/eltrac/weepinbell/src/branch/master/LLM-DECLARATION.md" target="_blank">
+  <img src="https://img.shields.io/badge/䷼%20LLM--DECLARATION-hint-ecfccb?labelColor=ecfccb" alt="LLM-DECLARATION: hint" />
+</a>
 </p>
 
 > JESSIE: A Poké Ball! Yours as well?
