@@ -1,6 +1,6 @@
 (ns weepinbell.webserver.retriever
   "Service getting webmention form storage and wrapping it in a response."
-  (:require [weepinbell.utils.url :refer [get-domain get-path]]
+  (:require [weepinbell.utils.url :refer [get-domain get-path valid-http-url?]]
             [ring.util.http-response :refer [bad-request not-found ok]]))
 
 (def default-page-size 12)
@@ -69,15 +69,21 @@
 (defn by-url
   "Get webmention sent to a particular URL."
   [url page storage opts]
-  (if url
+  (cond
+    ;; error handling
+    (nil? url)
+    (bad-request
+     {:message "Missing URL. Specify target URL whose webmentions you are querying."})
+    (not (valid-http-url? url))
+    (bad-request {:message "Invalid URL."})
+    ;; return data
+    :else
     (query-list {:domain (get-domain url)
                  :path (get-path url)
                  :page page
                  :page-size default-page-size
                  :storage storage
-                 :mftype (:type opts)})
-    {:status 400
-     :body {:message "Missing URL. Specify target URL whose webmentions you are querying."}}))
+                 :mftype (:type opts)})))
 
 ;; query one webmention
 

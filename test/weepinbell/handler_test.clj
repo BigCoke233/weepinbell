@@ -27,12 +27,12 @@
                               {:get-by-domain
                                (fn [_]
                                  [{:webmention {:source "https://source.net"
-                                                :target "http://localhost"
+                                                :target "http://target.org"
                                                 :id "123456789123456789"
                                                 :modified 0}
                                    :microformats {:type :like-of}}])}
                               {})
-                    (mock/request :get "/api/mentions?url=http://localhost"))]
+                    (mock/request :get "/api/mentions?url=http://target.org"))]
       (is (= (:status response) 200))
       (is (some? (:body response)))
       (when-not (-> response :body parse-string empty?)
@@ -53,9 +53,9 @@
     (let [response ((test-app nil
                               {:get-by-domain
                                (fn [_] [{:webmention {:source "1"
-                                                      :target "http://localhost"}}])}
+                                                      :target "http://test.com"}}])}
                               {})
-                    (mock/request :get "/api/count?url=http://localhost"))]
+                    (mock/request :get "/api/count?url=http://test.com"))]
       (is (= (:status response) 200))
       (is (= 1 (-> response :body parse-string (get "count") Long.)))))
 

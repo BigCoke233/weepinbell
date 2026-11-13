@@ -4,6 +4,7 @@
             [weepinbell.webserver.retriever :as ret]))
 
 (def page-size 1)
+(def dummy-url "https://valid.test.com")
 
 (defn- make-bare-wm [number]
   {:webmention {:source (str number) :target (str number)
@@ -34,8 +35,8 @@
     (with-redefs [weepinbell.webserver.retriever/default-page-size page-size]
       (let [mock-data (mapv make-bare-wm (range 2))
             mock-store {:get-by-domain (fn [& _] mock-data)}
-            resp0 (ret/by-url "2" 0 mock-store {})
-            resp1 (ret/by-url "2" 1 mock-store {})]
+            resp0 (ret/by-url dummy-url 0 mock-store {})
+            resp1 (ret/by-url dummy-url 1 mock-store {})]
         (is (= page-size (count (:body resp0))))
         (is (= page-size (count (:body resp1)))))))
   (testing "by-url with no url provieded"
@@ -45,10 +46,17 @@
         (is (= 400 (:status resp)))
         (is (= "Missing URL. Specify target URL whose webmentions you are querying."
                (get-in resp [:body :message]))))))
+  (testing "by-url with invalid url provieded"
+    (with-redefs [weepinbell.webserver.retriever/default-page-size page-size]
+      (let [mock-store {:get-by-domain (fn [& _])}
+            resp (ret/by-url "this is not a URL" 0 mock-store {})]
+        (is (= 400 (:status resp)))
+        (is (= "Invalid URL."
+               (get-in resp [:body :message]))))))
   (testing "by-url return 404 when list is empty"
     (with-redefs [weepinbell.webserver.retriever/default-page-size page-size]
       (let [mock-store {:get-by-domain (fn [& _])}
-            resp (ret/by-url "" nil mock-store {})]
+            resp (ret/by-url dummy-url nil mock-store {})]
         (is (= 404 (:status resp)))
         (is (= "The requested webmention list does not exist."
                (get-in resp [:body :message])))))))
@@ -81,8 +89,8 @@
           mock-data (reduce into [] [like-wms reply-wms])
           mock-store {:get-by-domain (fn [& _] mock-data)}
           ;; responses
-          resp-like (ret/by-url "" 0 mock-store {:type :like-of})
-          resp-reply (ret/by-url "" 0 mock-store {:type :in-reply-to})]
+          resp-like (ret/by-url dummy-url 0 mock-store {:type :like-of})
+          resp-reply (ret/by-url dummy-url 0 mock-store {:type :in-reply-to})]
       (is (= reply-wms (:body resp-reply)))
       (is (= like-wms (:body resp-like))))))
 
