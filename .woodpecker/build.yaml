@@ -1,5 +1,5 @@
 when:
-  - event: [] # disable temporarily
+  - event: [manual]
 
 steps:
   - name: Build
