@@ -1,8 +1,3 @@
-> [!important]
-> This Project is still under active development. API may change. There may be fatal bugs.
->
-> But we're close to a stable release.
-
 # weepinbell
 
 <img src="doc/images/weepinbell.avif" align="right" width="350px" />

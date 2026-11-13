@@ -1,5 +1,5 @@
 when:
-  - event: [release]
+  - event: [] # disable temporarily
 
 steps:
   - name: Build
