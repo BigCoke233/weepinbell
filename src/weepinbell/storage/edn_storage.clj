@@ -5,6 +5,7 @@
             [clojure.java.io :as io]
             [weepinbell.utils.url :refer [get-domain get-target get-path url=]]
             [weepinbell.storage.spec]
+            [taoensso.timbre :as timbre]
             [clojure.string :refer [join]]))
 
 (defn unload-data
@@ -35,12 +36,24 @@
      (-> wm get-target get-path)))
 ;; end predicates
 
+(defn read-edn-string 
+  "Wrapper of fast-edn/read-string. Catches error and ignores invalid lines."
+  [^String edn-str]
+  (try 
+    (edn/read-string edn-str)
+    (catch java.lang.RuntimeException e
+      (timbre/warn "Possibly invalid data entry found in EDN file: " (.getMessage e))
+      nil)
+    (catch Exception e
+      (timbre/error "Unexpected error while reading EDN file: " (.getMessage e)))))
+
 (defn with-webmentions
   "Opens the data file and applies function f to a lazy sequence of parsed Webmentions."
   [datasource f]
   (with-open [r (io/reader datasource)]
     (->> (line-seq r)
-         (map edn/read-string)
+         (map read-edn-string)
+         (remove nil?)
          f)))
 
 (defn get-wm
