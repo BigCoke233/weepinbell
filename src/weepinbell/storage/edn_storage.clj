@@ -29,8 +29,9 @@
     #(st-pair-equal-pred source target %)
     #(id-equal-pred source %)))
 (defn- domain-equal [domain wm]
-  (= domain
-     (-> wm get-target get-domain)))
+  (and (some? domain)
+       (= domain
+         (-> wm get-target get-domain))))
 (defn- path-equal [path wm]
   (= path
      (-> wm get-target get-path)))
