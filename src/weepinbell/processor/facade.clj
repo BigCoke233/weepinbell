@@ -44,11 +44,11 @@
         :wm wm
         :ok? true}))
    ;; pipeline steps
-   (partial check-storage storage)    ;; check if webmention exists
+   #(check-storage % storage)    ;; check if webmention exists
    verify                             ;; verify if target is mentioned
-   (partial clean storage callbacks)  ;; delete old unverified webmention
-   (partial wrap config)              ;; wrap metadata into webmention
-   (partial write storage callbacks)));; write to storage
+   #(clean % storage callbacks)  ;; delete old unverified webmention
+   #(wrap % config)              ;; wrap metadata into webmention
+   #(write % storage callbacks)));; write to storage
 
 (defn exec-pipeline
   "Basically wraps (pipeline wm) call inside a try block.
