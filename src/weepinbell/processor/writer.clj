@@ -5,6 +5,7 @@
 
 (defn write
   [data storage callbacks]
+  {:pre [(some? data)]}
   (when (:ok? data)
     (let [{:keys [id new? new-data]} data]
       (if new?

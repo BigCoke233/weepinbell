@@ -4,6 +4,7 @@
 (defn check-storage
   ;; data: {:id ..., :wm {:s ... :t ...}, :ok? true}
   [data storage]
+  {:pre [(some? data)]}
   (when (:ok? data)
     (timbre/info "checking if webmention" (:id data) "already exists")
     (let [{:keys [id wm]} data

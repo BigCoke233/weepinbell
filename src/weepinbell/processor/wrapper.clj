@@ -63,6 +63,7 @@
    handler of the pipeline, parses data from it, wraps data
    to :new-data in the data map, and proceed with ok signal."
   [data config]
+  {:pre [(some? data)]}
   (when (:ok? data)
     (let [{:keys [source-html wm id]} data
           new-data (-> wm (wrap-webmention-basics id)

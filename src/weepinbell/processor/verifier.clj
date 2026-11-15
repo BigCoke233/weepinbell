@@ -59,6 +59,7 @@
 
 (defn verify
   [data]
+  {:pre [(some? data)]}
   (when (:ok? data)
     (let [{:keys [id wm new?]} data
           {:keys [s t]} wm

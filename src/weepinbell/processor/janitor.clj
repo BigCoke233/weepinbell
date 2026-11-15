@@ -3,6 +3,7 @@
 
 (defn clean
   [data storage callbacks]
+  {:pre [(some? data)]}
   (when (:ok? data)
     (let [{:keys [verified? new? id old-data]} data]
       (if (and (not new?) (not verified?))
