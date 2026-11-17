@@ -46,8 +46,9 @@
      ;; Request verification
     (if-let [error-msg (check-request source target allowlist)]
        ;; respond if request verification failed
-      (bad-request {:status 400
-                    :message error-msg})
+      (bad-request {:message error-msg
+                    :source source
+                    :target target})
        ;; proceed if request is ok
       (do
          ;; The receiver SHOULD check that target is a valid
@@ -62,8 +63,30 @@
          ;; was sent into queue, include a Location header
         (let [wm-id (digest (str source target))
               wm-url (str (:base-url config) "/api/mention/" wm-id)
-              response {:status 201
-                        :message "Webmention is accepted and pending for verification."
+              response {:message "Webmention is accepted and pending for verification."
+                        :source source
+                        :target target
                         :url wm-url}]
           (created wm-url response))))))
+
+(defn receive-batch
+  "Receive multiple webmentions. Verify before putting into queue.
+   If some webmentions are not unverified, return them, but the rest
+   will be put into queue normally."
+  [wms wmc config]
+  (let [limit (:batch-receive-limit config)
+        responses (pmap #(receive % wmc config)
+                        (take limit wms))
+        created (filter #(= 201 (:status %)) responses)
+        invalid (filter #(= 400 (:status %)) responses)
+        result (cond
+                 (> (count wms) limit) [202 (str "Too many webmentions. Some were dropped. " 
+                                                 "Only first " limit " were accepted.")]
+                 (empty? created) [400 "All webmentions are invalid."]
+                 (empty? invalid) [200 "All webmentions are received."]
+                 :else [202 "Some webmentions are received. Some are invalid."])]
+    {:status (first result)
+     :body {:message (last result)
+            :accepted created
+            :rejected invalid}}))
 

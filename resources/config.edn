@@ -35,4 +35,7 @@
  ;; e.g. `:nrepl-prot 7888` means an nREPL client can connect to weepinbell's
  ;;      nREPL server and evaluate Clojure code on the fly.
  ;; WARNING: never expose nREPL server to the public network!
- :nrepl-port nil}
+ :nrepl-port nil
+ ;; :batch-receive-limit is to limit how many webmention /api/batch can receive
+ ;; at a time. Set to 0 or nil to turn off Batch API.
+ :batch-receive-limit 100}
