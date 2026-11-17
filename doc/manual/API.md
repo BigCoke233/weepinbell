@@ -12,6 +12,8 @@
 
 ## Receiver endpoint
 
+### Normal Endpoint
+
 Receiver endpoint is where people send their webmentions to. It's a route that accepts POST request with form parameters `source` and `target`.
 
 | Method | Path                                                  |
@@ -29,9 +31,10 @@ An immediate response is made upon request:
 
 ```json 
 {
-    "status": "201",
     "message": "Webmention is accepted and pending for verification.",
-    "url": "<config:base_url>/api/mention/<webmention_id>"
+    "url": "<config:base_url>/api/mention/<webmention_id>",
+    "source": "<source>",
+    "target": "<target>"
 }
 ```
 
@@ -39,18 +42,82 @@ The receiver does basic checks. If there's something wrong, it reponds with stat
 
 ```json 
 {
-    "status": "400",
-    "message": "<specifc_error_message>"
+    "message": "<specifc_error_message>",
+    "source": "<source>",
+    "target": "<target>"
 }
 ```
 
-All possible messages and their meanings: 
+All possible messages: 
 
 - "Invalid URLs. Source and target have to be valid http(s) urls."
 - "Source and target are identical."
 - "Domain of target is not allowed. This receiver does not receive webmention on its behalf."
 
-The message themselves should be informative enough.
+### Batch API
+
+> [!warning]
+> This is not a standard webmention endpoint. Don't set your `<link rel="webmention" href="...">` to this API. This is normally used for importing large batches of data during migration.
+
+| Method | Path         |
+| ------ | ------------ |
+| `POST` | `/api/batch` |
+
+Use Batch API when you need to send or import a lot of webmentions at the same time.
+
+```shell
+curl --request POST \
+  --url https://weepinbell.example.com/api/batch \
+  --data '
+[
+    {
+        "source": "...",
+        "target": "..."
+    },
+    {
+        "source": "...",
+        "target": "..."
+    },
+    // ...
+]
+'
+```
+
+Set `:batch-receive-limit` in `config.edn`. Default is `100`. If request contains more items than limit, those items are dropped and only the first `100` are accepted.
+
+An example response:
+
+```json
+{
+    "message": "<message>",
+    "accepted": [
+        {
+            "message": "Webmention is accepted and pending for verification.",
+            "url": "<config:base_url>/api/mention/<webmention_id>",
+            "source": "<source>",
+            "target": "<target>"
+        },
+        // ...
+    ],
+    "rejected": [
+        {
+            "message": "<specifc_error_message>",
+            "source": "<source>",
+            "target": "<target>"
+        },
+        // ...
+    ]
+}
+```
+
+All possible messages and their coresponding status code:
+
+| Status | Message                                                                                         |
+| ------ | ----------------------------------------------------------------------------------------------- |
+| `200`  | All webmentions are received.                                                                   |
+| `400`  | All webmentions are invalid.                                                                    |
+| `202`  | Some webmentions are received. Some are invalid.                                                |
+| `202`  | Too many webmentions. Some were dropped. Only first `<config:batch-receive-limit>` were accepted. |
 
 ---
 
