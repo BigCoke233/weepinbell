@@ -4,7 +4,7 @@
             [weepinbell.webserver.handler :refer [app]]
             [weepinbell.webserver.facade :refer [make-services]]
             [clojure.core.async :refer [chan poll!]]
-            [cheshire.core :refer [parse-string]]))
+            [cheshire.core :refer [parse-string generate-string]]))
 
 (defn test-app [wmc store config]
   (app {:wmc wmc :store store :config config
@@ -109,5 +109,17 @@
           resp-b (app (mock/request :post "/api/send" payload))]
       (is (= 201 (:status resp-a)))
       (is (= 201 (:status resp-b)))
+      (is (every? some? (repeatedly 2 #(poll! test-chan))))))
+  (testing "/api/batch should receive valid webmentions in JSON"
+    (let [test-chan (chan)
+          app (test-app test-chan nil {:endpoint "/endpoint"
+                                       :batch-receive-limit 100
+                                       :allowed-target-domains ["www.target.net"]})
+          payload [{:source "https://a.validsource.com"
+                    :target "https://www.target.net"}
+                   {:source "https://b.validsource.com"
+                    :target "https://www.target.net"}]
+          resp (app (mock/request :post "/api/batch" (generate-string payload)))]
+      (is (= 200 (:status resp)))
       (is (every? some? (repeatedly 2 #(poll! test-chan)))))))
 

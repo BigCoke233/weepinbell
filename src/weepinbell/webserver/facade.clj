@@ -16,6 +16,7 @@
   {:post [#(s/valid? :weepinbell.webserver.handler/services %)]}
   {:gen-feed feed/rss
    :receive receiver/receive
+   :receive-batch receiver/receive-batch
    :retrieve-by-domain retriever/by-domain
    :retrieve-by-url retriever/by-url
    :retrieve-by-id retriever/by-id
