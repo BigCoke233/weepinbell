@@ -49,12 +49,14 @@
        (context "/mentions" [page jf2type]
          (GET "/" [url]
            (retrieve-by-url url page store
-                            {:type jf2type 
-                             :page-size (:query-page-size config)}))
+                            (-> config
+                              (select-keys [:query-page-size :allow-unpaged-query])
+                              (assoc :type jf2type))))
          (GET "/:domain" [domain]
            (retrieve-by-domain domain page store
-                               {:type jf2type 
-                                :page-size (:query-page-size config)})))
+                               (-> config
+                                 (select-keys [:query-page-size :allow-unpaged-query])
+                                 (assoc :type jf2type)))))
       ;; query count of webmention list 
        (context "/count" [jf2type]
          (GET "/" [url]

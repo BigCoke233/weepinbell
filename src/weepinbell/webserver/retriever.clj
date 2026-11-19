@@ -30,8 +30,8 @@
    the requested frame.
    Returns the last frame if page number is not a number, as a fallback.
    Returns :OOB (Out Of Bounds) if page number is too large."
-  [^Long page ^Long page-size data]
-  (if (nil? page)
+  [^Long page ^Long page-size ^Boolean allow-no-page?, data]
+  (if (and (nil? page) allow-no-page?)
     ;; if no page number, return the whole query-list
     data
     ;; otherwise, partition all and return the requested frame
@@ -46,14 +46,14 @@
 (defn query-list
   "Get a list of webmentions by certain filters."
   [{:keys [^String domain, ^String path, ^Long page, ^Long page-size
-           storage mftype]}]
+           storage mftype allow-no-page]}]
   {:pre [(contains? storage :get-by-domain)]}
   (let [;; parse to number if possible, use original if not
         page (try (Long/parseLong page) (catch Exception _ page))
         ;; data trasformations
         data ((:get-by-domain storage path) domain)
         data (filter-by-jf2type mftype data)
-        data (paging page page-size data)]
+        data (paging page page-size allow-no-page data)]
     (respond-webmention-list-json data)))
 
 (defn by-domain
@@ -62,8 +62,9 @@
   (query-list {:domain domain
                :path nil
                :page page
-               :page-size (or (:page-size opts)
+               :page-size (or (:query-page-size opts)
                               default-page-size)
+               :allow-no-page (:allow-unpaged-query opts)
                :storage storage
                :mftype (:type opts)}))
 
@@ -82,8 +83,9 @@
     (query-list {:domain (get-domain url)
                  :path (get-path url)
                  :page page
-                 :page-size (or (:page-size opts)
+                 :page-size (or (:query-page-size opts)
                                 default-page-size)
+                 :allow-no-page (:allow-unpaged-query opts)
                  :storage storage
                  :mftype (:type opts)})))
 
