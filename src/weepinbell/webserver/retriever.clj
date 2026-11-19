@@ -62,7 +62,8 @@
   (query-list {:domain domain
                :path nil
                :page page
-               :page-size default-page-size
+               :page-size (or (:page-size opts)
+                              default-page-size)
                :storage storage
                :mftype (:type opts)}))
 
@@ -81,7 +82,8 @@
     (query-list {:domain (get-domain url)
                  :path (get-path url)
                  :page page
-                 :page-size default-page-size
+                 :page-size (or (:page-size opts)
+                                default-page-size)
                  :storage storage
                  :mftype (:type opts)})))
 
