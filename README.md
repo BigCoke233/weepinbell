@@ -3,7 +3,7 @@
 <img src="doc/images/weepinbell.avif" align="right" width="350px" />
 
 <p>
-<img src="https://img.shields.io/badge/clojure-1.12.6-brightgreen?logo=clojure" alt="clojure version">
+<img src="https://img.shields.io/badge/clojure-1.12.7-brightgreen?logo=clojure" alt="clojure version">
 <!--COVERAGE_BADGE:START--><img src="https://img.shields.io/badge/coverage-85.55%25-green" alt="test coverage 85.55%"><!--COVERAGE_BADGE:END-->
 <a href="https://ci.codeberg.org/repos/16777" target="_blank">
   <img src="https://ci.codeberg.org/api/badges/16777/status.svg?workflow=test" alt="status-badge" />
