@@ -40,9 +40,9 @@
  ;; at a time. Set to 0 or nil to turn off Batch API.
  :batch-receive-limit 100
  ;; :allow-unpaged-query is whether to allow /api/mentions query without page number,
- ;; which will return everything that matches the condition.
+ ;; which will return everything that matches the condition. For small data, this is fine.
  ;; For large data, this could cause Out-Of-Memory and consume a lot of bandwidth.
- :allow-unpaged-query false
+ :allow-unpaged-query true
  ;; :query-page-size is how many webmentions are returned in a /api/mentions query
  :query-page-size 12
  ;; :cache-query is whether to cache query results in memory
