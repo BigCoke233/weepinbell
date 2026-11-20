@@ -1,11 +1,16 @@
 (ns weepinbell.storage-test
   (:require [clojure.test :refer [testing is deftest]]
+            [weepinbell.utils.digest :refer [digest]]
             [weepinbell.storage.edn-storage :as edns]
             [weepinbell.storage.h2 :as h2]
             [weepinbell.storage.worker :as worker]
+            [weepinbell.storage.cache :refer [cache]]
             [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
-            [weepinbell.storage.spec]))
+            [weepinbell.storage.spec]
+            [taoensso.timbre :as timbre]))
+
+(timbre/set-min-level! :info)
 
 ;; preparing storages to test
 
@@ -21,7 +26,11 @@
 (def storages [["bare-edn" edn-storage]
                ["bare-h2" h2-storage]
                ["worker-edn" (last (worker/start edn-storage))]
-               ["worker-h2" (last (worker/start h2-storage))]])
+               ["worker-h2" (last (worker/start h2-storage))]
+               ["cached-edn" (cache edn-storage)]
+               ["cached-h2" (cache h2-storage)]
+               ["cached-worker-edn" (last (worker/start (cache edn-storage)))]
+               ["cached-worker-h2" (last (worker/start (cache h2-storage)))]])
 
 ;; check if storages conform spec
 
@@ -50,14 +59,12 @@
            (recur))))))
 
 (defn- wm= [& wms]
-  (->> (map :webmention wms)
-       (map #(select-keys % [:target :source :modified]))
-       (apply =)))
+  (apply = (map :webmention wms)))
 
 (defn- test-append-and-get [storage]
-  (let [id "123456789"
-        source "https://source.net"
+  (let [source "https://source.net"
         target "https://target.net"
+        id (digest (str source target))
         data {:webmention {:source source
                            :target target
                            :id id
@@ -72,13 +79,14 @@
 
 (defn- test-append-and-get-list [storage]
   (let [domain "target.com"
-        data [{:webmention {:source "https://source.net"
+        source "https://source.net"
+        data [{:webmention {:source source
                             :target (str "https://" domain "/a")
-                            :id "35231"
+                            :id (digest (str source "https://" domain "/a"))
                             :modified (System/currentTimeMillis)}}
-              {:webmention {:source "https://source.net"
+              {:webmention {:source source
                             :target (str "https://" domain "/b")
-                            :id "232425"
+                            :id (digest (str source "https://" domain "/b"))
                             :modified (System/currentTimeMillis)}}]
         ids (map #(:id (:webmention %)) data)]
     (doseq [item data]
@@ -94,9 +102,9 @@
     (is (= 0 (count ((:get-by-domain storage) domain))))))
 
 (defn- test-update [storage]
-  (let [id "987654321"
-        source "https://source.com"
+  (let [source "https://source.com"
         target "https://target.com"
+        id (digest (str source target))
         data {:webmention {:id id
                            :source source
                            :target target
@@ -124,11 +132,12 @@
   (is (nil? ((:get storage) nil nil))))
 
 (defn- test-friends [storage]
-  (let [id "123456789", mf {}
+  (let [mf {}, source "https://source.net", target "https://target.net"
+        id (digest (str source target))
         photo "https://source.net/photo.png"
         data {:webmention {:id id
-                           :source "https://source.net"
-                           :target "https://target.net"
+                           :source source
+                           :target target
                            :modified (System/currentTimeMillis)}
               :jf2 mf
               :extra {:proxied-photo photo}}]
@@ -142,21 +151,22 @@
 
 (defn- test-result-order [storage]
   (let [domain "target.com"
-        data [{:webmention {:source "https://source.net"
+        source "https://source.net"
+        data [{:webmention {:source source 
                             :target (str "https://" domain "/a")
-                            :id "135234"
+                            :id (digest (str source "https://" domain "/a"))
                             :modified (System/currentTimeMillis)}}
-              {:webmention {:source "https://source.net"
+              {:webmention {:source source
                             :target (str "https://" domain "/b")
-                            :id "24645"
+                            :id (digest (str source "https://" domain "/b"))
                             :modified (+ (System/currentTimeMillis) 1)}}
-              {:webmention {:source "https://source.net"
-                            :target (str "https://" domain "/b")
-                            :id "334324"
+              {:webmention {:source source
+                            :target (str "https://" domain "/c")
+                            :id (digest (str source "https://" domain "/c"))
                             :modified (+ (System/currentTimeMillis) 2)}}
-              {:webmention {:source "https://source.net"
-                            :target (str "https://" domain "/b")
-                            :id "45343"
+              {:webmention {:source source
+                            :target (str "https://" domain "/d")
+                            :id (str source "https://" domain "/d")
                             :modified (+ (System/currentTimeMillis) 3)}}]
         ids (map #(:id (:webmention %)) data)]
     (doseq [item (shuffle data)]
@@ -194,3 +204,5 @@
       (Thread/sleep 50)
       (is signal)
       (stop))))
+
+(timbre/set-min-level! :trace)

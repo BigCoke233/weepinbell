@@ -6,6 +6,7 @@
             [weepinbell.storage.edn-storage :as edn]
             [weepinbell.storage.h2 :as h2]
             [weepinbell.storage.worker :as worker]
+            [weepinbell.storage.cache :refer [cache]]
             [clojure.core.async :refer [chan >!! <!!]]
             [taoensso.timbre :as timbre]
             [nrepl.server :as nrepl]
@@ -33,6 +34,8 @@
         bare-store (case (:storage-type config)
                      :edn (edn/use-store data-path)
                      :h2 (h2/use-store data-path))
+        bare-store (if (:cache-query config)
+                     (cache bare-store) bare-store)
         [stop-worker async-store] (worker/start bare-store)
         ;; Hooks, a map of callback functions that processor calls 
         ;; on certain events. Can be used for webhooks and more.

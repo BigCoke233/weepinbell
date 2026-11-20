@@ -44,4 +44,8 @@
  ;; For large data, this could cause Out-Of-Memory and consume a lot of bandwidth.
  :allow-unpaged-query false
  ;; :query-page-size is how many webmentions are returned in a /api/mentions query
- :query-page-size 12}
+ :query-page-size 12
+ ;; :cache-query is whether to cache query results in memory
+ ;; so fewer queries hit database, which is easier on disk I/O and overall faster
+ ;; NOTE this is not a very stable feature, use with caution
+ :cache-query false}

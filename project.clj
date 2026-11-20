@@ -24,7 +24,8 @@
                  [com.github.seancorfield/next.jdbc "1.3.828"]
                  [com.h2database/h2 "2.3.232"]
                  [nrepl "1.8.0"]
-                 [org.clj-commons/hickory "0.7.7"]]
+                 [org.clj-commons/hickory "0.7.7"]
+                 [org.clojure/core.cache "1.2.999"]]
   :managed-dependencies [[org.clojure/tools.reader "1.6.0"]
                          [org.ow2.asm/asm "9.11.1"]]
   :profiles {:uberjar {:aot :all}
