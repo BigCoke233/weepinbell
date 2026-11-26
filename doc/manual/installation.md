@@ -104,6 +104,9 @@ exec /usr/local/jdk-25/bin/java -jar /home/_weepinbell/weepinbell-v1.x.x-standal
 
 Then, create `/etc/rc.d/weepinbell`:
 
+> [!warning]
+> There are some issues with this `rc` script. If you're familiar with OpenBSD, please help improve this.
+
 ```sh
 #!/bin/ksh
 daemon="/home/_weepinbell/run.sh"
@@ -130,6 +133,23 @@ To stop weepinbell:
 ```sh
 doas rcctl stop weepinbell
 ```
+
+### `tmux`
+
+Alternatively, you can run weepinbell in a `tmux` session.
+
+```sh
+# it's recommended to use a dedicated user
+su _weepinbell
+# Open up tmux
+tmux
+# Inside the tmux session
+java -jar weepinbell-v1.x.x-standalone.jar >> /var/log/weepinbell.log 2>&1
+```
+
+Then `Ctrl + b` `d` (or `:detach`).
+
+To shut down, `tmux attach` to that session and `Ctrl + C` to interrupt the program.
 
 ### `systemd` (Linux)
 
